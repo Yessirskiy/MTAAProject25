@@ -8,11 +8,12 @@ Aplikácia, ktorá umožňuje obyvateľom mesta (napr. Bratislavy) rýchlo upozo
 - [ ] Backend
 - [ ] Odovzdávanie
 ## Wireframes
-Prototype link je [tu](https://www.figma.com/proto/pfZmPbQAgaHCX3q65BFJUL/Wireframes?node-id=0-1&t=DhnH7YDRmDwB2B2S-1)
-Zdroje sú uložené v priečinku [wireframes](/wireframes/)
+Prototype link je [tu](https://www.figma.com/proto/pfZmPbQAgaHCX3q65BFJUL/Wireframes?node-id=0-1&t=DhnH7YDRmDwB2B2S-1)<br/>
+Zdroje sú uložené v priečinku [wireframes](/wireframes/)<br/>
+Odkaz s ikonkami je [tu](https://www.iconfinder.com/search/icons?family=systemui)
 ### Screens TODO:
 - [x] Prihlasovacia stránka
-- [ ] Registračná stránka
+- [x] Registračná stránka
 - [ ] Profilová stránka
 - [ ] Hlavná stránka
 ## UATy
