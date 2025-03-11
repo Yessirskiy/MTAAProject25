@@ -1,1 +1,3 @@
 fastapi[standard]==0.115.11
+SQLAlchemy==2.0.38
+asyncpg==0.30.0
