@@ -1,15 +1,13 @@
-from typing import Union
-
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from app.api.routers.report_router import router as report_router
+import asyncio
+from app.db.base import init_models
 
 app = FastAPI()
 
-
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
+app.include_router(report_router, prefix="/report", tags=["Report"])
 
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.on_event("startup")
+async def startup_event():
+    await init_models()
