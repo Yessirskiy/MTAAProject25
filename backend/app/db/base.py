@@ -11,7 +11,8 @@ engine = create_async_engine(getSettings().DATABASE_URL, echo=True)
 async_session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 
-async def init_models():
+async def init_models_DONTUSE():
+    """Testing purposes only, do not use"""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
