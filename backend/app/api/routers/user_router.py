@@ -15,5 +15,5 @@ async def createUserRoute(
     usercreate: UserCreate,
     db: AsyncSession = Depends(getSession),
 ) -> User:
-    created_cartitem = await create_user(db, usercreate)
-    return created_cartitem
+    created_user = await create_user(db, usercreate)
+    return created_user

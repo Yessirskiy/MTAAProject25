@@ -1,15 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class User(BaseModel):
     id: int
     username: str
-    email: str
+    email: EmailStr
     password: str
-    # created_at
+    is_admin: bool
 
 
 class UserCreate(BaseModel):
     username: str
-    email: str
+    email: EmailStr
     password: str

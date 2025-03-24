@@ -6,12 +6,27 @@ from app.db.models.user import User
 from app.db.schemas.user_schema import UserCreate
 import datetime
 from typing import Optional
+from passlib.hash import bcrypt
 
 
 async def create_user(db: AsyncSession, user_create: UserCreate) -> User:
-    data = user_create.model_dump(exclude_none=True)
-    new_user = User(**data)
+    hashed_password = bcrypt.hash(user_create.password)
+    new_user = User(
+        username=user_create.username,
+        email=user_create.email,
+        password=hashed_password,
+        is_admin=False
+    )
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
     return new_user
+
+async def get_user_by_id(db: AsyncSession, user_id: int) -> Optional[User]:
+    return await db.get(User, user_id)
+
+async def delete_user(db: AsyncSession, user_id: int) -> None:
+    user = await db.get(User, user_id)
+    if user:
+        await db.delete(user)
+        await db.commit()

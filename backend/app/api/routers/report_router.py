@@ -4,8 +4,8 @@ from sqlalchemy.exc import IntegrityError
 
 from app.db.base import getSession
 from app.db.models.report import Report
-from app.db.schemas.report_schema import ReportCreate, Report
-from app.db.crud.report_crud import createReport
+from app.db.schemas.report_schema import *
+from app.db.crud.report_crud import create_report
 
 router = APIRouter()
 
@@ -15,5 +15,5 @@ async def createReportRoute(
     reportcreate: ReportCreate,
     db: AsyncSession = Depends(getSession),
 ) -> Report:
-    created_cartitem = await createReport(db, reportcreate)
-    return created_cartitem
+    created_report = await create_report(db, reportcreate)
+    return created_report
