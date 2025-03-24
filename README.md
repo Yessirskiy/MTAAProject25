@@ -2,8 +2,8 @@
 Aplikácia, ktorá umožňuje obyvateľom mesta (napr. Bratislavy) rýchlo upozorniť úrady na nefunkčné/poškodené verejné zariadenia.
 ### Stages
 - [x] Hlavná myšlienka
-- [ ] Wireframes + Prototyping
-- [ ] UATy
+- [x] Wireframes + Prototyping
+- [x] UATy
 - [ ] Frontend
 - [ ] Backend
 - [ ] Odovzdávanie
@@ -14,8 +14,8 @@ Odkaz s ikonkami je [tu](https://www.iconfinder.com/search/icons?family=systemui
 ### Screens TODO:
 - [x] Prihlasovacia stránka
 - [x] Registračná stránka
-- [ ] Profilová stránka
-- [ ] Hlavná stránka
+- [x] Profilová stránka
+- [x] Hlavná stránka
 ## UATy
 Zdroje sú uložené v priečinku [uats](/uats/)
 ## Frontend

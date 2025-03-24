@@ -1,5 +1,17 @@
 from app.db.base import Base
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float, Enum, DateTime, Boolean, Enum, func
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    ForeignKey,
+    Float,
+    Enum,
+    DateTime,
+    Boolean,
+    Enum,
+    func,
+)
 from sqlalchemy.orm import relationship
 
 # from sqlalchemy.orm import relationship
@@ -21,6 +33,6 @@ class User(Base):
     email = Column(Text, unique=True, nullable=False)
     password = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    #reports = relationship("Report", back_populates="user", cascade="all, delete")
-    #votes = relationship()
+
+    # reports = relationship("Report", back_populates="user", cascade="all, delete")
+    # votes = relationship()

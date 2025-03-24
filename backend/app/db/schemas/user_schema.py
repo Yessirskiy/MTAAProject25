@@ -6,10 +6,10 @@ class User(BaseModel):
     username: str
     email: str
     password: str
-    #created_at
-    
+    # created_at
+
+
 class UserCreate(BaseModel):
     username: str
     email: str
     password: str
-
