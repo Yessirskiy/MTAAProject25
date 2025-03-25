@@ -19,14 +19,6 @@ from sqlalchemy.orm import relationship
 from app.db.base import Base
 
 
-# class User(Base):
-#     __tablename__ = "users"
-#     id = Column(Integer, primary_key=True, index=True)
-#     first_name = Column(String)
-#     last_name = Column(String, nullable=True)
-#     email = Column(String, unique=True, index=True)
-
-
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -35,6 +27,7 @@ class User(Base):
     password = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_admin = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
 
-    report = relationship("Report", back_populates="user", cascade="all, delete")
-    vote = relationship("Vote", back_populates="user", cascade="all, delete")
+    reports = relationship("Report", back_populates="user", cascade="all, delete")
+    votes = relationship("Vote", back_populates="user", cascade="all, delete")

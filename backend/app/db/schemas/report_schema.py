@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+from app.db.models.report import ReportStatus
+
+
 class Report(BaseModel):
     id: int
     user_id: int
@@ -9,9 +12,8 @@ class Report(BaseModel):
     address: str
     created_at: datetime
     latitude: float
-    longitude:float
+    longitude: float
     status: str
-    
 
 
 class ReportCreate(BaseModel):
@@ -20,4 +22,8 @@ class ReportCreate(BaseModel):
     address: str
     latitude: float
     longitude: float
-    status: str = "pending"
+    status: ReportStatus
+
+    class Config:
+        orm_mode = True
+        use_enum_values = True
