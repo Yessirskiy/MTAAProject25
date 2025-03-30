@@ -24,7 +24,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 
 # models must be imported too
-from app.db.models.report import Report, ReportStatus
+from app.db.models.report import Report, ReportStatus, ReportAddress, ReportPhoto
 from app.db.models.user import User
 from app.db.models.vote import Vote
 from app.db.base import Base
