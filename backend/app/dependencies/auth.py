@@ -38,7 +38,6 @@ async def getUser(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
     user = await getUserByEmail(db, token_data.sub)
 
     if user is None:

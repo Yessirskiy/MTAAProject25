@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str  # Ensure .env holds the value
     JWT_REFRESH_SECRET_KEY: str  # Ensure .env holds the value
 
+    # Directories
+    REPORT_PHOTOS: Path = Path(__file__).resolve().parent.parent.parent / "photos"
+
     # tricky stuff here
     # it looks for the env_file in current working dir (cwd)
     # and it happens to be whereever you launch code from

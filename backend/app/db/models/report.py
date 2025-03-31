@@ -20,22 +20,21 @@ from app.db.base import Base
 
 
 class ReportStatus(enum.Enum):
-    # Enum options are usually in uppercase
     # options were defined in the documentation (milestone 1.)
-    REPORTED = "reported"
-    PUBLISHED = "published"
-    IN_PROGRESS = "in_progress"
-    RESOLVED = "resolved"
-    CANCELLED = "cancelled"
+    reported = "reported"
+    published = "published"
+    in_progress = "in_progress"
+    resolved = "resolved"
+    cancelled = "cancelled"
 
 
 class Report(Base):
     __tablename__ = "reports"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE")
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )  # the User account won't be deleted (will be just deactivated)
-    status = Column(Enum(ReportStatus), default=ReportStatus.REPORTED)
+    status = Column(Enum(ReportStatus), default=ReportStatus.reported)
 
     report_datetime = Column(DateTime(timezone=True), server_default=func.now())
     published_datetime = Column(DateTime(timezone=True), default=None)
