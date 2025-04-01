@@ -9,8 +9,16 @@ from app.db.schemas.report_schema import (
     ReportCreate,
     Report as ReportSchema,
     ReportPhotoCreate,
+    ReportReadFull,
+    ReportUpdate,
 )
-from app.db.crud.report_crud import createReport, createReportAddress, createReportPhoto
+from app.db.crud.report_crud import (
+    createReport,
+    createReportAddress,
+    createReportPhoto,
+    getReportByID,
+    updateReport,
+)
 from app.dependencies.auth import getUser
 from app.dependencies.common import getSettings
 
@@ -57,6 +65,7 @@ async def createReportRoute(
                 ReportPhotoCreate(
                     report_id=created_report.id, filename_path=str(file_path)
                 ),
+                nocommit=True,
             )
         await db.commit()  # Commit only after all the operations completed
         return created_report
@@ -68,3 +77,30 @@ async def createReportRoute(
         # TODO: Remove photos from directory if failed sql query
         await db.rollback()
         raise HTTPException(status_code=500, detail="Error creating report")
+
+
+@router.get("/{report_id}", response_model=ReportReadFull, summary="Retrieve Report")
+async def getReportRoute(
+    report_id: int,
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser),
+):
+    report = await getReportByID(db, report_id, full=True)
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return report
+
+
+@router.put("/{report_id}", response_model=ReportReadFull, summary="Update Report")
+async def updateReportRoute(
+    report_id: int,
+    report_update: ReportUpdate,
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser),
+):
+    try:
+        report = await updateReport(db, report_id, report_update, user.id)
+        return report
+    except AssertionError as e:
+        print(e)
+        raise HTTPException(status_code=403, detail="No permission to update")

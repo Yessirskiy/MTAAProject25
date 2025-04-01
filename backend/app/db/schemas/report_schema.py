@@ -4,6 +4,7 @@ import decimal
 from typing import Optional
 
 from app.db.models.report import ReportStatus
+from app.db.schemas.user_schema import UserRead
 
 
 class ReportPhoto(BaseModel):
@@ -50,6 +51,12 @@ class ReportAddressCreate(BaseModel):
     longitude: decimal.Decimal
 
 
+class ReportAddressRead(ReportAddress): ...
+
+
+class ReportAddressUpdate(ReportAddressCreate): ...
+
+
 class Report(BaseModel):
     id: int
     user_id: int
@@ -66,6 +73,20 @@ class Report(BaseModel):
         use_enum_values = True
 
 
+class ReportReadFull(BaseModel):
+    id: int
+    status: ReportStatus
+
+    report_datetime: datetime.datetime
+    published_datetime: Optional[datetime.datetime] = None
+
+    note: str
+
+    user: UserRead
+    address: ReportAddressRead
+    photos: list[ReportPhotoRead]
+
+
 class ReportCreate(BaseModel):
     user_id: int
     note: str
@@ -74,3 +95,8 @@ class ReportCreate(BaseModel):
     class Config:
         from_attributes = True
         use_enum_values = True
+
+
+class ReportUpdate(BaseModel):
+    note: Optional[str] = None
+    address: Optional[ReportAddressUpdate] = None

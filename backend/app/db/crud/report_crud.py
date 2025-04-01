@@ -7,13 +7,27 @@ from app.db.schemas.report_schema import (
     ReportCreate,
     ReportAddressCreate,
     ReportPhotoCreate,
+    ReportUpdate,
 )
 import datetime
 from typing import Optional
 
 
-async def getReportByID(db: AsyncSession, report_id: int) -> Optional[Report]:
-    return await db.get(Report, report_id)
+async def getReportByID(
+    db: AsyncSession, report_id: int, full: bool = False
+) -> Optional[Report]:
+    if not full:
+        return await db.get(Report, report_id)
+    stmt = (
+        select(Report)
+        .options(
+            joinedload(Report.address),
+            joinedload(Report.user),
+            joinedload(Report.photos),
+        )
+        .where(Report.id == report_id)
+    )
+    return (await db.execute(stmt)).scalars().unique().one_or_none()
 
 
 async def createReport(
@@ -31,12 +45,22 @@ async def createReport(
 
 
 async def updateReport(
-    db: AsyncSession, report_id: int, new_data: dict
+    db: AsyncSession,
+    report_id: int,
+    report_update: ReportUpdate,
+    check_user_id: int = None,
 ) -> Optional[Report]:
-    report = await db.get(Report, report_id)
+    report = await getReportByID(db, report_id, full=True)
     if report:
+        if check_user_id:
+            assert report.user_id == check_user_id
+        new_data = report_update.model_dump(exclude_none=True)
         for key, value in new_data.items():
-            setattr(report, key, value)
+            if key == "address":
+                for addr_key, addr_value in value.items():
+                    setattr(report.address, addr_key, addr_value)
+            else:
+                setattr(report, key, value)
         await db.commit()
         await db.refresh(report)
     return report

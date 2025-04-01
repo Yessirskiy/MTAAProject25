@@ -9,7 +9,12 @@ from typing import Optional
 from app.utils import passwords
 
 
-async def getUserByID(db: AsyncSession, user_id: int) -> Optional[User]:
+async def getUserByID(
+    db: AsyncSession, user_id: int, active_only: bool = True
+) -> Optional[User]:
+    if active_only:
+        stmt = select(User).where(User.id == user_id, User.is_active == 1)
+        return (await db.scalars(stmt)).one_or_none()
     return await db.get(User, user_id)
 
 
