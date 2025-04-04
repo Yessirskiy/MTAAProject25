@@ -18,6 +18,7 @@ from app.db.crud.report_crud import (
     createReportPhoto,
     getReportByID,
     updateReport,
+    deleteReport,
 )
 from app.dependencies.auth import getUser
 from app.dependencies.common import getSettings
@@ -102,5 +103,29 @@ async def updateReportRoute(
         report = await updateReport(db, report_id, report_update, user.id)
         return report
     except AssertionError as e:
-        print(e)
-        raise HTTPException(status_code=403, detail="No permission to update")
+        if "Report not found" in e.args:
+            raise HTTPException(status_code=404, detail="Report not found")
+        elif "user ids do not match" in e.args:
+            raise HTTPException(status_code=403, detail="No permission to update")
+        else:
+            print(e)
+            raise HTTPException(status_code=500)
+
+
+@router.delete("/{report_id}", summary="Delete Report")
+async def deleteReportRoute(
+    report_id: int,
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser),
+):
+    try:
+        await deleteReport(db, report_id, user.id)
+        return Response(status_code=200)
+    except AssertionError as e:
+        if "Report not found" in e.args:
+            raise HTTPException(status_code=404, detail="Report not found")
+        elif "user ids do not match" in e.args:
+            raise HTTPException(status_code=403, detail="No permission to update")
+        else:
+            print(e)
+            raise HTTPException(status_code=500)

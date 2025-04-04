@@ -44,9 +44,9 @@ class Report(Base):
 
     user = relationship("User", back_populates="reports")
     address = relationship(
-        "ReportAddress", back_populates="report", uselist=False
+        "ReportAddress", back_populates="report", uselist=False, cascade="all, delete"
     )  # One-to-one relationship requires uselist=False
-    photos = relationship("ReportPhoto", back_populates="report")
+    photos = relationship("ReportPhoto", back_populates="report", cascade="all, delete")
     votes = relationship("Vote", back_populates="report", cascade="all, delete")
 
 

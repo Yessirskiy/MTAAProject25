@@ -30,6 +30,19 @@ async def getReportByID(
     return (await db.execute(stmt)).scalars().unique().one_or_none()
 
 
+async def getUserReports(db: AsyncSession, user_id: int) -> list[Report]:
+    stmt = (
+        select(Report)
+        .options(
+            joinedload(Report.address),
+            joinedload(Report.user),
+            joinedload(Report.photos),
+        )
+        .where(Report.user_id == user_id)
+    )
+    return (await db.execute(stmt)).scalars().unique().all()
+
+
 async def createReport(
     db: AsyncSession, report_create: ReportCreate, nocommit: bool = True
 ) -> Report:
@@ -51,23 +64,30 @@ async def updateReport(
     check_user_id: int = None,
 ) -> Optional[Report]:
     report = await getReportByID(db, report_id, full=True)
-    if report:
-        if check_user_id:
-            assert report.user_id == check_user_id
-        new_data = report_update.model_dump(exclude_none=True)
-        for key, value in new_data.items():
-            if key == "address":
-                for addr_key, addr_value in value.items():
-                    setattr(report.address, addr_key, addr_value)
-            else:
-                setattr(report, key, value)
-        await db.commit()
-        await db.refresh(report)
+    assert report is not None, "Report not found"
+    if check_user_id:
+        assert report.user_id == check_user_id, "user ids do not match"
+    new_data = report_update.model_dump(exclude_none=True)
+    for key, value in new_data.items():
+        if key == "address":
+            for addr_key, addr_value in value.items():
+                setattr(report.address, addr_key, addr_value)
+        else:
+            setattr(report, key, value)
+    await db.commit()
+    await db.refresh(report)
     return report
 
 
-async def deleteReport(db: AsyncSession, report_id: int) -> None:
-    report = db.get(Report, report_id)
+async def deleteReport(
+    db: AsyncSession,
+    report_id: int,
+    check_user_id: int = None,
+) -> None:
+    report = await db.get(Report, report_id)
+    assert report is not None, "Report not found"
+    if check_user_id:
+        assert report.user_id == check_user_id, "user ids do not match"
     await db.delete(report)
     await db.commit()
 

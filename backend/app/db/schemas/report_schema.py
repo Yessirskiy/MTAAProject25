@@ -100,3 +100,7 @@ class ReportCreate(BaseModel):
 class ReportUpdate(BaseModel):
     note: Optional[str] = None
     address: Optional[ReportAddressUpdate] = None
+
+
+class UserReports(BaseModel):
+    data: list[ReportReadFull]

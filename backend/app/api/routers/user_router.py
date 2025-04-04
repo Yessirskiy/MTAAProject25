@@ -9,8 +9,10 @@ from app.db.schemas.user_schema import (
     User as UserSchema,
     UserCreate,
 )  # Name conflict with SQLAlchemy model
+from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema
 from app.db.crud.user_crud import getUserByEmail, createUser
+from app.db.crud.report_crud import getUserReports
 
 from app.utils.passwords import verifyPassword
 from app.utils.auth import getAccessToken, getRefreshToken
@@ -69,3 +71,15 @@ async def login(
 )
 async def getMe(user: User = Depends(getUser)):
     return user
+
+
+@router.get(
+    "/reports",
+    summary="Get reports of currently logged in user",
+    response_model=UserReports,
+)
+async def getUserReportsRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
+    reports = await getUserReports(db, user.id)
+    return {"data": reports}
