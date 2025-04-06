@@ -8,10 +8,13 @@ from app.db.models.user import User
 from app.db.schemas.user_schema import (
     User as UserSchema,
     UserCreate,
+    UserUpdate,
+    UserAddressCreate,
+    UserSettings,
 )  # Name conflict with SQLAlchemy model
 from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema
-from app.db.crud.user_crud import getUserByEmail, createUser
+from app.db.crud.user_crud import getUserByEmail, createUser, getOrSetUserSettings, createUserSettings
 from app.db.crud.report_crud import getUserReports
 
 from app.utils.passwords import verifyPassword
@@ -83,3 +86,16 @@ async def getUserReportsRoute(
 ):
     reports = await getUserReports(db, user.id)
     return {"data": reports}
+
+@router.get(
+    "/settings",
+    summary="Get settings of currently logged in user if they exist, if not, create default settings (everything is false)",
+    response_model=UserSettings,
+)
+async def getUserSettingsRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
+    settings = await getOrSetUserSettings(db, user.id)
+    if not settings:
+        settings = await createUserSettings(db, user.id)
+    return settings

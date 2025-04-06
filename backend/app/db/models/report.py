@@ -48,6 +48,7 @@ class Report(Base):
     )  # One-to-one relationship requires uselist=False
     photos = relationship("ReportPhoto", back_populates="report", cascade="all, delete")
     votes = relationship("Vote", back_populates="report", cascade="all, delete")
+    notifications = relationship("Notification", back_populates="report")
 
 
 class ReportAddress(Base):
