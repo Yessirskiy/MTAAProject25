@@ -6,15 +6,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.base import getSession
 from app.db.models.user import User
 from app.db.schemas.user_schema import (
-    User as UserSchema,
+    User as UserSchema, # Name conflict with SQLAlchemy model
     UserCreate,
     UserUpdate,
     UserAddressCreate,
     UserSettings,
-)  # Name conflict with SQLAlchemy model
+    Notification as NotificationSchema, # Name conflict with SQLAlchemy model
+    NotificationCreate
+)
 from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema
-from app.db.crud.user_crud import getUserByEmail, createUser, getOrSetUserSettings, createUserSettings
+from app.db.crud.user_crud import *
 from app.db.crud.report_crud import getUserReports
 
 from app.utils.passwords import verifyPassword
@@ -99,3 +101,72 @@ async def getUserSettingsRoute(
     if not settings:
         settings = await createUserSettings(db, user.id)
     return settings
+
+@router.post(
+    "/notifications/create",
+    summary="Create a new notification for the user",
+    response_model=NotificationSchema,
+)
+async def createNotificationRoute(
+    user_id: int,
+    report_id: int,
+    title: str,
+    note: str,
+    db: AsyncSession = Depends(getSession)
+):
+    return await createNotification(db, create_notification=NotificationCreate(user_id=user_id, report_id=report_id, title=title, note=note))
+
+@router.get(
+    "/notifications/get/one",
+    summary="Get a notification by ID for the user",
+    response_model=NotificationSchema,
+)
+async def getNotificationRoute(
+    notification_id: int,
+    user: User = Depends(getUser),
+    db: AsyncSession = Depends(getSession)
+):
+    notification = await getUserNotification(db, notification_id, user.id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return notification
+
+@router.get(
+    "/notifications/get/all",
+    summary="Get all notifications for the user",
+    response_model=list[NotificationSchema],
+)
+async def getAllNotificationsRoute(
+    user: User = Depends(getUser),
+    db: AsyncSession = Depends(getSession)
+):
+    return await getAllUserNotifications(db, user.id)
+
+@router.put(
+    "/notifications/markAsRead",
+    summary="Mark a notification as read",
+    response_model=NotificationSchema,
+)
+async def markNotificationAsReadRoute(
+    notification_id: int,
+    user: User = Depends(getUser),
+    db: AsyncSession = Depends(getSession)
+):
+    notification = await markNotificationAsRead(db, notification_id, user.id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return notification
+
+@router.delete(
+    "/notifications/delete",
+    summary="Delete a notification",
+    response_model=NotificationSchema,
+)
+async def deleteNotificationRoute(
+    notification_id: int,
+    db: AsyncSession = Depends(getSession)
+):
+    notification = await deleteNotification(db, notification_id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return notification

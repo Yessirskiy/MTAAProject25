@@ -78,7 +78,7 @@ class Notification(Base):
     title = Column(String)
     note = Column(String)
     sent_datetime = Column(DateTime(timezone=True), server_default=func.now())
-    read_datetime = Column(DateTime(timezone=True), default=None)
+    read_datetime = Column(DateTime(timezone=True), nullable=True, default=None)
     
     user = relationship("User", back_populates="notifications")
     report = relationship("Report", back_populates="notifications")

@@ -41,7 +41,7 @@ async def createReportRoute(
     user: User = Depends(getUser),
 ) -> Report:
     try:  # Creating report + address + photos must be atomic, nocommit=True is obligatory
-        # becuase the data is sent in mutlipart (not application/json)
+        # because the data is sent in mutlipart (not application/json)
         # I though of this workaround: get the data as json-string in multipart
         # process it into the pydantic model manually (raise error if format is wrong)
         report_data = json.loads(reportcreatestr)  # str -> dict

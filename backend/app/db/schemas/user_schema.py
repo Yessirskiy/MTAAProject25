@@ -106,13 +106,17 @@ class UserSettingsSet(BaseModel):
 
 class UserSettingsRead(UserSettings): ...
 
-# class UserUpdatePassword(BaseModel):
-#     old_password: str
-#     new_password1: str
-#     new_password2: str
+class Notification(BaseModel):
+    id: int
+    user_id: int
+    report_id: int
+    title: str
+    note: str
+    sent_datetime: datetime.datetime
+    read_datetime: Optional[datetime.datetime] = None
 
-#     @model_validator(mode="after")
-#     def checkPasswordsMatch(self) -> Self:
-#         if self.new_password1 != self.new_password2:
-#             raise ValueError("New passwords do not match")
-#         return self
+class NotificationCreate(BaseModel):
+    user_id: int
+    report_id: int
+    title: str
+    note: str
