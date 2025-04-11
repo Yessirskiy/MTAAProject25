@@ -46,3 +46,12 @@ async def getUser(
         )
 
     return user
+
+
+async def getAdmin(user: User = Depends(getUser)) -> User:
+    if user.is_admin:
+        return user
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Permission denied",
+    )

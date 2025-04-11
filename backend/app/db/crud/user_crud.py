@@ -1,11 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func, update
-from sqlalchemy.orm import joinedload
-from datetime import datetime, timezone
-from app.db.models.user import User, UserSetting, UserAddress, Notification
-from app.db.schemas.user_schema import UserCreate, UserAddressCreate, UserAddress, UserUpdate, UserSettings, UserSettingsSet, UserAddressRead, NotificationCreate
-from typing import Optional, List
+from app.db.models.user import User, UserAddress
+from app.db.schemas.user_schema import (
+    UserCreate,
+    UserAddressCreate,
+    UserAddress,
+    UserUpdate,
+)
+from typing import Optional
 
 from app.utils import passwords
 
@@ -24,7 +26,9 @@ async def getUserByEmail(db: AsyncSession, user_email: str) -> Optional[User]:
     return (await db.scalars(stmt)).one_or_none()
 
 
-async def createUser(db: AsyncSession, user_create: UserCreate) -> User:
+async def createUser(
+    db: AsyncSession, user_create: UserCreate, nocommit: bool = False
+) -> User:
     hashed_password = passwords.hashPassword(
         user_create.password1
     )  # Pydantic model ensures passwords match
@@ -34,9 +38,13 @@ async def createUser(db: AsyncSession, user_create: UserCreate) -> User:
         hashed_password=hashed_password,
     )
     db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)  # so that user acquires an ID
+    if not nocommit:
+        await db.commit()
+        await db.refresh(new_user)
+        return new_user
+    await db.flush()
     return new_user
+
 
 async def createUserAddress(
     db: AsyncSession,
@@ -53,6 +61,7 @@ async def createUserAddress(
         return new_address
     await db.flush()
     return new_address
+
 
 async def updateUser(
     db: AsyncSession,
@@ -71,90 +80,3 @@ async def updateUser(
     await db.commit()
     await db.refresh(user)
     return user
-
-async def getUserSettings(
-    db: AsyncSession, user_id: int
-) -> Optional[UserSetting]:    
-    stmt = select(UserSetting).where(UserSetting.user_id == user_id)
-    return (await db.scalars(stmt)).one_or_none()
-
-async def getOrSetUserSettings(
-    db: AsyncSession, user_id: int
-) -> UserSetting:
-    settings = await getUserSettings(db, user_id)
-    if not settings:
-        settings = await createUserSettings(db, user_id)
-    return settings
-
-async def createUserSettings(
-    db: AsyncSession,
-    user_id: int,
-) -> UserSetting:
-    user_settings_create = UserSettingsSet()
-    data = user_settings_create.model_dump(exclude={"id", "user_id"})
-    new_settings = UserSetting(user_id=user_id, **data)
-    db.add(new_settings)
-    await db.commit()
-    await db.refresh(new_settings)
-    return new_settings
-
-async def updateUserSettings(
-    db: AsyncSession,
-    user_id: int,
-    user_settings: UserSetting,
-) -> Optional[UserSetting]:
-    user = await getUserByID(db, user_id)
-    assert user is not None, "User not found"
-    new_data = user_settings.model_dump(exclude_none=True)
-    for key, value in new_data.items():
-        setattr(user.settings, key, value)
-    await db.commit()
-    await db.refresh(user.settings)
-    return user.settings
-
-async def createNotification(
-    db: AsyncSession,
-    create_notification: NotificationCreate
-) -> Notification:
-    data = create_notification.model_dump(exclude_none=True)
-    new_notification = Notification(**data)
-    db.add(new_notification)
-    await db.commit()
-    await db.refresh(new_notification)
-    return new_notification
-
-async def getUserNotification(
-    db: AsyncSession, notification_id: int, user_id: int
-) -> Optional[Notification]:
-    stmt = select(Notification).where(
-        Notification.id == notification_id,
-        Notification.user_id == user_id,
-    )
-    return (await db.scalars(stmt)).one_or_none()
-
-async def getAllUserNotifications(
-    db: AsyncSession, user_id: int
-) -> List[Notification]:
-    stmt = select(Notification).where(Notification.user_id == user_id)
-    return (await db.scalars(stmt)).all()
-
-async def markNotificationAsRead(
-    db: AsyncSession, notification_id: int, user_id: int
-) -> Optional[Notification]:
-    stmt = (
-        update(Notification)
-        .where(Notification.id == notification_id, Notification.user_id == user_id)
-        .values(read_datetime=func.now())
-    )
-    await db.execute(stmt)
-    await db.commit()
-    return await getUserNotification(db, notification_id, user_id)
-
-async def deleteNotification(
-    db: AsyncSession, notification_id: int
-) -> Optional[Notification]:
-    notification = await db.get(Notification, notification_id)
-    assert notification is not None, "Notification not found"
-    await db.delete(notification)
-    await db.commit()
-    return notification

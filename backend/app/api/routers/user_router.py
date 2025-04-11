@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,18 +6,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.base import getSession
 from app.db.models.user import User
 from app.db.schemas.user_schema import (
-    User as UserSchema, # Name conflict with SQLAlchemy model
+    User as UserSchema,  # Name conflict with SQLAlchemy model
     UserCreate,
     UserUpdate,
     UserAddressCreate,
-    UserSettings,
-    Notification as NotificationSchema, # Name conflict with SQLAlchemy model
-    NotificationCreate
 )
 from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema
+from app.db.schemas.notification_schema import Notification, UserNotifications
+from app.db.schemas.settings_schema import UserSettingsRead, UserSettingsUpdate
 from app.db.crud.user_crud import *
 from app.db.crud.report_crud import getUserReports
+from app.db.crud.settings_crud import getSettings, createSettings
+from app.db.crud.notifications_crud import getNotificationAll
 
 from app.utils.passwords import verifyPassword
 from app.utils.auth import getAccessToken, getRefreshToken
@@ -39,8 +40,15 @@ async def signupUserRoute(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email is already in use",
         )
-    created_user = await createUser(db, usercreate)
-    return created_user
+    try:
+        created_user = await createUser(db, usercreate, nocommit=True)
+        created_settings = await createSettings(db, created_user.id, nocommit=True)
+        await db.commit()
+        return Response(status_code=200)
+    except Exception as e:
+        await db.rollback()
+        print(e)
+        raise HTTPException(status_code=500, detail="Error creating User")
 
 
 @router.post(
@@ -89,84 +97,24 @@ async def getUserReportsRoute(
     reports = await getUserReports(db, user.id)
     return {"data": reports}
 
+
 @router.get(
-    "/settings",
-    summary="Get settings of currently logged in user if they exist, if not, create default settings (everything is false)",
-    response_model=UserSettings,
+    "/settings", summary="Retrieve User's settings", response_model=UserSettingsRead
 )
 async def getUserSettingsRoute(
     db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
 ):
-    settings = await getOrSetUserSettings(db, user.id)
-    if not settings:
-        settings = await createUserSettings(db, user.id)
+    settings = await getSettings(db, user.id)
     return settings
 
-@router.post(
-    "/notifications/create",
-    summary="Create a new notification for the user",
-    response_model=NotificationSchema,
-)
-async def createNotificationRoute(
-    user_id: int,
-    report_id: int,
-    title: str,
-    note: str,
-    db: AsyncSession = Depends(getSession)
-):
-    return await createNotification(db, create_notification=NotificationCreate(user_id=user_id, report_id=report_id, title=title, note=note))
 
 @router.get(
-    "/notifications/get/one",
-    summary="Get a notification by ID for the user",
-    response_model=NotificationSchema,
+    "/notifications",
+    summary="Retrieve User's notifications",
+    response_model=UserNotifications,
 )
-async def getNotificationRoute(
-    notification_id: int,
-    user: User = Depends(getUser),
-    db: AsyncSession = Depends(getSession)
+async def getUserNotificationsRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
 ):
-    notification = await getUserNotification(db, notification_id, user.id)
-    if not notification:
-        raise HTTPException(status_code=404, detail="Notification not found")
-    return notification
-
-@router.get(
-    "/notifications/get/all",
-    summary="Get all notifications for the user",
-    response_model=list[NotificationSchema],
-)
-async def getAllNotificationsRoute(
-    user: User = Depends(getUser),
-    db: AsyncSession = Depends(getSession)
-):
-    return await getAllUserNotifications(db, user.id)
-
-@router.put(
-    "/notifications/markAsRead",
-    summary="Mark a notification as read",
-    response_model=NotificationSchema,
-)
-async def markNotificationAsReadRoute(
-    notification_id: int,
-    user: User = Depends(getUser),
-    db: AsyncSession = Depends(getSession)
-):
-    notification = await markNotificationAsRead(db, notification_id, user.id)
-    if not notification:
-        raise HTTPException(status_code=404, detail="Notification not found")
-    return notification
-
-@router.delete(
-    "/notifications/delete",
-    summary="Delete a notification",
-    response_model=NotificationSchema,
-)
-async def deleteNotificationRoute(
-    notification_id: int,
-    db: AsyncSession = Depends(getSession)
-):
-    notification = await deleteNotification(db, notification_id)
-    if not notification:
-        raise HTTPException(status_code=404, detail="Notification not found")
-    return notification
+    notifications = await getNotificationAll(db, user.id)
+    return UserNotifications(data=notifications)

@@ -77,7 +77,7 @@ async def createReportRoute(
     except Exception as e:
         # TODO: Remove photos from directory if failed sql query
         await db.rollback()
-        raise HTTPException(status_code=500, detail="Error creating report")
+        raise HTTPException(status_code=500, detail="Error creating Report")
 
 
 @router.get("/{report_id}", response_model=ReportReadFull, summary="Retrieve Report")
