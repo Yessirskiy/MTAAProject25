@@ -68,6 +68,9 @@ class Report(BaseModel):
     note: str
     admin_note: Optional[str] = None
 
+    votes_pos: int
+    votes_neg: int
+
     class Config:
         from_attributes = True
         use_enum_values = True
@@ -81,6 +84,9 @@ class ReportReadFull(BaseModel):
     published_datetime: Optional[datetime.datetime] = None
 
     note: str
+
+    votes_pos: int
+    votes_neg: int
 
     user: UserRead
     address: ReportAddressRead

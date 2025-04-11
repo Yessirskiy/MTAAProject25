@@ -31,7 +31,9 @@ from typing import Annotated
 router = APIRouter()
 
 
-@router.post("/create", response_model=ReportSchema, summary="Create Report")
+@router.post(
+    "/create", response_model=ReportSchema, summary="Create Report"
+)  # ReportReadFull?
 async def createReportRoute(
     reportcreatestr: Annotated[
         str, Form()

@@ -42,6 +42,9 @@ class Report(Base):
     note = Column(Text, nullable=False)
     admin_note = Column(Text, nullable=True)
 
+    votes_pos = Column(Integer, default=0, nullable=False)
+    votes_neg = Column(Integer, default=0, nullable=False)
+
     user = relationship("User", back_populates="reports")
     address = relationship(
         "ReportAddress", back_populates="report", uselist=False, cascade="all, delete"
