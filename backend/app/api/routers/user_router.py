@@ -10,6 +10,7 @@ from app.db.schemas.user_schema import (
     UserCreate,
     UserUpdate,
     UserAddressCreate,
+    UserReadFull
 )
 from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema
@@ -17,7 +18,7 @@ from app.db.schemas.notification_schema import Notification, UserNotifications
 from app.db.schemas.settings_schema import UserSettingsRead, UserSettingsUpdate
 from app.db.crud.user_crud import *
 from app.db.crud.report_crud import getUserReports
-from app.db.crud.settings_crud import getSettings, createSettings
+from app.db.crud.settings_crud import getSettings, createSettings, updateUserSettings
 from app.db.crud.notifications_crud import getNotificationAll
 
 from app.utils.passwords import verifyPassword
@@ -80,11 +81,54 @@ async def login(
 
 
 @router.get(
-    "/me", summary="Get details of currently logged in user", response_model=UserSchema
+    "/me", summary="Get details of currently logged in user", response_model=UserReadFull
 )
-async def getMe(user: User = Depends(getUser)):
+async def getMe(db: AsyncSession = Depends(getSession), user: User = Depends(getUser)):
+    user = await getUserByID(db, user.id, active_only=True)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
     return user
 
+
+@router.put(
+    "/change-details",
+    summary="Change User details(name, email, phone number, address)",
+    response_model=UserUpdate
+)
+async def updateUserDetailsRoute(
+    userupdate: UserUpdate,
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser)
+):
+    existing_user = await getUserByID(db, user.id)
+    if not existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    try:
+        await updateUser(db, user.id, userupdate)
+        return Response(status_code=200)
+    except Exception as e:
+        await db.rollback()
+        print(e)
+        raise HTTPException(status_code=500, detail="Error updating User details")
+
+@router.put(
+    "/change-password",
+    summary="Change User password",
+    response_model=UserChangePassword
+)
+async def changeUserPasswordRoute(
+    changePassword: UserChangePassword,
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser)
+):
+    await updateUserPassword(db, user.id, changePassword)
+    return Response(status_code=200)
 
 @router.get(
     "/reports",
@@ -107,6 +151,18 @@ async def getUserSettingsRoute(
     settings = await getSettings(db, user.id)
     return settings
 
+@router.put(
+    "/settings",
+    summary="Update User's settings",
+    response_model=UserSettingsRead,
+)
+async def updateUserSettingsRoute(
+    settings_update: UserSettingsUpdate,
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser)
+):
+    await updateUserSettings(db, user.id, settings_update)
+    return Response(status_code=200)
 
 @router.get(
     "/notifications",
