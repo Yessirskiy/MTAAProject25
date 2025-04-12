@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, model_validator
+from pydantic import BaseModel, EmailStr, model_validator, Field
 import datetime
 from typing import Optional, Self
 
@@ -28,19 +28,6 @@ class UserCreate(BaseModel):
             raise ValueError("Passwords do not match")
         return self
 
-
-class UserRead(BaseModel):
-    id: int
-    first_name: str
-    last_name: Optional[str] = None
-    email: Optional[str] = None
-    phone_number: Optional[str] = None
-    created_datetime: datetime.datetime
-
-
-class UserReadFull(UserRead): ...
-
-
 class UserAddress(BaseModel):
     id: int
     user_id: int
@@ -65,6 +52,18 @@ class UserAddressCreate(BaseModel):
 class UserAddressRead(UserAddress): ...
 
 
+class UserRead(BaseModel):
+    id: int
+    first_name: str
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    created_datetime: datetime.datetime
+    address: UserAddressRead
+
+
+class UserReadFull(UserRead): ...
+
 class UserAddressUpdate(UserAddressCreate): ...
 
 
@@ -74,3 +73,15 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[UserAddressCreate] = None
+    is_active: Optional[bool] = None
+
+class UserChangePassword(BaseModel):
+    old_password: str
+    new_password1: str
+    new_password2: str
+
+    @model_validator(mode="after")
+    def checkPasswordsMatch(self) -> Self:
+        if self.new_password1 != self.new_password2:
+            raise ValueError("Passwords do not match")
+        return self

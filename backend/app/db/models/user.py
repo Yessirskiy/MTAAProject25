@@ -47,6 +47,7 @@ class UserAddress(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True)
     street = Column(String, nullable=True)
+    building = Column(String, nullable=True)
     city = Column(String, nullable=True)
     state = Column(String, nullable=True)
     postal_code = Column(String, nullable=True)

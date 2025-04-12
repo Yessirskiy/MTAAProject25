@@ -25,6 +25,7 @@ def upgrade() -> None:
     op.create_table('useraddresses',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('building', sa.String(), nullable=True),
     sa.Column('street', sa.String(), nullable=True),
     sa.Column('city', sa.String(), nullable=True),
     sa.Column('state', sa.String(), nullable=True),
