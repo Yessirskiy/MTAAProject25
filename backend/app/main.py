@@ -8,6 +8,7 @@ from app.api.routers.user_router import router as user_router
 from app.api.routers.debug_router import router as debug_router
 from app.api.routers.vote_router import router as vote_router
 from app.api.routers.notification_router import router as notification_router
+from app.api.routers.admin_router import router as admin_router
 
 
 def setupDirs():  # Creating dirs (to store photos)
@@ -30,3 +31,4 @@ app.include_router(user_router, prefix="/user", tags=["User"])
 app.include_router(vote_router, prefix="/vote", tags=["Vote"])
 app.include_router(debug_router, prefix="/debug", tags=["Debug"])
 app.include_router(notification_router, prefix="/notification", tags=["Notification"])
+app.include_router(admin_router, prefix="/admin", tags=["Admin"])

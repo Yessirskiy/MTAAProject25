@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
+
 from app.db.models.user import User, UserAddress
 from app.db.schemas.user_schema import (
     UserCreate,
@@ -19,6 +21,20 @@ async def getUserByID(
         stmt = select(User).where(User.id == user_id, User.is_active == 1)
         return (await db.scalars(stmt)).one_or_none()
     return await db.get(User, user_id)
+
+
+async def getUserFullByID(
+    db: AsyncSession, user_id: int, active_only: bool = True
+) -> Optional[User]:
+    stmt = (
+        select(User)
+        .options(
+            joinedload(User.settings),
+            joinedload(User.address),
+        )
+        .where(User.id == user_id)
+    )
+    return (await db.scalars(stmt)).one_or_none()
 
 
 async def getUserByEmail(db: AsyncSession, user_email: str) -> Optional[User]:

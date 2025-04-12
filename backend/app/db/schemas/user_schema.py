@@ -2,6 +2,8 @@ from pydantic import BaseModel, EmailStr, model_validator
 import datetime
 from typing import Optional, Self
 
+from app.db.schemas.settings_schema import UserSettingsRead
+
 
 class User(BaseModel):
     id: int
@@ -38,9 +40,6 @@ class UserRead(BaseModel):
     created_datetime: datetime.datetime
 
 
-class UserReadFull(UserRead): ...
-
-
 class UserAddress(BaseModel):
     id: int
     user_id: int
@@ -74,3 +73,8 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[UserAddressCreate] = None
+
+
+class UserReadFull(UserRead):
+    address: UserAddressRead
+    settings: UserSettingsRead

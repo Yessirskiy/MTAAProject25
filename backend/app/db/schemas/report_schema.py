@@ -108,5 +108,19 @@ class ReportUpdate(BaseModel):
     address: Optional[ReportAddressUpdate] = None
 
 
+class ReportUpdateAdmin(ReportUpdate):
+    status: Optional[ReportStatus] = None
+
+    report_datetime: Optional[datetime.datetime] = None
+    published_datetime: Optional[datetime.datetime] = None
+
+    # note: Optional[str] = None
+
+    votes_pos: Optional[int] = None
+    votes_neg: Optional[int] = None
+
+    # address: Optional[ReportAddressRead] = None
+
+
 class UserReports(BaseModel):
     data: list[ReportReadFull]
