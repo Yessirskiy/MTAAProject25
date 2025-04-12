@@ -71,10 +71,6 @@ class UserRead(BaseModel):
     email: Optional[str] = None
     phone_number: Optional[str] = None
     created_datetime: datetime.datetime
-    address: UserAddressRead
-
-
-class UserReadFull(UserRead): ...
 
 
 class UserAddressUpdate(UserAddressCreate): ...
@@ -85,8 +81,8 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     email: Optional[str] = None
     phone_number: Optional[str] = None
-    address: Optional[UserAddressCreate] = None
-    is_active: Optional[bool] = None
+    # address: Optional[UserAddressCreate] = None
+    # is_active: Optional[bool] = None
 
 
 class UserChangePassword(BaseModel):

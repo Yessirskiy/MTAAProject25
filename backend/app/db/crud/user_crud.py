@@ -19,15 +19,8 @@ async def getUserByID(
     db: AsyncSession, user_id: int, active_only: bool = True
 ) -> Optional[User]:
     if active_only:
-        address = await getUserAddress(db, user_id, active_only)
-        if address is None:
-            await createUserAddress(db, UserAddressCreate(), user_id, nocommit=True)
-        stmt = (
-            select(User)
-            .options(joinedload(User.address))
-            .where(User.id == user_id, User.is_active == True)
-        )
-        return (await db.execute(stmt)).scalars().unique().one_or_none()
+        stmt = select(User).where(User.id == user_id, User.is_active == True)
+        return (await db.execute(stmt)).scalars().one_or_none()
     return await db.get(User, user_id)
 
 

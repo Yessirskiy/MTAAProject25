@@ -32,7 +32,7 @@ async def createSettings(
     return new_settings
 
 
-async def updateUserSettings(
+async def updateSettings(
     db: AsyncSession,
     user_id: int,
     user_settings: UserSettingsUpdate,

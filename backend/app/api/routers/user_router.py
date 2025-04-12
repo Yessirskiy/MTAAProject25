@@ -7,10 +7,11 @@ from app.db.base import getSession
 from app.db.models.user import User
 from app.db.schemas.user_schema import (
     User as UserSchema,  # Name conflict with SQLAlchemy model
+    UserRead,
     UserCreate,
     UserUpdate,
     UserAddressCreate,
-    UserReadFull
+    UserReadFull,
 )
 from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema
@@ -18,7 +19,7 @@ from app.db.schemas.notification_schema import Notification, UserNotifications
 from app.db.schemas.settings_schema import UserSettingsRead, UserSettingsUpdate
 from app.db.crud.user_crud import *
 from app.db.crud.report_crud import getUserReports
-from app.db.crud.settings_crud import getSettings, createSettings, updateUserSettings
+from app.db.crud.settings_crud import getSettings, createSettings
 from app.db.crud.notifications_crud import getNotificationAll
 
 from app.utils.passwords import verifyPassword
@@ -81,9 +82,13 @@ async def login(
 
 
 @router.get(
-    "/me", summary="Get details of currently logged in user", response_model=UserReadFull
+    "/me",
+    summary="Get details of currently logged in user",
+    response_model=UserRead,
 )
-async def getMe(db: AsyncSession = Depends(getSession), user: User = Depends(getUser)):
+async def getMeRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
     user = await getUserByID(db, user.id, active_only=True)
     if not user:
         raise HTTPException(
@@ -94,41 +99,64 @@ async def getMe(db: AsyncSession = Depends(getSession), user: User = Depends(get
 
 
 @router.put(
-    "/change-details",
-    summary="Change User details(name, email, phone number, address)",
-    response_model=UserUpdate
+    "/me",
+    summary="Update details of currently logged in user",
+    response_model=UserUpdate,
 )
-async def updateUserDetailsRoute(
-    userupdate: UserUpdate,
+async def updateMeRoute(
+    user_update: UserUpdate,
     db: AsyncSession = Depends(getSession),
-    user: User = Depends(getUser)
+    user: User = Depends(getUser),
 ):
-    existing_user = await getUserByID(db, user.id)
-    if not existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
     try:
-        await updateUser(db, user.id, userupdate)
+        user = await updateUser(db, user.id, user_update)
+        return user
+    except AssertionError as e:
+        if "User not found" in e.args[0]:
+            raise HTTPException(404, detail="User not found")
+        elif "Permission denied" in e.args[0]:
+            raise HTTPException(403, "Permission denied")
+        else:
+            print(e)
+            raise HTTPException(500)
+
+
+@router.delete(
+    "/me",
+    summary="Delete currently logged in user",
+)
+async def deleteMeRoute(
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser),
+):
+    try:
+        user = await getUserByID(db, user.id)
+        user.is_active = False
+        await db.commit()
         return Response(status_code=200)
-    except Exception as e:
-        await db.rollback()
-        print(e)
-        raise HTTPException(status_code=500, detail="Error updating User details")
+    except AssertionError as e:
+        if "User not found" in e.args[0]:
+            raise HTTPException(404, detail="User not found")
+        elif "Permission denied" in e.args[0]:
+            raise HTTPException(403, "Permission denied")
+        else:
+            print(e)
+            raise HTTPException(500)
+
 
 @router.put(
     "/change-password",
-    summary="Change User password",
-    response_model=UserChangePassword
+    summary="Change logged in User password",
+    response_model=UserChangePassword,
 )
 async def changeUserPasswordRoute(
     changePassword: UserChangePassword,
     db: AsyncSession = Depends(getSession),
-    user: User = Depends(getUser)
+    user: User = Depends(getUser),
 ):
     await updateUserPassword(db, user.id, changePassword)
     return Response(status_code=200)
+
 
 @router.get(
     "/reports",
@@ -141,28 +169,6 @@ async def getUserReportsRoute(
     reports = await getUserReports(db, user.id)
     return {"data": reports}
 
-
-@router.get(
-    "/settings", summary="Retrieve User's settings", response_model=UserSettingsRead
-)
-async def getUserSettingsRoute(
-    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
-):
-    settings = await getSettings(db, user.id)
-    return settings
-
-@router.put(
-    "/settings",
-    summary="Update User's settings",
-    response_model=UserSettingsRead,
-)
-async def updateUserSettingsRoute(
-    settings_update: UserSettingsUpdate,
-    db: AsyncSession = Depends(getSession),
-    user: User = Depends(getUser)
-):
-    await updateUserSettings(db, user.id, settings_update)
-    return Response(status_code=200)
 
 @router.get(
     "/notifications",
