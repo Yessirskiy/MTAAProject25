@@ -15,6 +15,39 @@ from app.dependencies.common import getSettings
 reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/user/login", scheme_name="JWT")
 
 
+async def refreshUser(
+    refresh_token: str, db: AsyncSession = Depends(getSession)
+) -> User:
+    settings = getSettings()
+    try:
+        payload = jwt.decode(
+            refresh_token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+
+        if datetime.fromtimestamp(token_data.exp) < datetime.now():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user = await getUserByEmail(db, token_data.sub)
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    return user
+
+
 async def getUser(
     token: str = Depends(reuseable_oauth), db: AsyncSession = Depends(getSession)
 ) -> User:

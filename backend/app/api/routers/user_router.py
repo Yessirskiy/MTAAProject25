@@ -14,7 +14,7 @@ from app.db.schemas.user_schema import (
     UserReadFull,
 )
 from app.db.schemas.report_schema import UserReports
-from app.db.schemas.tokens_schema import TokenSchema
+from app.db.schemas.tokens_schema import TokenSchema, AccessTokenSchema
 from app.db.schemas.notification_schema import Notification, UserNotifications
 from app.db.schemas.settings_schema import UserSettingsRead, UserSettingsUpdate
 from app.db.crud.user_crud import *
@@ -24,7 +24,7 @@ from app.db.crud.notifications_crud import getNotificationAll
 
 from app.utils.passwords import verifyPassword
 from app.utils.auth import getAccessToken, getRefreshToken
-from app.dependencies.auth import getUser
+from app.dependencies.auth import getUser, refreshUser
 
 from uuid import uuid4
 
@@ -74,11 +74,18 @@ async def login(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect email or password",
         )
+    return TokenSchema(
+        access_token=getAccessToken(user.email),
+        refresh_token=getRefreshToken(user.email),
+    )
 
-    return {
-        "access_token": getAccessToken(user.email),
-        "refresh_token": getRefreshToken(user.email),
-    }
+
+@router.post("/refresh", summary="Refresh access token for the User")
+async def refreshAccessRoute(
+    refresh_user: User = Depends(refreshUser), db: AsyncSession = Depends(getSession)
+):
+    new_access_token = getAccessToken(refresh_user.email)
+    return AccessTokenSchema(access_token=new_access_token)
 
 
 @router.get(
