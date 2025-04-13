@@ -2,11 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
-from app.db.models.user import User, UserAddress
+from app.db.models.user import User
 from app.db.schemas.user_schema import (
     UserCreate,
-    UserAddressCreate,
-    UserAddress as UserAddressSchema,
     UserUpdate,
     UserChangePassword,
 )
@@ -35,11 +33,17 @@ async def getUserFullByID(
         )
         .where(User.id == user_id)
     )
+    if active_only:
+        stmt = stmt.where(User.is_active == True)
     return (await db.scalars(stmt)).one_or_none()
 
 
-async def getUserByEmail(db: AsyncSession, user_email: str) -> Optional[User]:
+async def getUserByEmail(
+    db: AsyncSession, user_email: str, active_only: bool = True
+) -> Optional[User]:
     stmt = select(User).where(User.email == user_email)
+    if active_only:
+        stmt = stmt.where(User.is_active == True)
     return (await db.scalars(stmt)).one_or_none()
 
 
@@ -63,30 +67,6 @@ async def createUser(
     return new_user
 
 
-async def createUserAddress(
-    db: AsyncSession,
-    address_create: UserAddressCreate,
-    user_id: int,
-    nocommit: bool = True,
-) -> UserAddress:
-    data = address_create.model_dump(exclude_none=True)
-    new_address = UserAddress(user_id=user_id, **data)
-    db.add(new_address)
-    if not nocommit:
-        await db.commit()
-        await db.refresh(new_address)
-        return new_address
-    await db.flush()
-    return new_address
-
-
-async def getUserAddress(
-    db: AsyncSession, user_id: int, active_only: bool = True
-) -> Optional[UserAddress]:
-    stmt = select(UserAddress).where(UserAddress.user_id == user_id)
-    return (await db.execute(stmt)).scalars().unique().one_or_none()
-
-
 async def updateUser(
     db: AsyncSession,
     user_id: int,
@@ -96,11 +76,7 @@ async def updateUser(
     assert user is not None, "User not found"
     new_data = user_update.model_dump(exclude_none=True, exclude=("string",))
     for key, value in new_data.items():
-        if key == "address":
-            for addr_key, addr_value in value.items():
-                setattr(user.address, addr_key, addr_value)
-        else:
-            setattr(user, key, value)
+        setattr(user, key, value)
     await db.commit()
     await db.refresh(user)
     return user

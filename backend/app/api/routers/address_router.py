@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import getSession
 
-from app.db.schemas.settings_schema import UserSettingsRead, UserSettingsUpdate
-from app.db.crud.settings_crud import getSettings, createSettings, updateSettings
+from app.db.schemas.address_schema import UserAddressRead, UserAddressUpdate
+from app.db.crud.address_crud import getAddress, createAddress, updateAddress
 
 from app.db.models.user import User
 from app.dependencies.auth import getUser
@@ -14,9 +14,9 @@ router = APIRouter()
 
 
 @router.get(
-    "/{user_id}", summary="Retrieve User's settings", response_model=UserSettingsRead
+    "/{user_id}", summary="Retrieve User's address", response_model=UserAddressRead
 )
-async def getSettingsRoute(
+async def getAddressRoute(
     user_id: int,
     db: AsyncSession = Depends(getSession),
     user: User = Depends(getUser),
@@ -24,12 +24,12 @@ async def getSettingsRoute(
     try:
         if not user.is_admin:
             assert user.id == user_id, "Permission denied"
-        settings = await getSettings(db, user_id)
-        assert settings is not None, "Settings not found"
-        return settings
+        address = await getAddress(db, user_id)
+        assert address is not None, "Address not found"
+        return address
     except AssertionError as e:
-        if "Settings not found" in e.args[0]:
-            raise HTTPException(404, detail="Settings not found")
+        if "Address not found" in e.args[0]:
+            raise HTTPException(404, detail="Address not found")
         elif "Permission denied" in e.args[0]:
             raise HTTPException(403, "Permission denied")
         else:
@@ -39,23 +39,23 @@ async def getSettingsRoute(
 
 @router.put(
     "/{user_id}",
-    summary="Update User's settings",
-    response_model=UserSettingsRead,
+    summary="Update User's address",
+    response_model=UserAddressRead,
 )
-async def updateSettingsRoute(
+async def updateAddressRoute(
     user_id: int,
-    settings_update: UserSettingsUpdate,
+    address_update: UserAddressUpdate,
     db: AsyncSession = Depends(getSession),
     user: User = Depends(getUser),
 ):
     try:
         if not user.is_admin:
             assert user.id == user_id, "Permission denied"
-        settings = await updateSettings(db, user_id, settings_update)
-        return settings
+        address = await updateAddress(db, user_id, address_update)
+        return address
     except AssertionError as e:
-        if "Settings not found" in e.args[0]:
-            raise HTTPException(404, detail="Settings not found")
+        if "Address not found" in e.args[0]:
+            raise HTTPException(404, detail="Address not found")
         elif "Permission denied" in e.args[0]:
             raise HTTPException(403, "Permission denied")
         else:

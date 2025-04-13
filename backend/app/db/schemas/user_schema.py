@@ -3,6 +3,7 @@ import datetime
 from typing import Optional, Self
 
 from app.db.schemas.settings_schema import UserSettingsRead
+from app.db.schemas.address_schema import UserAddressRead
 
 
 class User(BaseModel):
@@ -40,40 +41,9 @@ class UserRead(BaseModel):
     created_datetime: datetime.datetime
 
 
-class UserAddress(BaseModel):
-    id: int
-    user_id: int
-
-    building: Optional[str] = None
-    street: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    postal_code: Optional[str] = None
-    country: Optional[str] = None
-
-
-class UserAddressCreate(BaseModel):
-    building: Optional[str] = None
-    street: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    postal_code: Optional[str] = None
-    country: Optional[str] = None
-
-
-class UserAddressRead(UserAddress): ...
-
-
-class UserRead(BaseModel):
-    id: int
-    first_name: str
-    last_name: Optional[str] = None
-    email: Optional[str] = None
-    phone_number: Optional[str] = None
-    created_datetime: datetime.datetime
-
-
-class UserAddressUpdate(UserAddressCreate): ...
+class UserReadFull(UserRead):
+    address: UserAddressRead
+    settings: UserSettingsRead
 
 
 class UserUpdate(BaseModel):
@@ -95,8 +65,3 @@ class UserChangePassword(BaseModel):
         if self.new_password1 != self.new_password2:
             raise ValueError("Passwords do not match")
         return self
-
-
-class UserReadFull(UserRead):
-    address: UserAddressRead
-    settings: UserSettingsRead

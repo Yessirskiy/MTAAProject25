@@ -56,7 +56,7 @@ async def getNotificationRoute(
     return notification
 
 
-@router.put(
+@router.patch(
     "/{notification_id}",
     summary="Mark Notification as read",
     response_model=NotificationSchema,

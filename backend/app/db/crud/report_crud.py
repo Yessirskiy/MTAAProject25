@@ -9,7 +9,6 @@ from app.db.schemas.report_schema import (
     ReportPhotoCreate,
     ReportUpdate,
 )
-import datetime
 from typing import Optional
 
 

@@ -1,10 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update, select
-from sqlalchemy.orm import joinedload
+from sqlalchemy import select
 from app.db.models.vote import Vote
 from app.db.schemas.vote_schema import VoteCreate, VoteUpdate
-import datetime
 from typing import Optional
 
 

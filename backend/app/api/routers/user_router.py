@@ -10,23 +10,19 @@ from app.db.schemas.user_schema import (
     UserRead,
     UserCreate,
     UserUpdate,
-    UserAddressCreate,
-    UserReadFull,
 )
 from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema, AccessTokenSchema
-from app.db.schemas.notification_schema import Notification, UserNotifications
-from app.db.schemas.settings_schema import UserSettingsRead, UserSettingsUpdate
+from app.db.schemas.notification_schema import UserNotifications
 from app.db.crud.user_crud import *
 from app.db.crud.report_crud import getUserReports
-from app.db.crud.settings_crud import getSettings, createSettings
+from app.db.crud.settings_crud import createSettings
+from app.db.crud.address_crud import createAddress
 from app.db.crud.notifications_crud import getNotificationAll
 
 from app.utils.passwords import verifyPassword
 from app.utils.auth import getAccessToken, getRefreshToken
 from app.dependencies.auth import getUser, refreshUser
-
-from uuid import uuid4
 
 router = APIRouter()
 
@@ -45,6 +41,7 @@ async def signupUserRoute(
     try:
         created_user = await createUser(db, usercreate, nocommit=True)
         created_settings = await createSettings(db, created_user.id, nocommit=True)
+        created_address = await createAddress(db, created_user.id, nocommit=True)
         await db.commit()
         return Response(status_code=200)
     except Exception as e:
@@ -58,7 +55,7 @@ async def signupUserRoute(
     summary="Create access and refresh tokens for user",
     response_model=TokenSchema,
 )
-async def login(
+async def loginRoute(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(getSession),
 ):
@@ -82,7 +79,8 @@ async def login(
 
 @router.post("/refresh", summary="Refresh access token for the User")
 async def refreshAccessRoute(
-    refresh_user: User = Depends(refreshUser), db: AsyncSession = Depends(getSession)
+    refresh_token: str,
+    refresh_user: User = Depends(refreshUser),
 ):
     new_access_token = getAccessToken(refresh_user.email)
     return AccessTokenSchema(access_token=new_access_token)
@@ -130,7 +128,7 @@ async def updateMeRoute(
 
 @router.delete(
     "/me",
-    summary="Delete currently logged in user",
+    summary="Deactivate (soft-deletion) currently logged in user",
 )
 async def deleteMeRoute(
     db: AsyncSession = Depends(getSession),

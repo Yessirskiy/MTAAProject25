@@ -1,15 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.db.models.user import User, UserSetting, UserAddress
+from app.db.models.user import UserSetting
 from app.db.schemas.settings_schema import (
-    UserSettings,
     UserSettingsCreate,
-    UserSettingsRead,
     UserSettingsUpdate,
 )
-from typing import Optional, List
-
-from app.utils import passwords
+from typing import Optional
 
 
 async def getSettings(db: AsyncSession, user_id: int) -> Optional[UserSetting]:
