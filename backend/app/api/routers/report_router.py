@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Form, File, UploadFile, HTTPException, Response
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
@@ -19,10 +20,12 @@ from app.db.crud.report_crud import (
     getReportByID,
     updateReport,
     deleteReport,
+    getReportPhoto,
 )
 from app.dependencies.auth import getUser
 from app.dependencies.common import getSettings
 
+import os
 import json
 import uuid
 from pathlib import Path
@@ -31,9 +34,7 @@ from typing import Annotated
 router = APIRouter()
 
 
-@router.post(
-    "/create", response_model=ReportSchema, summary="Create Report"
-)  # ReportReadFull?
+@router.post("/create", response_model=ReportReadFull, summary="Create Report")
 async def createReportRoute(
     reportcreatestr: Annotated[
         str, Form()
@@ -71,7 +72,8 @@ async def createReportRoute(
                 nocommit=True,
             )
         await db.commit()  # Commit only after all the operations completed
-        return created_report
+        # to obtain full info, we have to make one more request to DB
+        return await getReportByID(db, created_report.id, full=True)
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid ReportCreate Form")
     except AssertionError:
@@ -131,3 +133,15 @@ async def deleteReportRoute(
         else:
             print(e)
             raise HTTPException(status_code=500)
+
+
+@router.get(
+    "/photo/{photo_id}", response_class=FileResponse, summary="Retrieve Report Photo"
+)
+async def getReportPhotoRoute(photo_id: int, db: AsyncSession = Depends(getSession)):
+    photo = await getReportPhoto(db, photo_id)
+    if photo is None:
+        raise HTTPException(404, "Photo not found")
+    if not os.path.exists(photo.filename_path):
+        raise HTTPException(500)
+    return photo.filename_path

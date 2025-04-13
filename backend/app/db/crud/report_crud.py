@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update
 from sqlalchemy.orm import joinedload
 from app.db.models.report import Report, ReportAddress, ReportPhoto
 from app.db.schemas.report_schema import (
@@ -120,3 +119,7 @@ async def createReportPhoto(
         return new_photo
     await db.flush()
     return new_photo
+
+
+async def getReportPhoto(db: AsyncSession, photo_id: int):
+    return await db.get(ReportPhoto, photo_id)
