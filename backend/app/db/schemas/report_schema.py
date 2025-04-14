@@ -124,3 +124,7 @@ class ReportUpdateAdmin(ReportUpdate):
 
 class UserReports(BaseModel):
     data: list[ReportReadFull]
+
+
+class FeedReports(BaseModel):
+    data: list[ReportReadFull]

@@ -12,6 +12,7 @@ from app.db.schemas.report_schema import (
     ReportPhotoCreate,
     ReportReadFull,
     ReportUpdate,
+    FeedReports,
 )
 from app.db.crud.report_crud import (
     createReport,
@@ -21,6 +22,7 @@ from app.db.crud.report_crud import (
     updateReport,
     deleteReport,
     getReportPhoto,
+    getFeedReports,
 )
 from app.dependencies.auth import getUser
 from app.dependencies.common import getSettings
@@ -88,6 +90,14 @@ async def createReportRoute(
         # TODO: Remove photos from directory if failed sql query
         await db.rollback()
         raise HTTPException(status_code=500, detail="Error creating Report")
+
+
+@router.get("/feed", response_model=FeedReports, summary="Retrieve Reports Feed")
+async def getReportsFeedRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
+    reports = await getFeedReports(db)
+    return {"data": reports}
 
 
 @router.get("/{report_id}", response_model=ReportReadFull, summary="Retrieve Report")

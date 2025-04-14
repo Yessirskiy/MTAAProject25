@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
-from app.db.models.report import Report, ReportAddress, ReportPhoto
+from app.db.models.report import Report, ReportStatus, ReportAddress, ReportPhoto
 from app.db.schemas.report_schema import (
     ReportCreate,
     ReportAddressCreate,
@@ -123,3 +123,17 @@ async def createReportPhoto(
 
 async def getReportPhoto(db: AsyncSession, photo_id: int):
     return await db.get(ReportPhoto, photo_id)
+
+
+async def getFeedReports(db: AsyncSession) -> list[Report]:
+    stmt = (
+        select(Report)
+        .options(
+            joinedload(Report.address),
+            joinedload(Report.user),
+            joinedload(Report.photos),
+        )
+        .where(Report.status.in_([ReportStatus.published, ReportStatus.in_progress]))
+        .order_by(Report.published_datetime.desc())
+    )
+    return (await db.execute(stmt)).scalars().unique().all()
