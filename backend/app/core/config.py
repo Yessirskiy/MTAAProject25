@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "ActiveResident"
     DEBUG: bool = True
     DATABASE_URL: str
+    DEV_DATABASE_URL: str
 
     # JWT TOKEN SETTINGS
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # 30 minutes

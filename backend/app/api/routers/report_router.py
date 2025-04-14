@@ -59,10 +59,16 @@ async def createReportRoute(
         for photo in photos:
             file_extension = Path(photo.filename).suffix
             # TODO: CHECK THE EXTENSIONS (PHOTOS ONLY)
-            filename = f"{uuid.uuid4()}{file_extension}"
-            file_path = settings.REPORT_PHOTOS / filename
 
-            with file_path.open("wb") as f:
+            file_path = f"{uuid.uuid4()}{file_extension}"
+            # file_path = settings.REPORT_PHOTOS / filename
+            # The problem occured here. When you run locally (in dev env),
+            # It stores absolute path in the database, but this absolute path
+            # Is not the same for the isolated env (e.g. docker), and it cannot
+            # Locate the files anymore. so we save only name of the file
+            # And re-build absolute path (env-wise) when writings/retrieving photos
+
+            with (settings.REPORT_PHOTOS / file_path).open("wb") as f:
                 f.write(await photo.read())
             await createReportPhoto(
                 db,
@@ -138,10 +144,14 @@ async def deleteReportRoute(
 @router.get(
     "/photo/{photo_id}", response_class=FileResponse, summary="Retrieve Report Photo"
 )
-async def getReportPhotoRoute(photo_id: int, db: AsyncSession = Depends(getSession)):
+async def getReportPhotoRoute(
+    photo_id: int, db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
     photo = await getReportPhoto(db, photo_id)
     if photo is None:
         raise HTTPException(404, "Photo not found")
-    if not os.path.exists(photo.filename_path):
+    settings = getSettings()
+    full_path = settings.REPORT_PHOTOS / photo.filename_path
+    if not os.path.exists(full_path):
         raise HTTPException(500)
-    return photo.filename_path
+    return full_path

@@ -7,7 +7,10 @@ from app.dependencies.common import getSettings
 class Base(AsyncAttrs, DeclarativeBase): ...
 
 
-engine = create_async_engine(getSettings().DATABASE_URL, echo=True)
+settings = getSettings()
+engine = create_async_engine(
+    settings.DEV_DATABASE_URL if settings.DEBUG else settings.DATABASE_URL, echo=True
+)
 async_session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 
