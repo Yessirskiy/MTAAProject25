@@ -13,7 +13,12 @@ export default function TabLayout() {
           backgroundColor: '#FFFFFF',
         },
         headerShadowVisible: false,
-        headerTintColor: '#fff',
+        headerTintColor: '#000000',
+        headerTitleStyle: {
+          color: '#000000',
+          fontSize: 24,
+          textAlign: 'center'
+        },
         tabBarStyle: {
           backgroundColor: '#D9D9D9',
           paddingTop: 5,
