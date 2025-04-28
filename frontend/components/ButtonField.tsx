@@ -1,17 +1,18 @@
-import { StyleSheet, View, Pressable, Text, ViewStyle } from 'react-native';
+import { StyleSheet, View, Pressable, Text, ViewStyle, TextStyle } from 'react-native';
 
 type Props = {
   label: string,
   style?: ViewStyle,
   buttonStyle?: ViewStyle,
+  labelStyle?: TextStyle,
   onPress?: (...args: any[]) => void
 }
 
-export default function ButtonField({label, style, buttonStyle, onPress} : Props) {
+export default function ButtonField({label, style, buttonStyle, labelStyle, onPress} : Props) {
   return (
     <View style={[styles.container, style]}>
       <Pressable style={[styles.fieldContainer, buttonStyle]} onPress={onPress}>
-        <Text style={styles.fieldLabel}>{label}</Text>
+        <Text style={[styles.fieldLabel, labelStyle]}>{label}</Text>
       </Pressable>
     </View>
   );
@@ -25,11 +26,11 @@ const styles = StyleSheet.create({
   },
   fieldContainer: {
     paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: "#F1F1F1",
-    borderRadius: 5,
+    borderRadius: 8,
   },
   fieldLabel: {
     opacity: 0.9,

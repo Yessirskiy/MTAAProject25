@@ -47,7 +47,7 @@ export default function SettingsProfileScreen() {
         <InputField name="Priezvisko" style={{marginBottom: 15}} field='last_name' value={cur_data.last_name} handleChange={handleChange}/>
         <InputField name="Email" style={{marginBottom: 15}} field='email' value={cur_data.email} handleChange={handleChange}/>
         <InputField name="Adresa" style={{marginBottom: 15}}  field='address' value={cur_data.address} handleChange={handleChange} iconName='map'/>
-        {data_modified && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#B2B2B2"}}/>}
+        {data_modified && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#CFCFCF"}}/>}
       </View>
       </ScrollView>
     </View>

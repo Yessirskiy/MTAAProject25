@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     justifyContent: 'center',
     backgroundColor: "#F1F1F1",
-    borderRadius: 5,
+    borderRadius: 8,
   },
   fieldLabel: {
     opacity: 0.7,

@@ -16,8 +16,8 @@ export default function SettingsScreen() {
         <SettingsProfilePicture imgSource={PlaceholderImage} style={{marginBottom: 20}}/>
         <SettingsButtonGeneral label="Zmena profilového obrázka" dest='./settings/profile' iconName="camera" style={{marginBottom: 20}}/>
         <>
-          <SettingsButtonGeneral label="Osobné údaje" dest='./settings/profile' iconName="person" isGroup={true} isFirst={true}/>
-          <SettingsButtonGeneral label="Bezpečnosť" dest='./settings/profile' iconName="lock-closed" isGroup={true}/>
+          <SettingsButtonGeneral label="Osobné údaje" dest='./(settings)/profile' iconName="person" isGroup={true} isFirst={true}/>
+          <SettingsButtonGeneral label="Bezpečnosť" dest='./(settings)/security' iconName="lock-closed" isGroup={true}/>
           <SettingsButtonGeneral label="Notifikácie" dest='./settings/profile' iconName="notifications" isGroup={true} isLast={true}/>
         </>
       </View>
