@@ -29,7 +29,7 @@ export default function TabLayout() {
       <Tabs.Screen name="my_reports" options={getTabScreenOptions("Moje hlásenia", "list")}/>
       <Tabs.Screen name="add_report" options={getTabScreenOptions("Nahlásiť", "add")}/>
       <Tabs.Screen name="notifications" options={getTabScreenOptions("Oznámenia", "notifications")}/>
-      <Tabs.Screen name="settings" options={getTabScreenOptions("Nastavenia", "settings")}/>
+      <Tabs.Screen name="(settings)" options={getTabScreenOptions("Nastavenia", "settings")}/>
       <Tabs.Screen name="map_test" options={getTabScreenOptions("Mapy", "settings")}/>
     </Tabs>
   );
