@@ -44,28 +44,28 @@ export default function SecurityScreen() {
       >
       <View style={styles.subContainer}>
         <Text style={styles.groupLabel}>Súkromie</Text>
-        <ToggleSwitchField 
+        <ToggleSwitchField<UserSecurityType>
           name="Skryť moje meno a priezvisko" 
           field='is_name_hidden' 
           value={cur_data.is_name_hidden} 
           handleChange={handleChange}
           style={{marginBottom: 10}}
         />
-        <ToggleSwitchField 
+        <ToggleSwitchField<UserSecurityType> 
           name="Skryť moje telefóne číslo" 
           field='is_phone_hidden' 
           value={cur_data.is_phone_hidden} 
           handleChange={handleChange}
           style={{marginBottom: 10}}
         />
-        <ToggleSwitchField 
+        <ToggleSwitchField<UserSecurityType> 
           name="Skryť moj email" 
           field='is_email_hidden' 
           value={cur_data.is_email_hidden} 
           handleChange={handleChange}
           style={{marginBottom: 10}}
         />
-        <ToggleSwitchField 
+        <ToggleSwitchField<UserSecurityType> 
           name="Skryť profilovú fotografiu" 
           field='is_picture_hidden' 
           value={cur_data.is_picture_hidden} 

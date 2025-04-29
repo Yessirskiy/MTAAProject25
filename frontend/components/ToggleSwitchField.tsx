@@ -10,21 +10,23 @@ type UserSecurityType = {
   is_picture_hidden: boolean
 };
 
-type Props = {
+type Props<T> = {
     name: string,
-    field: keyof UserSecurityType,
+    field: keyof T,
     value: boolean,
-    handleChange: (field: keyof UserSecurityType, value: boolean) => void,
+    handleChange: (field: keyof T, value: boolean) => void,
     style?: ViewStyle,
     iconName?: string,
+    isDisabled?: boolean
 }
 
-export default function ToggleSwitchField({name, style, iconName, field, value, handleChange} : Props) {
+export default function ToggleSwitchField<T>({name, style, iconName, field, value, handleChange, isDisabled = false} : Props<T>) {
   return (
     <View style={[styles.container, style]}>
       <View style={styles.fieldContainer}>
         <Text style={styles.fieldLabel}>{name}</Text>
         <Switch 
+            disabled={isDisabled}
             trackColor={{ false: '#DDDDDE', true: '#34C759' }}
             thumbColor={value ? '#FFFFFF' : '#FFFFFF'}
             ios_backgroundColor="#DDDDDE"

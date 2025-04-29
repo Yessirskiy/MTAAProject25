@@ -18,7 +18,7 @@ export default function SettingsScreen() {
         <>
           <SettingsButtonGeneral label="Osobné údaje" dest='./(settings)/profile' iconName="person" isGroup={true} isFirst={true}/>
           <SettingsButtonGeneral label="Bezpečnosť" dest='./(settings)/(security)' iconName="lock-closed" isGroup={true}/>
-          <SettingsButtonGeneral label="Notifikácie" dest='./settings/profile' iconName="notifications" isGroup={true} isLast={true}/>
+          <SettingsButtonGeneral label="Notifikácie" dest='./(settings)/notifications' iconName="notifications" isGroup={true} isLast={true}/>
         </>
       </View>
       <View style={styles.subContainer}>
