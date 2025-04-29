@@ -2,8 +2,19 @@ import { Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getTabScreenOptions } from '@/utils/getTabScreenOptions';
+import { useContext, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { AuthContext } from "@/contexts/AuthContext";
 
 export default function TabLayout() {
+  const { accessToken, isLoading } = useContext(AuthContext);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !accessToken) {
+      router.replace("/signin");
+    }
+  }, [accessToken, isLoading]);
   return (
     <Tabs
       screenOptions={{
