@@ -6,6 +6,7 @@ import SettingsProfilePicture from '@/components/SettingsProfilePicture';
 import InputField from '@/components/InputField';
 import ButtonField from '@/components/ButtonField';
 import ToggleSwitchField from '@/components/ToggleSwitchField';
+import { router } from 'expo-router';
 
 
 const PlaceholderImage = require('@/assets/images/icon.png');
@@ -73,7 +74,12 @@ export default function SecurityScreen() {
         />
         {data_modified && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#CFCFCF"}}/>}
         <Text style={styles.groupLabel}>Prihlasovanie</Text>
-        <ButtonField label="Zmena hesla" buttonStyle={{height: '100%', alignItems: 'flex-start'}} style={{marginBottom: 10}}/>
+        <ButtonField 
+          label="Zmena hesla" 
+          buttonStyle={{height: '100%', alignItems: 'flex-start'}} 
+          style={{marginBottom: 10}}
+          onPress={() => router.push("/(tabs)/(settings)/(security)/changePassword")}
+        />
         <ButtonField 
           label="Odhlásenie z každého zariadenia" 
           buttonStyle={{

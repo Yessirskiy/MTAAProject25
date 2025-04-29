@@ -43,10 +43,10 @@ export default function SettingsProfileScreen() {
       <View style={styles.subContainer}>
         <SettingsProfilePicture imgSource={PlaceholderImage} style={{marginBottom: 20}}/>
         <ButtonField label="Zmena profilového obrázka"/>
-        <InputField name="Meno" style={{marginBottom: 15}} field='first_name' value={cur_data.first_name} handleChange={handleChange}/>
-        <InputField name="Priezvisko" style={{marginBottom: 15}} field='last_name' value={cur_data.last_name} handleChange={handleChange}/>
-        <InputField name="Email" style={{marginBottom: 15}} field='email' value={cur_data.email} handleChange={handleChange}/>
-        <InputField name="Adresa" style={{marginBottom: 15}}  field='address' value={cur_data.address} handleChange={handleChange} iconName='map'/>
+        <InputField<UserDataType> name="Meno" style={{marginBottom: 15}} field='first_name' value={cur_data.first_name} handleChange={handleChange}/>
+        <InputField<UserDataType> name="Priezvisko" style={{marginBottom: 15}} field='last_name' value={cur_data.last_name} handleChange={handleChange}/>
+        <InputField<UserDataType> name="Email" style={{marginBottom: 15}} field='email' value={cur_data.email} handleChange={handleChange}/>
+        <InputField<UserDataType> name="Adresa" style={{marginBottom: 15}}  field='address' value={cur_data.address} handleChange={handleChange} iconName='map'/>
         {data_modified && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#CFCFCF"}}/>}
       </View>
       </ScrollView>

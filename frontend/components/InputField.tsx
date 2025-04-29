@@ -10,16 +10,16 @@ type UserDataType = {
   address: string,
 };
 
-type Props = {
+type Props<T> = {
     name: string,
-    field: keyof UserDataType,
+    field: keyof T,
     value: string,
-    handleChange: (field: keyof UserDataType, value: string) => void,
+    handleChange: (field: keyof T, value: string) => void,
     style?: ViewStyle,
     iconName?: string,
 }
 
-export default function InputField({name, style, iconName, field, value, handleChange} : Props) {
+export default function InputField<T>({name, style, iconName, field, value, handleChange} : Props<T>) {
   return (
     <View style={[styles.container, style]}>
       <View style={styles.fieldContainer}>
