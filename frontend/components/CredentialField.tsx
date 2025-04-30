@@ -20,6 +20,7 @@ export default function CredentialField<T>({name, style, iconName, field, placeh
           {iconName && <View style={styles.verticalBar} />}
           <TextInput
             placeholder={placeholder}
+            placeholderTextColor="grey"
             value={value}
             editable
             numberOfLines={1}
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
   },
   fieldInputArea: {
     flexDirection: 'row',
-    marginBottom: 2,
+    marginBottom: 2
   },
   verticalBar: {
     width: StyleSheet.hairlineWidth,
