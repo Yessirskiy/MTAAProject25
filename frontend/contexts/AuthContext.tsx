@@ -60,22 +60,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      const response = await loginCall({email: email, password: password});
+    const response = await loginCall({email: email, password: password});
 
-      //const { accessToken, refreshToken, user } = response.data;
-      const { accessToken, refreshToken } = response.data;
+    //const { accessToken, refreshToken, user } = response.data;
+    const { access_token, refresh_token } = response;
 
-      setAccessToken(accessToken);
-      setRefreshToken(refreshToken);
-      // setUser(user);
+    setAccessToken(access_token);
+    setRefreshToken(refresh_token);
+    // setUser(user);
 
-      await SecureStore.setItemAsync('accessToken', accessToken);
-      await SecureStore.setItemAsync('refreshToken', refreshToken);
-      // await SecureStore.setItemAsync('userData', JSON.stringify(user));
-    } catch (error) {
-      console.error('Login error', error);
-    }
+    await SecureStore.setItemAsync('accessToken', access_token);
+    await SecureStore.setItemAsync('refreshToken', refresh_token);
+    // await SecureStore.setItemAsync('userData', JSON.stringify(user));
   };
 
   const logout = async () => {

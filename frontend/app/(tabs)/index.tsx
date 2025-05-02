@@ -5,7 +5,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Index page</Text>
-      <Link href="/feed" style={styles.button}>
+      <Link href="/(tabs)" style={styles.button}>
         Go to feed
       </Link>
     </View>

@@ -1,8 +1,11 @@
+import { login } from '@/api/authApi';
 import CredentialButton from '@/components/CredentialButton';
 import CredentialField from '@/components/CredentialField';
-import { Link } from 'expo-router';
-import { useState } from 'react';
+import { Link, useRouter } from 'expo-router';
+import { useState, useContext } from 'react';
 import { Text, View, StyleSheet, Image, ScrollView, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import Toast from 'react-native-toast-message';
+import { AuthContext } from '../contexts/AuthContext';
 
 const PlaceholderImage = require('@/assets/images/icon.png');
 
@@ -17,9 +20,53 @@ export default function SignInScreen() {
     password: ""
   });
 
+  const auth = useContext(AuthContext);
+  const router = useRouter();
+
   const handleChange = (field: keyof typeof loginForm, value: string) => {
     setLoginForm(prev => ({ ...prev, [field]: value }));
   };
+
+  const handlePress = async () => {
+    try {
+      // Your async logic here
+      console.log('Fetching something...');
+      const res = await auth.login(loginForm.email, loginForm.password)
+      console.log("successful login")
+      router.replace('/(tabs)')
+    } catch (error: any) {
+      if (error.response) {
+        console.error('HTTP Error:', error.response.status);
+        console.error('Error details:', error.response.data);
+  
+        if (error.response.status === 401) {
+          Toast.show({
+            type: 'error',
+            text1: 'Invalid email or password.'
+          });
+        } else {
+          Toast.show({
+            type: 'error',
+            text1:  error.response.data.detail,
+            text2: `Return code: ${error.response.status}`
+          });
+        }
+      } else if (error.request) {
+        Toast.show({
+          type: 'error',
+          text1: 'Network error.',
+          text2: `Please, check connection`
+        });
+      } else {
+        console.log(error);
+        Toast.show({
+          type: 'error',
+          text1: 'Unknown error.'
+        });
+      }
+    }
+  };
+
 
   return (
     <KeyboardAvoidingView
@@ -57,6 +104,7 @@ export default function SignInScreen() {
             label="Prihláste sa"
             iconName="enter-outline"
             style={{marginTop: 20}}
+            onPress={handlePress}
           />
           <View style={{flexDirection: 'row'}}>
             <Text style={styles.hintText}>Nemáte účet? </Text>

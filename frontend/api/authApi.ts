@@ -1,4 +1,5 @@
 import API from './axiosInstance';
+import qs from 'qs';
 
 interface LoginData {
   email: string;
@@ -13,7 +14,19 @@ interface RegisterData {
 }
 
 export const login = async (data: LoginData) => {
-  const res = await API.post('/user/login', data);
+  const formData = qs.stringify({
+    grant_type: 'password',
+    username: data.email,
+    password: data.password,
+    scope: '',
+    client_id: '',
+    client_secret: ''
+  });
+  const res = await API.post('/user/login', formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
   return res.data;
 };
 
