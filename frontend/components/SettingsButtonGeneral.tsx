@@ -1,20 +1,19 @@
 import { StyleSheet, View, Pressable, Text, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, RelativePathString } from 'expo-router';
 
 type Props = {
   label: string;
   iconName: string;
-  dest: RelativePathString;
   isFirst?: boolean;
   isLast?: boolean;
   isGroup?: boolean;
   style?: ViewStyle;
   labelStyle?: TextStyle;
   iconColor?: string;
+  onPress?: any;
 };
 
-export default function SettingsButtonGeneral({ label, iconName, dest, style, labelStyle, iconColor = "black", isFirst = false, isLast = false, isGroup = false }: Props) {
+export default function SettingsButtonGeneral({ label, iconName, style, labelStyle, onPress, iconColor = "black", isFirst = false, isLast = false, isGroup = false }: Props) {
   return (
     <View style={[styles.buttonContainer, style]}>
       <Pressable 
@@ -27,7 +26,7 @@ export default function SettingsButtonGeneral({ label, iconName, dest, style, la
             borderBottomRightRadius: (isLast ? 8 : 0),
           } : {borderRadius: 8},
         ]} 
-        onPress={() => router.push(dest)}
+        onPress={onPress}
       >
         <Text style={[styles.buttonLabel, labelStyle]}>{label}</Text>
         <Ionicons name={`${iconName}-outline` as keyof typeof Ionicons.glyphMap} size={22} color={iconColor} style={{opacity: 0.7}} />

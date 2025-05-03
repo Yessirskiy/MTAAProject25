@@ -14,6 +14,50 @@ router = APIRouter()
 
 
 @router.get(
+    "/me",
+    summary="Retrieve Authenticated User's settings",
+    response_model=UserSettingsRead,
+)
+async def getSettingsNotificationsMeRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
+    try:
+        settings = await getSettings(db, user.id)
+        return settings
+    except AssertionError as e:
+        if "Settings not found" in e.args[0]:
+            raise HTTPException(404, detail="Settings not found")
+        elif "Permission denied" in e.args[0]:
+            raise HTTPException(403, "Permission denied")
+        else:
+            print(e)
+            raise HTTPException(500)
+
+
+@router.put(
+    "/me",
+    summary="Update Authenticated User's settings",
+    response_model=UserSettingsRead,
+)
+async def updateSettingsNotificationsMeRoute(
+    settings_update: UserSettingsUpdate,
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser),
+):
+    try:
+        settings = await updateSettings(db, user.id, settings_update)
+        return settings
+    except AssertionError as e:
+        if "Settings not found" in e.args[0]:
+            raise HTTPException(404, detail="Settings not found")
+        elif "Permission denied" in e.args[0]:
+            raise HTTPException(403, "Permission denied")
+        else:
+            print(e)
+            raise HTTPException(500)
+
+
+@router.get(
     "/{user_id}", summary="Retrieve User's settings", response_model=UserSettingsRead
 )
 async def getSettingsRoute(

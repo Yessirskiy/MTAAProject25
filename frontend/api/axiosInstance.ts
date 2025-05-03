@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 const API = axios.create({
-  baseURL: 'http://192.168.240.23:8000',
+  baseURL: 'http://192.168.2.7:8000',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -15,18 +15,22 @@ API.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Response interceptor: refresh token on 401
+// Response interceptor: refresh token on 403
 API.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 403 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = await SecureStore.getItemAsync('refreshToken');
 
       if (refreshToken) {
         try {
-          const res = await axios.post('http://localhost:8000/refresh', { refreshToken });
+          const res = await axios.post(`http://192.168.2.7:8000/user/refresh`, {}, {
+            params: {
+              refresh_token: refreshToken
+            }
+          });
           const newAccessToken = res.data.accessToken;
 
           await SecureStore.setItemAsync('accessToken', newAccessToken);

@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { Text, View, TextInput, StyleSheet, TouchableOpacity, Image, Alert, TouchableWithoutFeedback, Keyboard, Dimensions, ScrollView, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import PhotoPicker from '@/components/PhotoPicker';
+import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 
 
 export default function AddReportScreen() {
+  const user = useProtectedRoute();
+  if (!user) return null;
   const [activeView, setActiveView] = useState<'main' | 'photo' | 'map'>('main');
 
   const [photos, setPhotos] = useState<string[]>([]);

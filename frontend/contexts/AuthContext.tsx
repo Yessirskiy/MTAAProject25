@@ -1,12 +1,13 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import * as SecureStore from 'expo-secure-store';
-import axios from 'axios';
-import { login as loginCall, register, refreshAccessToken as refreshCall } from "@/api/authApi";
+import { login as loginCall, refreshAccessToken as refreshCall } from "@/api/authApi";
+import { getUserMe as getUserMeCall } from "@/api/userApi";
 
 interface User {
   id: string;
-  first_name: string;
   email: string;
+  first_name: string;
+  last_name: string;
 }
 
 interface LoginResponse {
@@ -46,13 +47,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const loadSession = async () => {
       const storedAccessToken = await SecureStore.getItemAsync('accessToken');
       const storedRefreshToken = await SecureStore.getItemAsync('refreshToken');
-      // const storedUser = await SecureStore.getItemAsync('userData');
+      const storedUser = await SecureStore.getItemAsync('userData');
+      console.log("Initialized AuthContext:", storedAccessToken, storedRefreshToken, storedUser);
 
-      // if (storedAccessToken && storedRefreshToken && storedUser) {
-      if (storedAccessToken && storedRefreshToken) {
+      if (storedAccessToken && storedRefreshToken && storedUser) {
         setAccessToken(storedAccessToken);
         setRefreshToken(storedRefreshToken);
-        //setUser(JSON.parse(storedUser));
+        setUser(JSON.parse(storedUser));
       }
       setIsLoading(false);
     };
@@ -60,28 +61,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
+    console.log("Making login call.")
     const response = await loginCall({email: email, password: password});
+    console.log("LoginCall response:", response);
 
-    //const { accessToken, refreshToken, user } = response.data;
     const { access_token, refresh_token } = response;
 
     setAccessToken(access_token);
     setRefreshToken(refresh_token);
-    // setUser(user);
+
+    const user = await getUserMeCall();
+    setUser(user);
 
     await SecureStore.setItemAsync('accessToken', access_token);
     await SecureStore.setItemAsync('refreshToken', refresh_token);
-    // await SecureStore.setItemAsync('userData', JSON.stringify(user));
+    await SecureStore.setItemAsync('userData', JSON.stringify(user));
   };
 
   const logout = async () => {
     setAccessToken(null);
     setRefreshToken(null);
-    // setUser(null);
+    setUser(null);
 
     await SecureStore.deleteItemAsync('accessToken');
     await SecureStore.deleteItemAsync('refreshToken');
-    // await SecureStore.deleteItemAsync('userData');
+    await SecureStore.deleteItemAsync('userData');
   };
 
   const refreshAccessToken = async () => {

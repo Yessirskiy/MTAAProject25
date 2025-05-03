@@ -1,7 +1,11 @@
 import { Text, View, StyleSheet } from "react-native";
 import { Link } from "expo-router";
+import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 
 export default function Index() {
+  const user = useProtectedRoute();
+  if (!user) return null;
+  
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Index page</Text>

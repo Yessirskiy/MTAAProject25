@@ -7,6 +7,18 @@ type UserUpdate = {
   phone_number?: string
 };
 
+type UserSettingsUpdate = {
+  is_name_hidden?: boolean,
+  is_phone_hidden?: boolean,
+  is_email_hidden?: boolean,
+  is_picture_hidden?: boolean,
+  is_notification_allowed?: boolean,
+  is_local_notification?: boolean,
+  is_weekly_notification?: boolean,
+  is_onchange_notification?: boolean,
+  is_onreact_notification?: boolean
+}
+
 export const getUserMe = async () => {
   const res = await API.get('/user/me');
   return res.data;
@@ -14,5 +26,15 @@ export const getUserMe = async () => {
 
 export const updateUserMe = async (data: UserUpdate) => {
   const res = await API.put('/user/me', data);
+  return res.data;
+}
+
+export const getUserSettingsMe = async () => {
+  const res = await API.get('/settings/me');
+  return res.data;
+};
+
+export const updateUserSettingsMe = async (data: UserSettingsUpdate) => {
+  const res = await API.put('/settings/me', data);
   return res.data;
 }

@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.base import getSession
 from app.db.schemas.user_schema import User
 from app.db.schemas.tokens_schema import TokenPayload
-from app.db.crud.user_crud import getUserByEmail
+from app.db.crud.user_crud import getUserByID, getUserByEmail
 from app.dependencies.common import getSettings
 
 reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/user/login", scheme_name="JWT")
@@ -39,7 +39,7 @@ async def refreshUser(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = await getUserByEmail(db, token_data.sub)
+    user = await getUserByID(db, int(token_data.sub))
 
     if user is None:
         raise HTTPException(
@@ -72,7 +72,7 @@ async def getUser(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = await getUserByEmail(db, token_data.sub)
+    user = await getUserByID(db, int(token_data.sub))
 
     if user is None:
         raise HTTPException(

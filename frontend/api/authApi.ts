@@ -1,5 +1,6 @@
 import API from './axiosInstance';
 import qs from 'qs';
+import { setItemAsync } from 'expo-secure-store';
 
 interface LoginData {
   email: string;
@@ -27,6 +28,11 @@ export const login = async (data: LoginData) => {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
   });
+  if (res.data){
+    const token = res.data.access_token;
+    await setItemAsync('accessToken', token);
+    API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
   return res.data;
 };
 

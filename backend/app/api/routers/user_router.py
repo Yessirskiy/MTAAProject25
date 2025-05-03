@@ -72,8 +72,8 @@ async def loginRoute(
             detail="Incorrect email or password",
         )
     return TokenSchema(
-        access_token=getAccessToken(user.email),
-        refresh_token=getRefreshToken(user.email),
+        access_token=getAccessToken(user.id),
+        refresh_token=getRefreshToken(user.id),
     )
 
 
@@ -82,7 +82,7 @@ async def refreshAccessRoute(
     refresh_token: str,
     refresh_user: User = Depends(refreshUser),
 ):
-    new_access_token = getAccessToken(refresh_user.email)
+    new_access_token = getAccessToken(refresh_user.id)
     return AccessTokenSchema(access_token=new_access_token)
 
 
@@ -94,12 +94,12 @@ async def refreshAccessRoute(
 async def getMeRoute(
     db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
 ):
-    user = await getUserByID(db, user.id, active_only=True)
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found",
-        )
+    # user = await getUserByID(db, user.id, active_only=True)
+    # if not user:
+    #     raise HTTPException(
+    #         status_code=404,
+    #         detail="User not found",
+    #     )
     return user
 
 
