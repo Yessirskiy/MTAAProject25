@@ -19,6 +19,12 @@ type UserSettingsUpdate = {
   is_onreact_notification?: boolean
 }
 
+type UserPasswordUpdate = {
+  old_password: string,
+  new_password1: string,
+  new_password2: string
+}
+
 export const getUserMe = async () => {
   const res = await API.get('/user/me');
   return res.data;
@@ -37,4 +43,9 @@ export const getUserSettingsMe = async () => {
 export const updateUserSettingsMe = async (data: UserSettingsUpdate) => {
   const res = await API.put('/settings/me', data);
   return res.data;
+}
+
+export const updateUserPasswordMe = async (data: UserPasswordUpdate) => {
+  const res = await API.put('/user/change-password', data);
+  return res;
 }

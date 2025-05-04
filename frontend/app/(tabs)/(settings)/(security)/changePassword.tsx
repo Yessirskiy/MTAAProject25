@@ -6,6 +6,8 @@ import SettingsProfilePicture from '@/components/SettingsProfilePicture';
 import InputField from '@/components/InputField';
 import ButtonField from '@/components/ButtonField';
 import ToggleSwitchField from '@/components/ToggleSwitchField';
+import { updateUserPasswordMe } from '@/api/userApi';
+import Toast from 'react-native-toast-message';
 
 
 const PlaceholderImage = require('@/assets/images/icon.png');
@@ -24,7 +26,7 @@ const mock_data = {
 }
 
 export default function ChangePasswordScreen() {
-  const [init_data] = useState<UserChangePasswordType>(mock_data);
+  const [init_data, setInitData] = useState<UserChangePasswordType>(mock_data);
   const [cur_data, setCurData] = useState<UserChangePasswordType>(mock_data);
 
   const handleChange = (field: keyof typeof cur_data, value: string) => {
@@ -32,6 +34,52 @@ export default function ChangePasswordScreen() {
   };
 
   const data_modified = JSON.stringify(init_data) !== JSON.stringify(cur_data);
+
+  const handleSavePress = async () => {
+    try {
+      console.log('Call to update User s Password');
+      console.log(cur_data);
+      const res = await updateUserPasswordMe(cur_data);
+      if (res){
+        console.log("Return from call:", res);
+        setInitData(mock_data);
+        setCurData(mock_data);
+        Toast.show({
+          type: 'success',
+          text1:  "Nové heslo bolo úspešne nastavené.",
+        });
+      }
+    } catch (error: any) {
+      if (error.response.status == 422){
+        console.log("Unprocessable entity supplied.");
+        Toast.show({
+          type: 'error',
+          text1:  'Uistite sa, že sa nové heslá zhodujú a nie sú prázdne'
+        });
+      } else if (error.response) {
+        console.error('HTTP Error:', error.response.status);
+        console.error('Error details:', error.response);
+  
+        Toast.show({
+          type: 'error',
+          text1:  error.response.data.detail,
+          text2: `Return code: ${error.response.status}`
+        });
+      } else if (error.request) {
+        Toast.show({
+          type: 'error',
+          text1: 'Network error.',
+          text2: `Please, check connection.`
+        });
+      } else {
+        console.log(error);
+        Toast.show({
+          type: 'error',
+          text1: 'Unknown error.'
+        });
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -61,7 +109,7 @@ export default function ChangePasswordScreen() {
           value={cur_data.new_password2} 
           handleChange={handleChange}
         />
-        {data_modified && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#CFCFCF"}}/>}
+        {data_modified && <ButtonField label="Zmeniť heslo" buttonStyle={{backgroundColor: "#CFCFCF"}} onPress={handleSavePress}/>}
       </View>
       </ScrollView>
     </View>

@@ -56,7 +56,6 @@ export default function SecurityScreen() {
 
   const handleSavePress = async () => {
     try {
-      // Your async logic here
       console.log('Call to update User s Settings');
       console.log(cur_data);
       const res = await updateUserSettingsMe(cur_data);

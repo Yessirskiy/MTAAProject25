@@ -159,8 +159,11 @@ async def changeUserPasswordRoute(
     db: AsyncSession = Depends(getSession),
     user: User = Depends(getUser),
 ):
-    await updateUserPassword(db, user.id, changePassword)
-    return Response(status_code=200)
+    try:
+        await updateUserPassword(db, user.id, changePassword)
+        return Response(status_code=200)
+    except ValueError as e:
+        return Response("Old password is incorrect!", status_code=400)
 
 
 @router.get(
