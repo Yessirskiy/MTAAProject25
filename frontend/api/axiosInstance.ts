@@ -32,7 +32,6 @@ API.interceptors.response.use(
             }
           });
           const newAccessToken = res.data.access_token;
-          console.log(newAccessToken);
 
           await SecureStore.setItemAsync('accessToken', newAccessToken);
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
