@@ -1,21 +1,53 @@
-import React, { useState } from 'react';
-import { Text, View, TextInput, StyleSheet, TouchableOpacity, Image, Alert, TouchableWithoutFeedback, Keyboard, Dimensions, ScrollView, FlatList } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Text,
+  View,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Dimensions,
+  ScrollView,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import PhotoPicker from '@/components/PhotoPicker';
+import MapPicker from '@/components/MapPicker';
+import AddressInputField from '@/components/AddressInputField'
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 
 export default function AddReportScreen() {
   const user = useProtectedRoute();
   if (!user) return null;
-  const [activeView, setActiveView] = useState<'main' | 'photo' | 'map'>('main');
 
+  const [activeView, setActiveView] = useState<'main' | 'photo' | 'map'>('main');
   const [photos, setPhotos] = useState<string[]>([]);
   const [address, setAddress] = useState('');
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [note, setNote] = useState('');
 
-  const handlePhoto = (uris: string[]) => {
-    setPhotos(uris);
+  const searchRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (searchRef.current && address) {
+      const currentText = searchRef.current?.getAddressText?.();
+      if (currentText !== address) {
+        searchRef.current.setAddressText(address);
+      }
+    }
+    console.log('Current address:', address);
+    console.log('Current coordinates:', coords);
+  }, [address]);
+
+  const handlePhoto = (uris: string[] = []) => {
+    setPhotos((prev) => [...prev, ...uris]);
     setActiveView('main');
   };
 
@@ -25,89 +57,108 @@ export default function AddReportScreen() {
       return;
     }
   };
-  
+
   if (activeView === 'photo') {
-    return <PhotoPicker onPhotoSelected={(newUris) => {
-      setPhotos((prev) => [...prev, ...newUris]);
-      setActiveView('main');
-    }} onGoBack={() => setActiveView('main')} />;
+    return (
+      <PhotoPicker
+        onPhotoSelected={(newUris) => {
+          setPhotos((prev) => [...prev, ...newUris]);
+          setActiveView('main');
+        }}
+        onGoBack={() => setActiveView('main')}
+      />
+    );
+  }
+
+  if (activeView === 'map') {
+    return (
+      <MapPicker
+        onLocationPicked={(locationData) => {
+          setAddress(locationData.address);
+          setCoords({
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+          });
+          searchRef.current?.setAddressText(locationData.address);
+        }}
+        goBack={() => setActiveView('main')}
+      />
+    );
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView contentContainerStyle={styles.container}>
-
-        {photos.length > 0 ? (
-            <View style={{ height: screenWidth - 40, marginBottom: 10 }}>
-              <FlatList
-                data={photos}
-                keyExtractor={(item, index) => index.toString()}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={true}
-                renderItem={({ item }) => (
-                  <View style={{ position: 'relative' }}>
-                    <Image
-                      source={{ uri: item }}
-                      style={styles.photoBox}
-                    />
-                    <TouchableOpacity onPress={() => setPhotos(prev => prev.filter(uri => uri !== item))}
-                    style={{
-                      position: 'absolute',
-                      top: 10,
-                      right: 10,
-                      backgroundColor: 'rgba(0,0,0,0.6)',
-                      borderRadius: 12,
-                      padding: 2,
-                      zIndex: 1,
-                    }}
-                    >
-                      <Ionicons name="close" size={18} color="#fff" />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              />
-            </View>
-          ) : (
-            <TouchableOpacity onPress={() => setActiveView('photo')} style={styles.photoBox}>
-              <Ionicons name="camera" size={48} color="#999" />
-              <Text style={{ color: '#999', marginTop: 8, }}>Pridať fotky</Text>
-            </TouchableOpacity>
-        )}
-
-        <TouchableOpacity
-          onPress={() => setActiveView('photo')}
-          style={{ marginBottom: 10, backgroundColor: '#eee', justifyContent: 'center', alignItems: 'center', borderRadius: 10 }}
-        >
-          <Ionicons name="add-circle-outline" size={32} color="#666" />
-          <Text style={{ color: '#666', marginTop: 4, marginBottom: 4 }}>Pridať ďalšie fotky</Text>
-        </TouchableOpacity>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: '#fff'}}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}
+      >
+        <AddressInputField
+          address={address}
+          setAddress={setAddress}
+          setCoords={setCoords}
+          onMapPress={() => setActiveView('map')}
+        />
 
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Pridať polohu"
-            placeholderTextColor="#999"
-            editable={true}
-          />
-          <TouchableOpacity onPress={() => setActiveView('map')}>
-            <Ionicons name='compass' size={22} color="#888" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder='Pridať poznámku'
+            placeholder="Pridať poznámku"
             placeholderTextColor="#999"
             value={note}
             onChangeText={setNote}
             multiline
           />
         </View>
+        
+        {photos.length > 0 ? (
+          <FlatList
+            data={photos}
+            keyExtractor={(item, index) => index.toString()}
+            horizontal
+            pagingEnabled
+            scrollEnabled
+            showsHorizontalScrollIndicator
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => (
+              <View style={{ position: 'relative' }}>
+                <Image source={{ uri: item }} style={styles.photoBox} />
+                <TouchableOpacity
+                  onPress={() =>
+                    setPhotos((prev) => prev.filter((uri) => uri !== item))
+                  }
+                  style={styles.closeButton}
+                >
+                  <Ionicons name="close" size={18} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            )}
+            style={{ maxHeight: screenWidth - 40, marginBottom: 10 }}
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={() => setActiveView('photo')}
+            style={styles.photoBox}
+          >
+            <Ionicons name="camera" size={48} color="#999" />
+            <Text style={{ color: '#999', marginTop: 8 }}>Pridať fotky</Text>
+          </TouchableOpacity>
+        )}
 
+        <TouchableOpacity
+          onPress={() => setActiveView('photo')}
+          style={styles.photoAddButton}
+        >
+          <Ionicons name="add-circle-outline" size={32} color="#666" />
+          <Text style={{ color: '#666', marginVertical: 4 }}>
+            Pridať ďalšie fotky
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
-    </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -115,7 +166,7 @@ const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#FFFFFF',
     padding: 20,
   },
@@ -136,18 +187,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 8,
+    marginBottom: 10,
   },
   input: { flex: 1, fontSize: 16 },
-  submitButton: {
-    backgroundColor: '#ccc',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 12,
+    padding: 2,
+    zIndex: 1,
   },
-  photoPreview: {
-    width: '100%',
-    height: '100%',
+  photoAddButton: {
+    marginBottom: 10,
+    backgroundColor: '#eee',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 10,
+    paddingVertical: 10,
   },
 });
