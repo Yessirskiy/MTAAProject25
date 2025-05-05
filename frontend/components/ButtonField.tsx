@@ -5,13 +5,14 @@ type Props = {
   style?: ViewStyle,
   buttonStyle?: ViewStyle,
   labelStyle?: TextStyle,
-  onPress?: (...args: any[]) => void
+  onPress?: (...args: any[]) => void,
+  disabled?: boolean
 }
 
-export default function ButtonField({label, style, buttonStyle, labelStyle, onPress} : Props) {
+export default function ButtonField({label, style, buttonStyle, labelStyle, onPress, disabled=false} : Props) {
   return (
     <View style={[styles.container, style]}>
-      <Pressable style={[styles.fieldContainer, buttonStyle]} onPress={onPress}>
+      <Pressable style={[styles.fieldContainer, buttonStyle]} onPress={onPress} disabled={disabled}>
         <Text style={[styles.fieldLabel, labelStyle]}>{label}</Text>
       </Pressable>
     </View>

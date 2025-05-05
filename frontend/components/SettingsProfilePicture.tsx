@@ -2,12 +2,12 @@ import { ImageStyle, StyleSheet } from 'react-native';
 import { Image, type ImageSource } from 'expo-image';
 
 type Props = {
-  imgSource: ImageSource;
+  imgSource: string;
   style?: ImageStyle;
 };
 
 export default function SettingsProfilePicture({ imgSource, style }: Props) {
-  return <Image source={imgSource} style={[styles.image, style]} />;
+  return <Image source={{uri: imgSource}} style={[styles.image, style]} />;
 }
 
 const styles = StyleSheet.create({

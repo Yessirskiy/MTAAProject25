@@ -25,6 +25,12 @@ type UserPasswordUpdate = {
   new_password2: string
 }
 
+type UserPictureForm = {
+  uri: string,
+  type?: string,
+  filename?: string
+}
+
 export const getUserMe = async () => {
   const res = await API.get('/user/me');
   return res.data;
@@ -47,5 +53,28 @@ export const updateUserSettingsMe = async (data: UserSettingsUpdate) => {
 
 export const updateUserPasswordMe = async (data: UserPasswordUpdate) => {
   const res = await API.put('/user/change-password', data);
+  return res;
+}
+
+export const getUserPhotoMe = async () => {
+  const res = await API.get('/user/me/photo', {responseType: 'blob'});
+  return res;
+}
+
+export const updateUserPhotoMe = async (data: UserPictureForm) => {
+  const formData = new FormData();
+  formData.append('photo', {
+    uri: data.uri,
+    name: data.filename ?? 'upload.jpg',
+    type: data.type ?? 'image/jpeg',
+  } as any);
+  const res = await API.put('/user/me/photo', formData, {headers: {
+    'Content-Type': 'multipart/form-data'
+  }});
+  return res;
+}
+
+export const deleteUserPhotoMe = async () => {
+  const res = await API.delete('/user/me/photo');
   return res;
 }

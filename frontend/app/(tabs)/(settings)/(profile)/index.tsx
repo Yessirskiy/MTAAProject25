@@ -1,15 +1,16 @@
-import { Text, View, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useLayoutEffect, useState, useEffect } from 'react';
 import SettingsButtonGeneral from '@/components/SettingsButtonGeneral'
 import SettingsProfilePicture from '@/components/SettingsProfilePicture';
 import InputField from '@/components/InputField';
 import ButtonField from '@/components/ButtonField';
-import { getUserMe, updateUserMe } from '@/api/userApi';
+import { getUserMe, getUserPhotoMe, updateUserMe } from '@/api/userApi';
 import Toast from 'react-native-toast-message';
+import { router } from 'expo-router';
 
 
-const PlaceholderImage = require('@/assets/images/icon.png');
+const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
 const dangerZoneColor = '#D63E3E';
 
 type UserDataType = {
@@ -27,6 +28,7 @@ const mock_data = {
 }
 
 export default function SettingsProfileScreen() {
+  const [profilePic, setProfilePic] = useState<string>(PlaceholderImage);
   const [init_data, setInitData] = useState<UserDataType>(mock_data);
   const [cur_data, setCurData] = useState<UserDataType>(mock_data);
 
@@ -45,8 +47,22 @@ export default function SettingsProfileScreen() {
       }
     };
 
-    fetchData();  // Call the async function
+    const fetchImage = async () => {
+      const response = await getUserPhotoMe();
+      if (response.status == 204){
+        setProfilePic(PlaceholderImage);
+        return;
+      }
+      const blob = await response.data;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
+    };
 
+    fetchData();
+    fetchImage();
   }, []);
 
   const data_modified = JSON.stringify(init_data) !== JSON.stringify(cur_data);
@@ -99,8 +115,8 @@ export default function SettingsProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
       <View style={styles.subContainer}>
-        <SettingsProfilePicture imgSource={PlaceholderImage} style={{marginBottom: 20}}/>
-        <ButtonField label="Zmena profilového obrázka"/>
+        <SettingsProfilePicture imgSource={profilePic} style={{marginBottom: 20}}/>
+        <ButtonField label="Zmena profilového obrázka" onPress={() => router.push('./changeProfilePicture')}/>
         <InputField<UserDataType> name="Meno" style={{marginBottom: 15}} field='first_name' value={cur_data.first_name} handleChange={handleChange}/>
         <InputField<UserDataType> name="Priezvisko" style={{marginBottom: 15}} field='last_name' value={cur_data.last_name} handleChange={handleChange}/>
         <InputField<UserDataType> name="Email" style={{marginBottom: 15}} field='email' value={cur_data.email} handleChange={handleChange}/>

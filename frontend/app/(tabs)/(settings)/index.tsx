@@ -1,15 +1,18 @@
-import { Text, View, StyleSheet, ScrollView } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, Image  } from 'react-native';
 import SettingsButtonGeneral from '@/components/SettingsButtonGeneral'
 import SettingsProfilePicture from '@/components/SettingsProfilePicture';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
-import { useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 import { router, useRouter } from 'expo-router';
+import { getUserPhotoMe } from '@/api/userApi';
 
-const PlaceholderImage = require('@/assets/images/icon.png');
+const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
 const dangerZoneColor = '#D63E3E';
 
 export default function SettingsScreen() {
+  const [profilePic, setProfilePic] = useState<string>(PlaceholderImage);
+
   const router1 = useRouter();
   const auth = useContext(AuthContext);
   const { logout } = auth;
@@ -22,6 +25,24 @@ export default function SettingsScreen() {
     router1.replace("/signin");
   };
 
+  useEffect(() => {
+    const fetchImage = async () => {
+      const response = await getUserPhotoMe();
+      if (response.status == 204){
+        setProfilePic(PlaceholderImage);
+        return;
+      }
+      const blob = await response.data;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
+    };
+
+    fetchImage();
+  }, []);
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -29,10 +50,10 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
       <View style={styles.subContainer}>
-        <SettingsProfilePicture imgSource={PlaceholderImage} style={{marginBottom: 20}}/>
-        <SettingsButtonGeneral label="Zmena profilového obrázka" onPress={() => router.push('./settings/profile')} iconName="camera" style={{marginBottom: 20}}/>
+        <SettingsProfilePicture imgSource={profilePic} style={{marginBottom: 20}}/>
+        <SettingsButtonGeneral label="Zmena profilového obrázka" onPress={() => router.push('./(settings)/(profile)')} iconName="camera" style={{marginBottom: 20}}/>
         <>
-          <SettingsButtonGeneral label="Osobné údaje" onPress={() =>  router.push('./(settings)/profile')} iconName="person" isGroup={true} isFirst={true}/>
+          <SettingsButtonGeneral label="Osobné údaje" onPress={() =>  router.push('./(settings)/(profile)')} iconName="person" isGroup={true} isFirst={true}/>
           <SettingsButtonGeneral label="Bezpečnosť" onPress={() => router.push('./(settings)/(security)')} iconName="lock-closed" isGroup={true}/>
           <SettingsButtonGeneral label="Notifikácie" onPress={() => router.push('./(settings)/notifications')} iconName="notifications" isGroup={true} isLast={true}/>
         </>
@@ -44,7 +65,7 @@ export default function SettingsScreen() {
           labelStyle={{color: dangerZoneColor}} iconColor={dangerZoneColor}
         />
         <SettingsButtonGeneral 
-          label="Vymazať užívateľský účet" iconName="close-circle" onPress={() => router.push('./(settings)/profile')}
+          label="Vymazať užívateľský účet" iconName="close-circle" onPress={() => router.push('./(settings)/(profile)')}
           isGroup={true} isLast={true} 
           labelStyle={{color: dangerZoneColor}} iconColor={dangerZoneColor}
         />
