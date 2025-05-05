@@ -1,4 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from pathlib import Path
+from typing import Annotated
+import uuid
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+    Response,
+    File,
+    UploadFile,
+)
+from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,6 +35,9 @@ from app.db.crud.notifications_crud import getNotificationAll
 from app.utils.passwords import verifyPassword
 from app.utils.auth import getAccessToken, getRefreshToken
 from app.dependencies.auth import getUser, refreshUser
+
+from app.dependencies.common import getSettings
+import os
 
 router = APIRouter()
 
@@ -101,6 +116,58 @@ async def getMeRoute(
     #         detail="User not found",
     #     )
     return user
+
+
+@router.get(
+    "/me/photo", summary="Get profile picture of the User", response_class=FileResponse
+)
+async def getMePhotoRoute(
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser),
+):
+    if user.picture_path is None:
+        return Response(status_code=204)  # No picture
+    settings = getSettings()
+    full_path = settings.USER_PHOTOS / user.picture_path
+    if not os.path.exists(full_path):
+        raise HTTPException(500)
+    return FileResponse(full_path)
+
+
+@router.put("/me/photo", summary="Update profile picture of the User")
+async def putMePhotoRoute(
+    photo: Annotated[UploadFile, File()],
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser),
+):
+    file_extension = Path(photo.filename).suffix
+    # TODO: CHECK THE EXTENSIONS (PHOTOS ONLY)
+
+    file_path = f"{uuid.uuid4()}{file_extension}"
+    settings = getSettings()
+    with (settings.USER_PHOTOS / file_path).open("wb") as f:
+        f.write(await photo.read())
+    await updateUserPhoto(
+        db, UserPhotoUpdate(user_id=user.id, picture_path=str(file_path))
+    )
+    return Response(status_code=200)
+
+
+@router.delete("/me/photo", summary="Delete profile picture of the User")
+async def deleteMePhotoRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
+    if user.picture_path is None:
+        return Response(status_code=200)
+
+    # TODO: remove the profile picture locally
+    # Is it actually a problem if we leave it there?
+    # settings = getSettings()
+    # filepath = settings.USER_PHOTOS / user.picture_path
+    # os.remove(filepath)
+
+    await updateUserPhoto(db, UserPhotoUpdate(user_id=user.id, picture_path=None))
+    return Response(status_code=200)
 
 
 @router.put(

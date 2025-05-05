@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import update
 from sqlalchemy.orm import joinedload
 
 from app.db.models.user import User
@@ -7,6 +8,7 @@ from app.db.schemas.user_schema import (
     UserCreate,
     UserUpdate,
     UserChangePassword,
+    UserPhotoUpdate,
 )
 from typing import Optional
 
@@ -95,3 +97,11 @@ async def updateUserPassword(
     await db.commit()
     await db.refresh(user)
     return user
+
+
+async def updateUserPhoto(db: AsyncSession, update_photo: UserPhotoUpdate):
+    user = await getUserByID(db, update_photo.user_id)
+    assert user is not None, "User not found"
+    user.picture_path = update_photo.picture_path
+    await db.commit()
+    await db.refresh(user)

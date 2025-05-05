@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     # Directories
     REPORT_PHOTOS: Path = Path(__file__).resolve().parent.parent.parent / "photos"
+    USER_PHOTOS: Path = Path(__file__).resolve().parent.parent.parent / "photos"
 
     # tricky stuff here
     # it looks for the env_file in current working dir (cwd)

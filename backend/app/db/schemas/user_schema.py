@@ -65,3 +65,8 @@ class UserChangePassword(BaseModel):
         if self.new_password1 != self.new_password2:
             raise ValueError("Passwords do not match")
         return self
+
+
+class UserPhotoUpdate(BaseModel):
+    user_id: int
+    picture_path: Optional[str] = None
