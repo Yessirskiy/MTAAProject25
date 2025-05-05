@@ -4,8 +4,8 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions, TouchableWithoutF
 import MapView, { Marker, MapPressEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -31,7 +31,7 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
         const coords = e.nativeEvent.coordinate;
         setMarker(coords);
 
-        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=AIzaSyB2s1LM7NXJot8ot0iLKayEObKgs-LZic8&language=sk`;
+        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=${GOOGLE_MAPS_API_KEY}&language=sk`;
         const res = await fetch(geocodeUrl);
         const json = await res.json();
         if (json.results.length > 0) {
@@ -76,7 +76,7 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
                         }
                     }}
                     query={{
-                        key: 'AIzaSyB2s1LM7NXJot8ot0iLKayEObKgs-LZic8',
+                        key: GOOGLE_MAPS_API_KEY,
                         language: 'sk',
                         types: 'geocode',
                         components: 'country:sk'

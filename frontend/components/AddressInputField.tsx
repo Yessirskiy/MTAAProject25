@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 
 
 interface AddressInputProps {
@@ -40,7 +41,7 @@ export default function AddressInputField({ address, setAddress, setCoords, onMa
                 }}
                 fetchDetails={true}
                 query={{
-                    key: 'AIzaSyB2s1LM7NXJot8ot0iLKayEObKgs-LZic8',
+                    key: GOOGLE_MAPS_API_KEY,
                     language: 'sk',
                     types: 'geocode',
                     components: 'country:sk',
