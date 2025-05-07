@@ -1,9 +1,8 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { BASE_URL, REFRESH_URL } from '@env';
 
 const API = axios.create({
-  baseURL: BASE_URL,
+  baseURL: 'http://192.168.240.23:8000',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -27,7 +26,7 @@ API.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const res = await axios.post(REFRESH_URL, {}, {
+          const res = await axios.post(`http://192.168.240.23:8000/user/refresh`, {}, {
             params: {
               refresh_token: refreshToken
             }
