@@ -25,7 +25,9 @@ from app.db.schemas.user_schema import (
 )
 from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema, AccessTokenSchema
-from app.db.schemas.notification_schema import UserNotifications
+from app.db.schemas.notification_schema import (
+    UserNotifications,
+)
 from app.db.crud.user_crud import *
 from app.db.crud.report_crud import getUserReports
 from app.db.crud.settings_crud import createSettings
@@ -234,7 +236,7 @@ async def changeUserPasswordRoute(
 
 
 @router.get(
-    "/reports",
+    "/me/reports",
     summary="Get reports of currently logged in user",
     response_model=UserReports,
 )
@@ -246,7 +248,7 @@ async def getUserReportsRoute(
 
 
 @router.get(
-    "/notifications",
+    "/me/notifications",
     summary="Retrieve User's notifications",
     response_model=UserNotifications,
 )
