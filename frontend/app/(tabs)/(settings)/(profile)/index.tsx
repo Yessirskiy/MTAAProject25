@@ -1,13 +1,16 @@
 import { Text, View, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useLayoutEffect, useState, useEffect } from 'react';
+import { useLayoutEffect, useState, useEffect, useRef } from 'react';
 import SettingsButtonGeneral from '@/components/SettingsButtonGeneral'
 import SettingsProfilePicture from '@/components/SettingsProfilePicture';
 import InputField from '@/components/InputField';
 import ButtonField from '@/components/ButtonField';
-import { getUserMe, getUserPhotoMe, updateUserMe } from '@/api/userApi';
+import { getUserAddressMe, getUserMe, getUserPhotoMe, updateUserAddressMe, updateUserMe } from '@/api/userApi';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
+import TempAddressInputField from '@/components/TempAddressInputField';
+import MapPicker from '@/components/MapPicker';
+import TempMapPicker from '@/components/TempMapPicker';
 
 
 const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
@@ -20,17 +23,47 @@ type UserDataType = {
   address: string,
 };
 
-const mock_data = {
+type AddressDataType = {
+  building: string;
+  street: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+}
+
+const mock_user_data = {
   first_name: '',
   last_name: '',
   email: '',
   address: ''
 }
 
+const mock_address_data = {
+  building: '',
+  street: '',
+  city: '',
+  state: '',
+  postal_code: '',
+  country: '',
+  latitude: 0,
+  longitude: 0,
+}
+
 export default function SettingsProfileScreen() {
   const [profilePic, setProfilePic] = useState<string>(PlaceholderImage);
-  const [init_data, setInitData] = useState<UserDataType>(mock_data);
-  const [cur_data, setCurData] = useState<UserDataType>(mock_data);
+  const [init_data, setInitData] = useState<UserDataType>(mock_user_data);
+  const [cur_data, setCurData] = useState<UserDataType>(mock_user_data);
+
+  const [address_init, setAddressInit] = useState<AddressDataType>(mock_address_data);
+  const [address, setAddress] = useState<AddressDataType>(mock_address_data);
+  const [addressStr, setAddressStr] = useState<string>("")
+  
+  const [activeView, setActiveView] = useState<'main' | 'map'>('main');
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const searchRef = useRef<any>(null);
 
   const handleChange = (field: keyof typeof cur_data, value: string) => {
     setCurData(prev => ({ ...prev, [field]: value }));
@@ -42,6 +75,10 @@ export default function SettingsProfileScreen() {
         const data = await getUserMe();
         setInitData(data); 
         setCurData(data);
+        const addr = await getUserAddressMe();
+        setAddressInit(addr.data);
+        setAddress(addr.data);
+        setAddressStr(addr.data.street + ", " + addr.data.postal_code);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -66,6 +103,7 @@ export default function SettingsProfileScreen() {
   }, []);
 
   const data_modified = JSON.stringify(init_data) !== JSON.stringify(cur_data);
+  const address_modified = JSON.stringify(address_init) !== JSON.stringify(address);
 
   const handlePress = async () => {
     try {
@@ -77,6 +115,16 @@ export default function SettingsProfileScreen() {
         console.log("Return from call:", res);
         setInitData(res);
         setCurData(res);
+      }
+      console.log('Call to update User s Address');
+      console.log(address);
+      const res1 = await updateUserAddressMe(address);
+      if (res1){
+        console.log("Return from call:", res1);
+        setAddressInit(res1.data);
+        setAddress(res1.data);
+      }
+      if (res && res1){
         Toast.show({
           type: 'success',
           text1:  "Profil bol aktualizovaný",
@@ -108,6 +156,24 @@ export default function SettingsProfileScreen() {
     }
   };
 
+
+  if (activeView === 'map') {
+    return (
+      <TempMapPicker
+        onLocationPicked={(locationData) => {
+          setAddress(locationData);
+          setCoords({
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+          });
+          setAddressStr(locationData.street + ", " + locationData.postal_code);
+          searchRef.current?.setAddressText(addressStr);
+        }}
+        goBack={() => setActiveView('main')}
+      />
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -120,8 +186,16 @@ export default function SettingsProfileScreen() {
         <InputField<UserDataType> name="Meno" style={{marginBottom: 15}} field='first_name' value={cur_data.first_name} handleChange={handleChange}/>
         <InputField<UserDataType> name="Priezvisko" style={{marginBottom: 15}} field='last_name' value={cur_data.last_name} handleChange={handleChange}/>
         <InputField<UserDataType> name="Email" style={{marginBottom: 15}} field='email' value={cur_data.email} handleChange={handleChange}/>
-        <InputField<UserDataType> name="Adresa" style={{marginBottom: 15}}  field='address' value={cur_data.address} handleChange={handleChange} iconName='map'/>
-        {data_modified && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#CFCFCF"}} onPress={handlePress}/>}
+        <TempAddressInputField 
+          name="Adresa" 
+          iconName='map'
+          address={addressStr}
+          setAddress={setAddressStr}
+          setCoords={setCoords}
+          onMapPress={() => setActiveView('map')}
+          style={{marginBottom: 20}}
+        />
+        {(data_modified || address_modified) && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#CFCFCF"}} onPress={handlePress}/>}
       </View>
       </ScrollView>
     </View>

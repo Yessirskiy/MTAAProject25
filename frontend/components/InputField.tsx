@@ -1,14 +1,5 @@
-import { StyleSheet, View, Pressable, Text, TextInput, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, View, Text, TextInput, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, RelativePathString } from 'expo-router';
-import { useState } from 'react';
-
-type UserDataType = {
-  first_name: string,
-  last_name: string,
-  email: string,
-  address: string,
-};
 
 type Props<T> = {
     name: string,

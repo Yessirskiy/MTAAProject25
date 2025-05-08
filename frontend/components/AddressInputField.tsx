@@ -89,10 +89,10 @@ export default function AddressInputField({ address, setAddress, setCoords, onMa
                 textInputHide={false}
                 textInputProps={{}}
                 timeout={20000}
-                />
-                <TouchableOpacity onPress={onMapPress}>
-                    <Ionicons name="compass" size={22} color="#888" />
-                </TouchableOpacity>
+            />
+            <TouchableOpacity onPress={onMapPress}>
+                <Ionicons name="compass" size={22} color="#888" />
+            </TouchableOpacity>
         </View>
     );
 

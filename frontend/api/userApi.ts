@@ -31,6 +31,15 @@ type UserPictureForm = {
   filename?: string
 }
 
+type AddressUpdate = {
+  building?: string,
+  street?: string,
+  city?: string,
+  state?: string,
+  postal_code?: string,
+  country?: string
+}
+
 export const getUserMe = async () => {
   const res = await API.get('/user/me');
   return res.data;
@@ -76,5 +85,15 @@ export const updateUserPhotoMe = async (data: UserPictureForm) => {
 
 export const deleteUserPhotoMe = async () => {
   const res = await API.delete('/user/me/photo');
+  return res;
+}
+
+export const getUserAddressMe = async () => {
+  const res = await API.get('/address/me');
+  return res;
+}
+
+export const updateUserAddressMe = async(data: AddressUpdate) => {
+  const res = await API.put('/address/me', data);
   return res;
 }

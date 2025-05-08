@@ -14,6 +14,51 @@ router = APIRouter()
 
 
 @router.get(
+    "/me",
+    summary="Retrieve authenticated User's address",
+    response_model=UserAddressRead,
+)
+async def getAddressMeRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
+    try:
+        address = await getAddress(db, user.id)
+        assert address is not None, "Address not found"
+        return address
+    except AssertionError as e:
+        if "Address not found" in e.args[0]:
+            raise HTTPException(404, detail="Address not found")
+        elif "Permission denied" in e.args[0]:
+            raise HTTPException(403, "Permission denied")
+        else:
+            print(e)
+            raise HTTPException(500)
+
+
+@router.put(
+    "/me",
+    summary="Update authenticated User's address",
+    response_model=UserAddressRead,
+)
+async def updateAddressRoute(
+    address_update: UserAddressUpdate,
+    db: AsyncSession = Depends(getSession),
+    user: User = Depends(getUser),
+):
+    try:
+        address = await updateAddress(db, user.id, address_update)
+        return address
+    except AssertionError as e:
+        if "Address not found" in e.args[0]:
+            raise HTTPException(404, detail="Address not found")
+        elif "Permission denied" in e.args[0]:
+            raise HTTPException(403, "Permission denied")
+        else:
+            print(e)
+            raise HTTPException(500)
+
+
+@router.get(
     "/{user_id}", summary="Retrieve User's address", response_model=UserAddressRead
 )
 async def getAddressRoute(
