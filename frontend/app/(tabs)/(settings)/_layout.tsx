@@ -3,13 +3,13 @@ import { Stack } from 'expo-router';
 import { useLayoutEffect } from 'react';
 
 export default function SettingsLayout() {
-    const navigation = useNavigation();
+  const navigation = useNavigation();
 
-    useLayoutEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
-        headerTitle: 'Nastavenia'
+      headerTitle: 'Nastavenia'
     });
-    }, [navigation]);
+  }, [navigation]);
   return (
     <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
