@@ -5,22 +5,44 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 
 
 interface AddressInputProps {
-    address: string;
-    setAddress: (addr: string) => void;
+    address: {
+        building?: string;
+        street?: string;
+        city?: string;
+        state?: string;
+        postal_code?: string;
+        country?: string;
+    } | null;
+    setAddress: (addr: AddressInputProps['address']) => void;
     setCoords: (coords: { latitude: number; longitude: number }) => void;
     onMapPress: () => void;
+    addressText: string;
+    setAddressText: (text: string) => void;
 }
 
-export default function AddressInputField({ address, setAddress, setCoords, onMapPress }: AddressInputProps) {
+export default function AddressInputField({ address, setAddress, setCoords, onMapPress, addressText, setAddressText }: AddressInputProps) {
     const searchRef = useRef<any>(null);
-
     const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+    const formatAddress = (addressComponents: any) => {
+        const getComponent = (type: string) =>
+            addressComponents.find((component: any) => component.types.includes(type))?.long_name || "";
+        
+        return {
+            building: getComponent("street_number"),
+            street: getComponent("route"),
+            city: getComponent("locality") || getComponent("administrative_area_level_2"),
+            state: getComponent("administrative_area_level_1"),
+            postal_code: getComponent("postal_code"),
+            country: getComponent("country"),
+        };
+    };
 
     useEffect(() => {
         if (searchRef.current && address) {
-            searchRef.current.setAddressText(address);
+            searchRef.current.setAddressText(addressText)
         }
-    }, [address]);
+    }, [addressText]);
 
     return (
         <View style={styles.inputContainer}>
@@ -29,15 +51,16 @@ export default function AddressInputField({ address, setAddress, setCoords, onMa
                 placeholder="Pridať polohu"
                 onPress={(data, details = null) => {
                     if (details) {
-                    const selectedAddress = details.formatted_address;
-                    const latitude = details.geometry.location.lat;
-                    const longitude = details.geometry.location.lng;
+                        const formattedAddress = formatAddress(details.address_components);
+                        const latitude = details.geometry.location.lat;
+                        const longitude = details.geometry.location.lng;
 
-                    setAddress(selectedAddress);
-                    setCoords({
-                        latitude: latitude,
-                        longitude: longitude,
-                    });
+                        setAddress(formattedAddress);
+                        setCoords({
+                            latitude: latitude,
+                            longitude: longitude,
+                        });
+                        setAddressText(data.description);
                     }
                 }}
                 fetchDetails={true}
@@ -87,8 +110,8 @@ export default function AddressInputField({ address, setAddress, setCoords, onMa
                 }}
                 suppressDefaultStyles={false}
                 textInputHide={false}
-                textInputProps={{}}
                 timeout={20000}
+                textInputProps={{}}
             />
             <TouchableOpacity onPress={onMapPress}>
                 <Ionicons name="compass" size={22} color="#888" />

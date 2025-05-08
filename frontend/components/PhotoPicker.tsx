@@ -26,7 +26,9 @@ export default function PhotoPicker({ onPhotoSelected, onGoBack }: PhotoPickerPr
         }
 
         const result = await ImagePicker.launchImageLibraryAsync({
-            quality: 0.7,
+            mediaTypes: ['images'],
+            base64: false,
+            quality: 0.5,
             allowsMultipleSelection: true,
         });
 

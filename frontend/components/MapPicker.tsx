@@ -1,17 +1,26 @@
 import 'react-native-get-random-values';
-import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import MapView, { Marker, MapPressEvent } from 'react-native-maps';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { Ionicons } from '@expo/vector-icons';
 
 
 const screenWidth = Dimensions.get('window').width;
 
 type LocationData = {
-    address: string;
+    address: {
+        building?: string;
+        street?: string;
+        city?: string;
+        state?: string;
+        postal_code?: string;
+        country?: string;
+    };
     latitude: number;
     longitude: number;
+    fullText: string;
 };
 
 type MapProps = {
@@ -21,13 +30,62 @@ type MapProps = {
 
 export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
     const [marker, setMarker] = useState<{ latitude: number; longitude: number } | null>(null);
-    const [address, setAddress] = useState('');
+    const [addressText, setAddressText] = useState('');
+    const [address, setAddress] = useState<{
+        building?: string;
+        street?: string;
+        city?: string;
+        state?: string;
+        postal_code?: string;
+        country?: string;
+    } | null>(null);
+    const [region, setRegion] = useState<Region | null>(null);
     const mapRef = useRef<MapView>(null);
 
     const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     const searchRef = useRef<any>(null);
     
+    useEffect(() => {
+        (async () => {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Location access is required to show your location.');
+            return;
+          }
+    
+          const loc = await Location.getCurrentPositionAsync({});
+    
+          setRegion({
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+            latitudeDelta: 0.02,
+            longitudeDelta: 0.02
+          });
+        })();
+    }, []);
+
+    useEffect(() => {
+        if (searchRef.current && addressText) {
+            searchRef.current.setAddressText(addressText);
+        }
+    }, [addressText]);
+    
+    const formatAddress = (addressComponents: any) => {
+        const getComponent = (type: string) =>
+            addressComponents.find((component: any) => component.types.includes(type))?.long_name || "";
+        
+        return {
+            building: getComponent("street_number"),
+            street: getComponent("route"),
+            city: getComponent("locality") || getComponent("administrative_area_level_2"),
+            state: getComponent("administrative_area_level_1"),
+            postal_code: getComponent("postal_code"),
+            country: getComponent("country"),
+        };
+    };
+
+
     const handleMapPress = async (e: MapPressEvent) => {
         const coords = e.nativeEvent.coordinate;
         setMarker(coords);
@@ -35,26 +93,42 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
         const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=${GOOGLE_API_KEY}&language=sk`;
         const res = await fetch(geocodeUrl);
         const json = await res.json();
+        
         if (json.results.length > 0) {
-            const formattedAddress = json.results[0].formatted_address;
+            const formattedAddress = formatAddress(json.results[0].address_components);
             setAddress(formattedAddress);
-            searchRef.current?.setAddressText(formattedAddress);
+            setAddressText(json.results[0].formatted_address);
         }
     };
 
     const handleAccept = () => {
         if (!marker || !address) return;
         onLocationPicked({
-            address,
+            address: {
+                building: address?.building || '',
+                street: address?.street || '',
+                city: address?.city || '',
+                state: address?.state || '',
+                postal_code: address?.postal_code || '',
+                country: address?.country || '',
+            },
             latitude: marker.latitude,
             longitude: marker.longitude,
+            fullText: addressText,
         });
+        console.log(addressText);
+        console.log(address);
         goBack();
     }
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
+
+                <TouchableOpacity style={styles.backButton} onPress={goBack}>
+                    <Ionicons name="arrow-back" size={24} color="#fff" />
+                </TouchableOpacity>
+
                 <GooglePlacesAutocomplete
                     ref={searchRef}
                     placeholder="Search"
@@ -73,7 +147,9 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
                                     longitudeDelta: 0.005,
                                 });
                             }
-                            setAddress(details?.formatted_address ?? data.description);
+                            const formattedAddress = formatAddress(details?.address_components || []);
+                            setAddress(formattedAddress);
+                            setAddressText(data.description);
                         }
                     }}
                     query={{
@@ -134,14 +210,17 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
                     timeout={20000}
                 />
 
-                <MapView
-                    ref={mapRef}
-                    style={styles.map}
-                    onPress={handleMapPress}
-                    showsUserLocation
-                >
-                    {marker && <Marker coordinate={marker} title="Vybrané miesto" />}
-                </MapView>
+                {region && (
+                    <MapView
+                        ref={mapRef}
+                        style={styles.map}
+                        onPress={handleMapPress}
+                        showsUserLocation
+                        region={region}
+                    >
+                        {marker && <Marker coordinate={marker} title="Vybrané miesto" />}
+                    </MapView>
+                )}
 
                 <View style={styles.addressContainer}>
                     <TouchableOpacity onPress={handleAccept} style={styles.acceptButton}>
@@ -171,6 +250,12 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 8,
         alignItems: 'center',
+    },
+    backButton: {
+        position: 'absolute',
+        top: 70,
+        left: 20,
+        zIndex: 1,
     },
     acceptText: { color: '#fff', fontWeight: 'bold', },
 });

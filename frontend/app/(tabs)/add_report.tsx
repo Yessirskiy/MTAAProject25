@@ -20,41 +20,84 @@ import PhotoPicker from '@/components/PhotoPicker';
 import MapPicker from '@/components/MapPicker';
 import AddressInputField from '@/components/AddressInputField'
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { createReport } from '@/api/reportApi';
+
 
 
 export default function AddReportScreen() {
   const user = useProtectedRoute();
   if (!user) return null;
-
   const [activeView, setActiveView] = useState<'main' | 'photo' | 'map'>('main');
   const [photos, setPhotos] = useState<string[]>([]);
-  const [address, setAddress] = useState('');
+  const [addressText, setAddressText] = useState('');
+  const [address, setAddress] = useState<{
+    building?: string;
+    street?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  } | null>(null);
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [note, setNote] = useState('');
 
   const searchRef = useRef<any>(null);
 
   useEffect(() => {
-    if (searchRef.current && address) {
-      const currentText = searchRef.current?.getAddressText?.();
-      if (currentText !== address) {
-        searchRef.current.setAddressText(address);
-      }
+    if (searchRef.current && addressText) {
+      searchRef.current.setAddressText(addressText);
     }
-    console.log('Current address:', address);
-    console.log('Current coordinates:', coords);
-  }, [address]);
+  }, [addressText]);
 
-  const handlePhoto = (uris: string[] = []) => {
-    setPhotos((prev) => [...prev, ...uris]);
-    setActiveView('main');
-  };
 
-  const handleSubmit = () => {
-    if (!photos || !address || !note) {
+  const handleSubmit = async () => {
+    if (!user) {
+      console.error('User is null');
+      return;
+    }
+
+    const userId = Number(user.id);
+
+    if (photos.length === 0 || !address || !note || !coords) {
       Alert.alert('Chyba', 'Vyplňte všetky polia!');
       return;
+    }
+    console.log(address);
+    console.log(note);
+    console.log(photos);
+
+    try {
+      const reportData = {
+        user_id: userId,
+        note: note,
+        address: {
+          building: address.building || '',
+          street: address.street || '',
+          city: address.city || '',
+          state: address.state || '',
+          postal_code: address.postal_code || '',
+          country: address.country || '',
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        },
+      };
+
+      const result = await createReport(reportData, photos);
+
+      console.log('Report created successfully', result);
+      Alert.alert('Succes', 'Report created successfully');
+    } catch (error: any) {
+      if (error.response) {
+        console.error('HTTP Error:', error.response.status);
+        console.error('Error details:', error.response.data);
+
+        Alert.alert('Error', error.response.data.detail);
+      } else if (error.request) {
+        Alert.alert('Network error', 'Please check your connection');
+      } else {
+        console.error('Unknown error', error);
+        Alert.alert('Error', 'An error has occured');
+      }
     }
   };
 
@@ -79,7 +122,7 @@ export default function AddReportScreen() {
             latitude: locationData.latitude,
             longitude: locationData.longitude,
           });
-          searchRef.current?.setAddressText(locationData.address);
+          setAddressText(locationData.fullText);
         }}
         goBack={() => setActiveView('main')}
       />
@@ -100,6 +143,8 @@ export default function AddReportScreen() {
           address={address}
           setAddress={setAddress}
           setCoords={setCoords}
+          addressText={addressText}
+          setAddressText={setAddressText}
           onMapPress={() => setActiveView('map')}
         />
 
@@ -156,6 +201,9 @@ export default function AddReportScreen() {
           <Text style={{ color: '#666', marginVertical: 4 }}>
             Pridať ďalšie fotky
           </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleSubmit()} style={styles.photoAddButton}>
+          <Text>Send</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -41,7 +41,7 @@ async def createReportRoute(
     reportcreatestr: Annotated[
         str, Form()
     ],  # here is the form because the data is sent as multipart/form-data
-    photos: Annotated[list[UploadFile], list[File()]],
+    photos: Annotated[list[UploadFile], File()],
     db: AsyncSession = Depends(getSession),
     user: User = Depends(getUser),
 ) -> Report:
