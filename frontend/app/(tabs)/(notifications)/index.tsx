@@ -29,8 +29,8 @@ export default function NotificationsScreen() {
         const res = await getNotificationsMe();
         const parsedNotifications = res.data.data.map((n: any) => ({
           ...n,
-          sent_datetime: new Date(n.sent_datetime),
-          read_datetime: new Date(n.read_datetime),
+          sent_datetime: n.sent_datetime ? new Date(n.sent_datetime) : null,
+          read_datetime: n.read_datetime ? new Date(n.read_datetime) : null,
         }));
         
         setNotifications(parsedNotifications);
@@ -75,6 +75,7 @@ export default function NotificationsScreen() {
             key={notification.id}
             notification={notification}
             onPress={() => router.push(`/(notifications)/${notification.id}`)}
+            containerStyle={{marginBottom: 15}}
           />
         ))}
       </ScrollView>
@@ -88,6 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 10
   },
   text: {
     color: '#fff',

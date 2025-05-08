@@ -1,4 +1,5 @@
 import { StyleSheet, View, Pressable, Text, ViewStyle, TextStyle } from 'react-native';
+import { formatDateTime } from '@/utils/formatDateTime';
 
 type Notification = {
   id: number,
@@ -18,18 +19,6 @@ type Props = {
   receivedStyle?: TextStyle,
 }
 
-function formatDateTime(date: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, '0');
-
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-  const day = pad(date.getDate());
-  const month = pad(date.getMonth() + 1); // Months are 0-based
-  const year = date.getFullYear();
-
-  return `${hours}:${minutes} ${day}-${month}-${year}`;
-}
-
 export default function ButtonField({notification, onPress, containerStyle, titleStyle, noteStyle, receivedStyle} : Props) {
   return (
     <View style={[styles.container, containerStyle]}>
@@ -37,6 +26,9 @@ export default function ButtonField({notification, onPress, containerStyle, titl
         <Text style={[styles.titleStyle, titleStyle]}>{notification.title}</Text>
         <Text style={[styles.noteStyle, noteStyle]}>{notification.note}</Text>
         <Text style={[styles.receivedStyle, receivedStyle]}>{formatDateTime(notification.sent_datetime)}</Text>
+        {!notification.read_datetime && (
+          <View style={styles.unreadDot} />
+        )}
       </Pressable>
     </View>
   );
@@ -48,6 +40,7 @@ const styles = StyleSheet.create({
     minHeight: 140,
   },
   pressableContainer: {
+    position: 'relative',
     backgroundColor: '#F1F1F1',
     marginHorizontal: 18,
     padding: 10,
@@ -68,6 +61,15 @@ const styles = StyleSheet.create({
   receivedStyle: {
     fontSize: 10,
     opacity: 0.5
+  },
+  unreadDot: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    width: 15,
+    height: 15,
+    borderRadius: 10,
+    backgroundColor: '#FF6C6C',
   }
 });
   
