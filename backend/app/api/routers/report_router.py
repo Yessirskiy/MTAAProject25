@@ -164,4 +164,4 @@ async def getReportPhotoRoute(
     full_path = settings.REPORT_PHOTOS / photo.filename_path
     if not os.path.exists(full_path):
         raise HTTPException(500)
-    return full_path
+    return FileResponse(full_path)

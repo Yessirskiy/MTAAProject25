@@ -59,7 +59,7 @@ export default function AddReportScreen() {
     const userId = Number(user.id);
 
     if (photos.length === 0 || !address || !note || !coords) {
-      Alert.alert('Chyba', 'Vyplňte všetky polia!');
+      Alert.alert('Chyba', 'Vyplňte všetky polia');
       return;
     }
     console.log(address);
@@ -85,7 +85,11 @@ export default function AddReportScreen() {
       const result = await createReport(reportData, photos);
 
       console.log('Report created successfully', result);
-      Alert.alert('Succes', 'Report created successfully');
+      Alert.alert('Úspech', 'Hlásenie bolo úspešne vytvorené');
+      setAddress(null);
+      setCoords(null);
+      setAddressText('');
+      setPhotos([]);
     } catch (error: any) {
       if (error.response) {
         console.error('HTTP Error:', error.response.status);
@@ -93,10 +97,10 @@ export default function AddReportScreen() {
 
         Alert.alert('Error', error.response.data.detail);
       } else if (error.request) {
-        Alert.alert('Network error', 'Please check your connection');
+        Alert.alert('Chyba siete', 'Prosím skontrolujte vaše pripojenie');
       } else {
         console.error('Unknown error', error);
-        Alert.alert('Error', 'An error has occured');
+        Alert.alert('Chyba', 'Nastala chyba');
       }
     }
   };
@@ -203,7 +207,7 @@ export default function AddReportScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleSubmit()} style={styles.photoAddButton}>
-          <Text>Send</Text>
+          <Text style={{ color: '#666', marginVertical: 4 }}>Nahlásiť</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -43,3 +43,8 @@ export const createReport = async (reportData: ReportData, photos: string[]) => 
 
     return res.data;
 };
+
+export const getReportPhoto = async (photoId: number) => {
+    const res = API.get(`report/photo/${photoId}`);
+    return res;
+}

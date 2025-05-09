@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 
 interface AddressInputProps {
@@ -102,9 +103,9 @@ export default function AddressInputField({ address, setAddress, setCoords, onMa
                 styles={{
                     container: { flex: 1 },
                     textInput: {
-                    height: 40,
-                    borderColor: 'transparent',
-                    fontSize: 16,
+                        height: 40,
+                        borderColor: 'transparent',
+                        fontSize: 16,
                     },
                     listView: { zIndex: 100 },
                 }}

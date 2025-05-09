@@ -97,3 +97,8 @@ export const updateUserAddressMe = async(data: AddressUpdate) => {
   const res = await API.put('/address/me', data);
   return res;
 }
+
+export const getUserReportsMe = async() => {
+  const res = await API.get('/user/me/reports');
+  return res;
+}

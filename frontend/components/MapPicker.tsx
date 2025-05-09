@@ -131,7 +131,7 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
 
                 <GooglePlacesAutocomplete
                     ref={searchRef}
-                    placeholder="Search"
+                    placeholder="Vyhľadať"
                     onPress={(data, details = null) => {
                         const location = details?.geometry?.location;
                         if (location) {
