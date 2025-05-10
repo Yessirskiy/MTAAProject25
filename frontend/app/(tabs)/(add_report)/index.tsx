@@ -41,15 +41,6 @@ export default function AddReportScreen() {
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [note, setNote] = useState('');
 
-  const searchRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (searchRef.current && addressText) {
-      searchRef.current.setAddressText(addressText);
-    }
-  }, [addressText]);
-
-
   const handleSubmit = async () => {
     if (!user) {
       console.error('User is null');
@@ -86,10 +77,7 @@ export default function AddReportScreen() {
 
       console.log('Report created successfully', result);
       Alert.alert('Úspech', 'Hlásenie bolo úspešne vytvorené');
-      setAddress(null);
-      setCoords(null);
-      setAddressText('');
-      setPhotos([]);
+
     } catch (error: any) {
       if (error.response) {
         console.error('HTTP Error:', error.response.status);

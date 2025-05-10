@@ -118,6 +118,7 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
         });
         console.log(addressText);
         console.log(address);
+        console.log(marker);
         goBack();
     }
 

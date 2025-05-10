@@ -7,6 +7,7 @@ import FastImage from 'react-native-fast-image'
 import { AuthContext } from '@/contexts/AuthContext';
 import MapPicker from '@/components/MapPicker';
 import AddressInputField from '@/components/AddressInputField';
+import EditReport from '@/components/EditReport';
 
 
 type Report = {
@@ -59,8 +60,7 @@ export default function MyReportsScreen() {
   const [loading, setLoading] = useState(true);
   const [reload, setReload] = useState(true);
 
-  useEffect(() => {
-    const fetchReports = async () => {
+  const fetchReports = async () => {
       try {
         const response = await getUserReportsMe();
         const data: Report[] = response.data.data;
@@ -78,6 +78,8 @@ export default function MyReportsScreen() {
           })
         );
         
+        console.log(reports);
+
         setReports(reportsWithPhotos);
       } catch (err) {
         console.error('Failed to fetch report:', err);
@@ -85,6 +87,8 @@ export default function MyReportsScreen() {
         setLoading(false);
       }
     };
+
+  useEffect(() => {
 
     fetchReports();
   }, [reload]);
@@ -109,35 +113,6 @@ export default function MyReportsScreen() {
     return statusLabels[status] || 'Unknown state';
   };
 
-  function EditReport({ report, onGoBack }: { report: ReportWithPhoto, onGoBack: () => void }) {
-    const [note, setNote] = useState('');
-    const [address, setAddress] = useState(report.address || null);
-    const [coords, setCoords] = useState({
-      latitude: parseFloat(report.address.latitude),
-      longitude: parseFloat(report.address.longitude),
-    });
-    const [addressText, setAddressText] = useState(
-      `${report.address.street || ''} ${report.address.building || ''} ${report.address.city || ''}`
-    )
-
-    const handleSave = () => {
-      console.log('Updated note:', note);
-      console.log('Updated address:', address);
-      console.log('Updated coordinates:', coords);
-      onGoBack();
-    }
-
-    return (
-      <View style={styles.editContainer}>
-        <Text style={styles.header}>Hlásenie č. {report.id}</Text>
-        <TouchableOpacity onPress={() => onGoBack()}>
-          <Text>PLACEHOLDER</Text>
-        </TouchableOpacity>
-      </View>
-    )
-  }
-
-
   if (loading) {
     return <ActivityIndicator style={{ marginTop: 100 }} size="large" />;
   }
@@ -147,9 +122,11 @@ export default function MyReportsScreen() {
       <EditReport
         report={selectedReport as ReportWithPhoto}
         onGoBack={() => {
+          fetchReports();
           setSelectedReport(null);
           setActiveView('list');
         }}
+        accessToken={accessToken}
       />
     );
   }
@@ -184,7 +161,7 @@ export default function MyReportsScreen() {
                 {item.address?.street === '' ? '' : `${item.address?.street} `}{item.address?.building === '' ? '' : `${item.address?.building} `}{item.address?.postal_code === '' ? '' : `${item.address?.postal_code} `}{item.address?.city}
               </Text>
               <Text numberOfLines={2} style={styles.note}>{item.note}</Text>
-              <Text style={styles.id}>Hlasenie č. {item.id}</Text>
+              <Text style={styles.id}>Hlásenie č. {item.id}</Text>
               <Text style={styles.status}>{getStatusLabel(item.status)}</Text>
             </View>
           </TouchableOpacity>

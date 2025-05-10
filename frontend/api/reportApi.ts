@@ -15,6 +15,20 @@ type ReportData = {
     };
 };
 
+type ReportUpdate = {
+    note: string;
+    address: {
+        building: string;
+        street: string;
+        city: string;
+        state: string;
+        postal_code: string;
+        country: string;
+        latitude: number;
+        longitude: number;
+    };
+};
+
 export const createReport = async (reportData: ReportData, photos: string[]) => {
     const formData = new FormData();
 
@@ -46,5 +60,10 @@ export const createReport = async (reportData: ReportData, photos: string[]) => 
 
 export const getReportPhoto = async (photoId: number) => {
     const res = API.get(`report/photo/${photoId}`);
+    return res;
+}
+
+export const updateReport = async (reportId: number, data: ReportUpdate) => {
+    const res = API.put(`report/${reportId}`, data);
     return res;
 }
