@@ -36,12 +36,17 @@ export default function TabLayout() {
         },
       }}
     >
-      <Tabs.Screen name="index" options={getTabScreenOptions("Hlavná", "home")}/>
+      <Tabs.Screen
+        name="index"
+        options={{
+          tabBarItemStyle: { display: "none" },
+        }}
+      />
+      <Tabs.Screen name="(home)" options={getTabScreenOptions("Hlavná", "home")}/>
       <Tabs.Screen name="(my_reports)" options={getTabScreenOptions("Moje hlásenia", "list")}/>
       <Tabs.Screen name="(add_report)" options={getTabScreenOptions("Nahlásiť", "add")}/>
       <Tabs.Screen name="(notifications)" options={getTabScreenOptions("Oznámenia", "notifications")}/>
       <Tabs.Screen name="(settings)" options={getTabScreenOptions("Nastavenia", "settings")}/>
-      <Tabs.Screen name="map_test" options={getTabScreenOptions("Mapy", "settings")}/>
     </Tabs>
   );
 }
