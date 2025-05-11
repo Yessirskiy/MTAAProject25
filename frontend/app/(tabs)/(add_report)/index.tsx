@@ -18,15 +18,18 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import PhotoPicker from '@/components/PhotoPicker';
 import MapPicker from '@/components/MapPicker';
+import InputField from '@/components/InputField'
 import AddressInputField from '@/components/AddressInputField'
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { createReport } from '@/api/reportApi';
+import { useRouter } from 'expo-router';
 
 
 
 export default function AddReportScreen() {
   const user = useProtectedRoute();
   if (!user) return null;
+  const router = useRouter();
   const [activeView, setActiveView] = useState<'main' | 'photo' | 'map'>('main');
   const [photos, setPhotos] = useState<string[]>([]);
   const [addressText, setAddressText] = useState('');
@@ -77,6 +80,9 @@ export default function AddReportScreen() {
 
       console.log('Report created successfully', result);
       Alert.alert('Úspech', 'Hlásenie bolo úspešne vytvorené');
+
+      router.replace('/');
+      router.replace('../');
 
     } catch (error: any) {
       if (error.response) {
@@ -141,8 +147,9 @@ export default function AddReportScreen() {
         />
 
         <View style={styles.inputContainer}>
+          <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: '#666' }}>Poznámka</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { height: 40, paddingTop: 15 }]}
             placeholder="Pridať poznámku"
             placeholderTextColor="#999"
             value={note}
@@ -195,7 +202,7 @@ export default function AddReportScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleSubmit()} style={styles.photoAddButton}>
-          <Text style={{ color: '#666', marginVertical: 4 }}>Nahlásiť</Text>
+          <Text style={{ color: '#000', marginVertical: 4, fontSize: 18 }}>Nahlásiť</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -222,11 +229,12 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#eee',
+    backgroundColor: '#eee',
     borderRadius: 8,
     alignItems: 'center',
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: 15,
     marginBottom: 10,
   },
   input: { flex: 1, fontSize: 16 },

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Text, View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { getUserReportsMe } from '@/api/userApi';
 import { getReportPhoto } from '@/api/reportApi';
@@ -8,6 +8,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import MapPicker from '@/components/MapPicker';
 import AddressInputField from '@/components/AddressInputField';
 import EditReport from '@/components/EditReport';
+import { useFocusEffect } from 'expo-router';
 
 
 type Report = {
@@ -58,7 +59,6 @@ export default function MyReportsScreen() {
   const [selectedReport, setSelectedReport] = useState<ReportWithPhoto | null>(null);
   const [reports, setReports] = useState<ReportWithPhoto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [reload, setReload] = useState(true);
 
   const fetchReports = async () => {
       try {
@@ -71,14 +71,14 @@ export default function MyReportsScreen() {
 
             const firstPhotoId = report.photos?.[0]?.id;
             if (firstPhotoId) {
-              photoUri = `http://192.168.240.23:8000/report/photo/${firstPhotoId}`;
+              photoUri = `${process.env.EXPO_PUBLIC_BASE_URL}/report/photo/${firstPhotoId}`;
             }
 
             return { ...report, photoUri };
           })
         );
         
-        console.log(reports);
+        //console.log(reports);
 
         setReports(reportsWithPhotos);
       } catch (err) {
@@ -88,14 +88,11 @@ export default function MyReportsScreen() {
       }
     };
 
-  useEffect(() => {
-
-    fetchReports();
-  }, [reload]);
-
-  const handleReload = () => {
-    setReload((prev) => !prev);
-  };
+  useFocusEffect(
+    useCallback(() => {
+      fetchReports();
+    }, [])
+  );
 
   interface StatusLabels {
     [key: string]: string;

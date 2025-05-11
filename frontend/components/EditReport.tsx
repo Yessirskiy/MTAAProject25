@@ -17,6 +17,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';import AddressInputField from '@/components/AddressInputField';
 import MapPicker from '@/components/MapPicker';
+import InputField from '@/components/InputField';
+import InfoField from '@/components/InfoField';
 import { AuthContext } from '@/contexts/AuthContext';
 import { parse } from '@babel/core';
 import { updateReport } from '@/api/reportApi';
@@ -86,6 +88,13 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     });
     const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>({latitude: parseFloat(report.address.latitude), longitude: parseFloat(report.address.longitude)});
     const [note, setNote] = useState(report.note);
+
+    const date = new Date(report.report_datetime);
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+
+    const formattedDate = `${day}.${month}.${year}`;
 
     useEffect(() => {
         const addr = report.address;
@@ -162,18 +171,17 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                 <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
                     <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
-                <Text style={styles.label1}>Adresa</Text>
-                <TextInput
-                    editable={false}
+                <InfoField
+                    name='Nahlásené'
+                    value={formattedDate}
+                    style={{ marginBottom: 10, paddingHorizontal: 0, marginTop: 20 }}
+                />
+                <InfoField
+                    name='Adresa'
                     value={`${report.address?.street === '' ? '' : `${report.address?.street} `}${report.address?.building === '' ? '' : `${report.address?.building} `}${report.address?.postal_code === '' ? '' : `${report.address?.postal_code} `}${report.address?.city}`}
-                    style={styles.textInfo}
+                    style={{ marginBottom: 10, paddingHorizontal: 0 }}
                 />
-                <Text style={styles.label}>Poznámka</Text>
-                <TextInput
-                    editable={false}
-                    value={report.note}
-                    style={styles.textInfo}
-                />
+                <InfoField name='Poznámka' value={report.note} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
                 <FlatList
                     data={report.photos}
                     keyExtractor={(item) => item.id.toString()}
@@ -182,12 +190,13 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     scrollEnabled
                     showsHorizontalScrollIndicator={true}
                     keyboardShouldPersistTaps="handled"
+                    style={{ maxHeight: screenWidth - 40, marginBottom: 10 }}
                     renderItem={({ item }: { item: { id: number } }) => (
                     <View style={{ position: 'relative' }}>
                         <Image
                             style={styles.image}
                             source={{
-                            uri: `http://192.168.240.23:8000/report/photo/${item.id}` || undefined,
+                            uri: `${process.env.EXPO_PUBLIC_BASE_URL}/report/photo/${item.id}` || undefined,
                             headers: {
                                 Authorization: `Bearer ${accessToken}`,
                             },
@@ -197,7 +206,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     )}
                 />
                 <TouchableOpacity onPress={() => setActiveView('edit')} style={styles.editButton}>
-                    <Text style={{ color: '#666', marginVertical: 8 }}>Upraviť hlásenie</Text>
+                    <Text style={{ color: '#000', marginVertical: 8, fontSize: 18 }}>Upraviť hlásenie</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -214,23 +223,25 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                 nestedScrollEnabled={true}
             >
                 <Text style={styles.header}>Upraviť hlásenie</Text>
-                <Text style={styles.label}>Adresa:</Text>
                 <AddressInputField
-                address={address}
-                setAddress={setAddress}
-                setCoords={setCoords}
-                addressText={addressText}
-                setAddressText={setAddressText}
-                onMapPress={() => setActiveView('map')}
+                    address={address}
+                    setAddress={setAddress}
+                    setCoords={setCoords}
+                    addressText={addressText}
+                    setAddressText={setAddressText}
+                    onMapPress={() => setActiveView('map')}
                 />
-                <Text style={styles.label}>Poznámka:</Text>
-                <TextInput
+                <View style={styles.inputContainer}>
+                    <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: '#666' }}>Poznámka</Text>
+                    <TextInput
+                    style={[styles.input, { height: 40, paddingTop: 15 }]}
+                    placeholder="Pridať poznámku"
+                    placeholderTextColor="#999"
                     value={note}
                     onChangeText={setNote}
                     multiline
-                    style={styles.textInput}
-                    placeholder='Zadajte poznámku'
-                />
+                    />
+                </View>
 
                 <View style={styles.buttonRow}>
                     <TouchableOpacity style={styles.cancelButton} onPress={() => setActiveView('main')}>
@@ -321,12 +332,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     editButton: {
+        flex: 1,
         marginBottom: 10,
         backgroundColor: '#eee',
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,
-        paddingVertical: 10,
     },
     backButton: {
         position: 'absolute',
@@ -335,4 +346,16 @@ const styles = StyleSheet.create({
         zIndex: 10,
         padding: 8,
     },
+    inputContainer: {
+        flexDirection: 'row',
+        borderWidth: 1,
+        borderColor: '#eee',
+        backgroundColor: '#eee',
+        borderRadius: 8,
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 15,
+        marginBottom: 10,
+    },
+    input: { flex: 1, fontSize: 16 },
 });

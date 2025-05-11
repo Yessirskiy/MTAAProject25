@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
@@ -46,6 +46,8 @@ export default function AddressInputField({ address, setAddress, setCoords, onMa
     }, [addressText]);
 
     return (
+        <View>
+        <Text style={{ position: 'absolute', marginTop: 10, marginLeft: 12, zIndex: 100, color: '#666' }}>Adresa</Text>
         <View style={styles.inputContainer}>
             <GooglePlacesAutocomplete
                 ref={searchRef}
@@ -85,7 +87,7 @@ export default function AddressInputField({ address, setAddress, setCoords, onMa
                 type: 'restaurant',
                 }}
                 GoogleReverseGeocodingQuery={{}}
-                isRowScrollable={true}
+                isRowScrollable={false}
                 keyboardShouldPersistTaps="always"
                 listUnderlayColor="#c8c7cc"
                 listViewDisplayed="auto"
@@ -101,22 +103,37 @@ export default function AddressInputField({ address, setAddress, setCoords, onMa
                 predefinedPlaces={[]}
                 predefinedPlacesAlwaysVisible={false}
                 styles={{
-                    container: { flex: 1 },
+                    container: { flex: 1, backgroundColor: '#eee' },
                     textInput: {
+                        marginTop: 10,
                         height: 40,
                         borderColor: 'transparent',
                         fontSize: 16,
+                        backgroundColor: '#eee',
                     },
-                    listView: { zIndex: 100 },
+                    listView: { zIndex: 100, backgroundColor: '#eee' },
+                    textInputContainer: {
+                        backgroundColor: '#eee',
+                    },
+                    row: {
+                        backgroundColor: '#eee',
+                        borderRadius: 8,
+                    },
+                    poweredContainer: {
+                        backgroundColor: '#eee',
+                    },
                 }}
                 suppressDefaultStyles={false}
                 textInputHide={false}
                 timeout={20000}
-                textInputProps={{}}
+                textInputProps={{
+                    placeholderTextColor: '#999'
+                }}
             />
             <TouchableOpacity onPress={onMapPress}>
-                <Ionicons name="compass" size={22} color="#888" />
+                <Ionicons name="map" size={22} color="#888" />
             </TouchableOpacity>
+        </View>
         </View>
     );
 
@@ -126,11 +143,12 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: '#eee',
         borderRadius: 8,
         alignItems: 'center',
-        paddingHorizontal: 10,
+        paddingRight: 10,
         paddingVertical: 8,
         marginBottom: 10,
-    }
+        backgroundColor: '#eee',
+    },
 })
