@@ -12,6 +12,7 @@ import { useFocusEffect } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { UseTheme } from '@/contexts/ThemeContext';
 import { getColors } from '@/theme/colors';
+import * as Device from 'expo-device';
 
 
 type Report = {
@@ -66,6 +67,8 @@ export default function MyReportsScreen() {
   const { isDarkMode } = UseTheme();
   const colors = getColors(isDarkMode);
   const { isAccessibilityMode } = UseTheme();
+
+  const isTablet = Device.deviceType === Device.DeviceType.TABLET;
 
   const fetchReports = async () => {
       try {
@@ -168,6 +171,12 @@ export default function MyReportsScreen() {
       borderRadius: 6,
       backgroundColor: colors.border,
     },
+    tabletImage: {
+      width: isAccessibilityMode ? 150 * 1.25 : 150,
+      height: isAccessibilityMode ? 150 * 1.25 : 150,
+      borderRadius: 6,
+      backgroundColor: colors.border,
+    },
     info: {
       flex: 1,
       marginLeft: 12,
@@ -177,15 +186,30 @@ export default function MyReportsScreen() {
       fontSize: isAccessibilityMode ? 16 * 1.25 : 16,
       color: colors.textPrimary
     },
+    tabletTitle: {
+      fontWeight: 'bold',
+      fontSize: isAccessibilityMode ? 26 * 1.25 : 26,
+      color: colors.textPrimary
+    },
     note: {
       color: colors.darkGrey,
       marginTop: 4,
       fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
     },
+    tabletNote: {
+      color: colors.darkGrey,
+      marginTop: 4,
+      fontSize: isAccessibilityMode ? 24 * 1.25 : 24,
+    },
     id: {
       color: colors.icon,
       marginTop: 6,
       fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+    },
+    tabletId: {
+      color: colors.icon,
+      marginTop: 6,
+      fontSize: isAccessibilityMode ? 24 * 1.25 : 24,
     },
     status: {
       backgroundColor: colors.buttonBackground,
@@ -195,6 +219,15 @@ export default function MyReportsScreen() {
       alignSelf: 'flex-start',
       color: colors.icon,
       fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+    },
+    tabletStatus: {
+      backgroundColor: colors.buttonBackground,
+      padding: 4,
+      borderRadius: 6,
+      marginTop: 6,
+      alignSelf: 'flex-start',
+      color: colors.icon,
+      fontSize: isAccessibilityMode ? 24 * 1.25 : 24,
     },
     editContainer: {
       flex: 1,
@@ -227,7 +260,7 @@ export default function MyReportsScreen() {
             }}
           >
             <Image
-              style={styles.image}
+              style={isTablet ? styles.tabletImage : styles.image}
               source={{
                 uri: item.photoUri || undefined,
                 headers: {
@@ -236,12 +269,12 @@ export default function MyReportsScreen() {
               }}
             />
             <View style={styles.info}>
-              <Text style={styles.title}>
+              <Text style={isTablet ? styles.tabletTitle : styles.title}>
                 {item.address?.street === '' ? '' : `${item.address?.street} `}{item.address?.building === '' ? '' : `${item.address?.building} `}{item.address?.postal_code === '' ? '' : `${item.address?.postal_code} `}{item.address?.city}
               </Text>
-              <Text numberOfLines={2} style={styles.note}>{item.note}</Text>
-              <Text style={styles.id}>Hlásenie č. {item.id}</Text>
-              <Text style={styles.status}>{getStatusLabel(item.status)}</Text>
+              <Text numberOfLines={2} style={isTablet ? styles.tabletNote : styles.note}>{item.note}</Text>
+              <Text style={isTablet ? styles.tabletId : styles.id}>Hlásenie č. {item.id}</Text>
+              <Text style={isTablet ? styles.tabletStatus : styles.status}>{getStatusLabel(item.status)}</Text>
             </View>
           </TouchableOpacity>
         )}

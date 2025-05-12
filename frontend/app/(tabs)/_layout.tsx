@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { AuthContext } from "@/contexts/AuthContext";
 import { UseTheme } from '@/contexts/ThemeContext';
 import { getColors } from '@/theme/colors';
+import * as Device from 'expo-device';
 
 
 export default function TabLayout() {
@@ -15,6 +16,8 @@ export default function TabLayout() {
 
   const { isDarkMode } = UseTheme();
   const colors = getColors(isDarkMode);
+
+  const isTablet = Device.deviceType === Device.DeviceType.TABLET;
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
