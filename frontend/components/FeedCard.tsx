@@ -39,19 +39,22 @@ export default function FeedCard({imgSource, report, imgStyle, containerStyle} :
       fontSize: isAccessibilityMode ? 15 * 1.25 : 15,
       lineHeight: 17,
       opacity: 0.9,
-      marginBottom: 1
+      marginBottom: 1,
+      color: colors.textPrimary,
     },
     addressText: {
       fontSize: isAccessibilityMode ? 13 * 1.25 : 13,
       lineHeight: 17,
       opacity: 0.7,
-      marginBottom: 1
+      marginBottom: 1,
+      color: colors.textPrimary,
     },
     reporterText: {
       fontSize: isAccessibilityMode ? 11 * 1.25 : 11,
       lineHeight: 15,
       opacity: 0.6,
-      marginBottom: 9
+      marginBottom: 9,
+      color: colors.textPrimary,
     },
     reactionsContainer: {
       backgroundColor: colors.buttonBackground,
@@ -71,6 +74,7 @@ export default function FeedCard({imgSource, report, imgStyle, containerStyle} :
       lineHeight: 15,
       opacity: 0.7,
       marginBottom: 7,
+      color: colors.textPrimary,
     }
   });
 
