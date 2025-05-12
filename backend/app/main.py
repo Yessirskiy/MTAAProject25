@@ -13,6 +13,8 @@ from app.api.routers.admin_router import router as admin_router
 from app.api.routers.settings_router import router as settings_router
 from app.api.routers.address_router import router as address_router
 
+from app.websockets import new_report
+
 
 def setupDirs():  # Creating dirs (to store photos)
     settings = getSettings()
@@ -44,3 +46,5 @@ app.include_router(notification_router, prefix="/notification", tags=["Notificat
 app.include_router(admin_router, prefix="/admin", tags=["Admin"])
 
 app.include_router(debug_router, prefix="/debug", tags=["Debug"])
+
+app.add_api_websocket_route("/ws/new_report", new_report.newReportWebsocket)
