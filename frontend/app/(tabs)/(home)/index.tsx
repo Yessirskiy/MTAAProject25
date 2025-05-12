@@ -253,7 +253,7 @@ export default function Index() {
         </View>
         <View style={styles.feedContainer}>
           {feedReports.map((item) => (
-            <FeedCard key={item.id} imgSource={PlaceholderImage} report={item} onHandlePress={() => {setSelectedReport(item); setActiveView('inspect')}}/>
+            <FeedCard key={item.id} report={item} onHandlePress={() => {setSelectedReport(item); setActiveView('inspect')}}/>
           ))}
         </View>
       </ScrollView>

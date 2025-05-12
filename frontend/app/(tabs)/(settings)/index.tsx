@@ -34,14 +34,14 @@ export default function SettingsScreen() {
     const response = await getUserPhotoMe();
     if (response.status == 204){
       setProfilePic(PlaceholderImage);
-      return;
+    } else {
+      const blob = await response.data;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
     }
-    const blob = await response.data;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfilePic(reader.result as string);
-    };
-    reader.readAsDataURL(blob);
   };
 
   useEffect(() => {
