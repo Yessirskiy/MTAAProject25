@@ -4,7 +4,11 @@ import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 export default function Index() {
   const user = useProtectedRoute();
   if (!user) return null;
-  console.log(user);
+  if (user.is_admin){
+    return (
+      <Redirect href="/(admin_home)"/>
+    )
+  }
   return (
     <Redirect href="/(home)" />
   );

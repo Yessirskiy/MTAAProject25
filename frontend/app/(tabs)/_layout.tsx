@@ -30,7 +30,7 @@ export default function TabLayout() {
   if (user?.is_admin) {
     return (
       <Tabs
-      screenOptions={{
+        screenOptions={{
         tabBarActiveTintColor: colors.textPrimary,
         tabBarInactiveTintColor: colors.textPrimary,
         headerStyle: {
@@ -56,7 +56,8 @@ export default function TabLayout() {
           tabBarItemStyle: { display: "none" },
         }}
       />
-      <Tabs.Screen name="(home)" options={getTabScreenOptions("Hlavná", "home")}/>
+      <Tabs.Screen name="(admin_home)" options={getTabScreenOptions("Hlavná", "home")}/>
+      <Tabs.Screen name="(home)" options={{ tabBarItemStyle: {display: 'none'} }}/>
       <Tabs.Screen name="(my_reports)" options={{ tabBarItemStyle: {display: 'none'} }}/>
       <Tabs.Screen name="(add_report)" options={{ tabBarItemStyle: {display: 'none'} }}/>
       <Tabs.Screen name="(notifications)" options={{ tabBarItemStyle: {display: 'none'} }}/>
@@ -93,6 +94,7 @@ export default function TabLayout() {
           tabBarItemStyle: { display: "none" },
         }}
       />
+      <Tabs.Screen name="(admin_home)" options={{ tabBarItemStyle: {display: 'none'} }}/>
       <Tabs.Screen name="(home)" options={getTabScreenOptions("Hlavná", "home")}/>
       <Tabs.Screen name="(my_reports)" options={getTabScreenOptions("Moje hlásenia", "list")}/>
       <Tabs.Screen name="(add_report)" options={getTabScreenOptions("Nahlásiť", "add")}/>
