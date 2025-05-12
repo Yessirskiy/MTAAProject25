@@ -8,6 +8,8 @@ import ButtonField from '@/components/ButtonField';
 import ToggleSwitchField from '@/components/ToggleSwitchField';
 import { updateUserPasswordMe } from '@/api/userApi';
 import Toast from 'react-native-toast-message';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
 
 
 const PlaceholderImage = require('@/assets/images/icon.png');
@@ -34,6 +36,10 @@ export default function ChangePasswordScreen() {
   };
 
   const data_modified = JSON.stringify(init_data) !== JSON.stringify(cur_data);
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
 
   const handleSavePress = async () => {
     try {
@@ -81,6 +87,29 @@ export default function ChangePasswordScreen() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 10,
+      alignItems: 'center',
+
+    },
+    subContainer: {
+      width: '100%',
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    groupLabel: {
+      alignSelf: 'flex-start', 
+      marginLeft: 18, 
+      marginBottom: 7,
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+      opacity: 0.7
+    }
+  });
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -115,26 +144,3 @@ export default function ChangePasswordScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingTop: 10,
-    alignItems: 'center',
-
-  },
-  subContainer: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  groupLabel: {
-    alignSelf: 'flex-start', 
-    marginLeft: 18, 
-    marginBottom: 7,
-    fontSize: 14,
-    opacity: 0.7
-  }
-});

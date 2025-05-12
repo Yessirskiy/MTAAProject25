@@ -1,5 +1,8 @@
 import { StyleSheet, View, Text, TextInput, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 type Props<T> = {
     name: string,
@@ -11,6 +14,41 @@ type Props<T> = {
 }
 
 export default function InputField<T>({name, style, iconName, field, value, handleChange} : Props<T>) {
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      width: '100%',
+      height: 55,
+      paddingHorizontal: 15,
+    },
+    fieldContainer: {
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      justifyContent: 'center',
+      backgroundColor: colors.lightGrey,
+      borderRadius: 8,
+    },
+    fieldLabel: {
+      opacity: 0.7,
+      fontSize: isAccessibilityMode ? 13 * 1.25 : 13,
+      marginBottom: 2,
+      color: colors.textPrimary,
+    },
+    fieldInputArea: {
+      flexDirection: 'row',
+      marginBottom: 2,
+    },
+    textInput: {
+      flex: 1,
+      fontSize: isAccessibilityMode ? 15 * 1.25 : 15,
+      color: colors.textPrimary,
+    },
+  });
+
   return (
     <View style={[styles.container, style]}>
       <View style={styles.fieldContainer}>
@@ -30,32 +68,4 @@ export default function InputField<T>({name, style, iconName, field, value, hand
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    height: 55,
-    paddingHorizontal: 15,
-  },
-  fieldContainer: {
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-    backgroundColor: "#F1F1F1",
-    borderRadius: 8,
-  },
-  fieldLabel: {
-    opacity: 0.7,
-    fontSize: 13,
-    marginBottom: 2,
-  },
-  fieldInputArea: {
-    flexDirection: 'row',
-    marginBottom: 2,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 15
-  },
-});
   

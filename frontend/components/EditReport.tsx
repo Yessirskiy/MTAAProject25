@@ -22,6 +22,8 @@ import InfoField from '@/components/InfoField';
 import { AuthContext } from '@/contexts/AuthContext';
 import { parse } from '@babel/core';
 import { updateReport } from '@/api/reportApi';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
 
 
 type Report = {
@@ -88,6 +90,10 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     });
     const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>({latitude: parseFloat(report.address.latitude), longitude: parseFloat(report.address.longitude)});
     const [note, setNote] = useState(report.note);
+
+    const { isDarkMode } = UseTheme();
+    const colors = getColors(isDarkMode);
+    const { isAccessibilityMode } = UseTheme();
 
     const date = new Date(report.report_datetime);
     const day = String(date.getUTCDate()).padStart(2, '0');
@@ -164,12 +170,117 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
         )
     }
 
+    const screenWidth = Dimensions.get('window').width;
+
+    const styles = StyleSheet.create({
+        container: {
+            padding: 20,
+            backgroundColor: colors.background,
+            flexGrow: 1,
+        },
+        header: {
+            fontSize: isAccessibilityMode ? 22 * 1.25 : 22,
+            fontWeight: '600',
+            marginTop: 10,
+            marginBottom: 20,
+            color: colors.textPrimary,
+        },
+        image: {
+            backgroundColor: colors.border,
+            borderRadius: 10,
+            width: screenWidth - 40,
+            height: screenWidth - 40,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 10,
+        },
+        textInput: {
+            borderWidth: 1,
+            borderColor: colors.border,
+            padding: 10,
+            borderRadius: 6,
+            marginBottom: 20,
+            minHeight: 80,
+            textAlignVertical: 'top',
+        },
+        textInfo: {
+            borderWidth: 1,
+            borderColor: colors.border,
+            padding: 10,
+            borderRadius: 6,
+            marginBottom: 10,
+            minHeight: 40,
+            textAlignVertical: 'top',
+        },
+        label: {
+            fontWeight: 'bold',
+            marginBlock: 6,
+        },
+        label1: {
+            marginTop: 30,
+            fontWeight: 'bold',
+            marginBlock: 6,
+        },
+        buttonRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: 20,
+        },
+        cancelButton: {
+            backgroundColor: colors.disabled,
+            padding: 12,
+            borderRadius: 6,
+            flex: 1,
+            marginRight: 10,
+            alignItems: 'center',
+        },
+        saveButton: {
+            backgroundColor: colors.accentBlue,
+            padding: 12,
+            borderRadius: 6,
+            flex: 1,
+            alignItems: 'center',
+        },
+        buttonText: {
+            color: '#fff',
+            fontWeight: 'bold',
+            fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+        },
+        editButton: {
+            flex: 1,
+            marginBottom: 10,
+            backgroundColor: colors.card,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 10,
+        },
+        backButton: {
+            position: 'absolute',
+            top: 0,
+            left: 10,
+            zIndex: 10,
+            padding: 8,
+        },
+        inputContainer: {
+            flexDirection: 'row',
+            borderWidth: 1,
+            borderColor: colors.card,
+            backgroundColor: colors.card,
+            borderRadius: 8,
+            alignItems: 'center',
+            paddingHorizontal: 10,
+            paddingVertical: 15,
+            marginBottom: 10,
+        },
+        input: { flex: 1, color: colors.textPrimary, fontSize: isAccessibilityMode ? 16 * 1.25 : 16 },
+    });
+
     if (activeView === 'main') {
 
         return (
-            <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.container} style={{ flex: 1, backgroundColor: colors.background }} nestedScrollEnabled={true}>
                 <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
-                    <Ionicons name="arrow-back" size={24} color="#000" />
+                    <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
                 </TouchableOpacity>
                 <InfoField
                     name='Nahlásené'
@@ -206,16 +317,16 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     )}
                 />
                 <TouchableOpacity onPress={() => setActiveView('edit')} style={styles.editButton}>
-                    <Text style={{ color: '#000', marginVertical: 8, fontSize: 18 }}>Upraviť hlásenie</Text>
+                    <Text style={{ color: colors.textPrimary, marginVertical: 8, fontSize: isAccessibilityMode ? 18 * 1.25 : 18 }}>Upraviť hlásenie</Text>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         )
     }
 
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={{ flex: 1, backgroundColor: '#fff'}}
+            style={{ flex: 1, backgroundColor: colors.background}}
         >
             <ScrollView
                 contentContainerStyle={styles.container}
@@ -232,14 +343,14 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     onMapPress={() => setActiveView('map')}
                 />
                 <View style={styles.inputContainer}>
-                    <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: '#666' }}>Poznámka</Text>
+                    <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: colors.textSecondary }}>Poznámka</Text>
                     <TextInput
-                    style={[styles.input, { height: 40, paddingTop: 15 }]}
-                    placeholder="Pridať poznámku"
-                    placeholderTextColor="#999"
-                    value={note}
-                    onChangeText={setNote}
-                    multiline
+                        style={[styles.input, { height: 40, paddingTop: 15 }]}
+                        placeholder="Pridať poznámku"
+                        placeholderTextColor="#999"
+                        value={note}
+                        onChangeText={setNote}
+                        multiline
                     />
                 </View>
 
@@ -256,106 +367,3 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     )
 
 }
-
-const screenWidth = Dimensions.get('window').width;
-
-const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-        backgroundColor: '#fff',
-        flex: 1,
-    },
-    header: {
-        fontSize: 22,
-        fontWeight: '600',
-        marginTop: 10,
-        marginBottom: 20,
-    },
-    image: {
-        backgroundColor: '#ccc',
-        borderRadius: 10,
-        width: screenWidth - 40,
-        height: screenWidth - 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    textInput: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        borderRadius: 6,
-        marginBottom: 20,
-        minHeight: 80,
-        textAlignVertical: 'top',
-    },
-    textInfo: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        borderRadius: 6,
-        marginBottom: 10,
-        minHeight: 40,
-        textAlignVertical: 'top',
-    },
-    label: {
-        fontWeight: 'bold',
-        marginBlock: 6,
-    },
-    label1: {
-        marginTop: 30,
-        fontWeight: 'bold',
-        marginBlock: 6,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
-    },
-    cancelButton: {
-        backgroundColor: '#aaa',
-        padding: 12,
-        borderRadius: 6,
-        flex: 1,
-        marginRight: 10,
-        alignItems: 'center',
-    },
-    saveButton: {
-        backgroundColor: '#007AFF',
-        padding: 12,
-        borderRadius: 6,
-        flex: 1,
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    editButton: {
-        flex: 1,
-        marginBottom: 10,
-        backgroundColor: '#eee',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 10,
-    },
-    backButton: {
-        position: 'absolute',
-        top: 0,
-        left: 10,
-        zIndex: 10,
-        padding: 8,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        borderWidth: 1,
-        borderColor: '#eee',
-        backgroundColor: '#eee',
-        borderRadius: 8,
-        alignItems: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 15,
-        marginBottom: 10,
-    },
-    input: { flex: 1, fontSize: 16 },
-});

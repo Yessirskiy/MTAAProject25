@@ -5,15 +5,21 @@ import HomeStatisticsBox from "@/components/HomeStatisticsBox";
 import FeedCard from "@/components/FeedCard";
 import { useCallback, useEffect, useState } from "react";
 import { getFeed } from "@/api/feedApi";
-import type { Report, ReportUser, ReportAddress } from '@/types/report';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+import type { Report as FeedCardReport, ReportUser, ReportAddress } from '@/types/report';
 
 const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
 
 export default function Index() {
   const user = useProtectedRoute();
-  const [feedReports, setFeedReports] = useState<Report[]>([]);
+  const [feedReports, setFeedReports] = useState<FeedCardReport[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
   const fetchFeed = async () => {
     try {
       const res = await getFeed();
@@ -31,12 +37,52 @@ export default function Index() {
   }, []);
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    fetchFeed();
-    setRefreshing(false);
-  }, []);
+      setRefreshing(true);
+      fetchFeed();
+      setRefreshing(false);
+    }, []);
 
   if (!user) return null;
+
+  const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    alignSelf: 'stretch',
+    alignItems: 'flex-start',
+    gap: 20,
+    marginHorizontal: 20,
+    backgroundColor: colors.background,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+    paddingHorizontal: 10,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.textPrimary,
+    opacity: 0.6,
+    marginHorizontal: 8,
+  },
+  sectionText: {
+    fontSize: isAccessibilityMode ? 20 * 1.25 : 20,
+    color: colors.textSecondary,
+  },
+  feedContainer: {
+    flex: 1,
+    marginHorizontal: 20,
+    alignSelf: 'stretch',
+  }
+  });
+  
 
   return (
     <View style={styles.container}>
@@ -50,7 +96,7 @@ export default function Index() {
         <View style={styles.statsContainer}>
           <HomeStatisticsBox 
             upperText="V tomto roku ste zaslali" 
-            statisticText="06"
+            statisticText="06" 
             bottomText="hlásení"
             containerStyle={{flexShrink: 1}}
           />
@@ -75,41 +121,3 @@ export default function Index() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    alignSelf: 'stretch',
-    alignItems: 'flex-start',
-    gap: 20,
-    marginHorizontal: 20,
-    backgroundColor: '#ffffff',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 20,
-    paddingHorizontal: 10,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'black',
-    opacity: 0.6,
-    marginHorizontal: 8,
-  },
-  sectionText: {
-    fontSize: 20,
-  },
-  feedContainer: {
-    flex: 1,
-    marginHorizontal: 20,
-    alignSelf: 'stretch',
-  }
-});

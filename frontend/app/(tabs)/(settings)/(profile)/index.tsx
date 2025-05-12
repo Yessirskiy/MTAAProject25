@@ -11,6 +11,8 @@ import { router } from 'expo-router';
 import TempAddressInputField from '@/components/TempAddressInputField';
 import MapPicker from '@/components/MapPicker';
 import TempMapPicker from '@/components/TempMapPicker';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
 
 
 const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
@@ -68,6 +70,10 @@ export default function SettingsProfileScreen() {
   const handleChange = (field: keyof typeof cur_data, value: string) => {
     setCurData(prev => ({ ...prev, [field]: value }));
   };
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -174,6 +180,39 @@ export default function SettingsProfileScreen() {
     );
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 10,
+      alignItems: 'center',
+
+    },
+    subContainer: {
+      width: '100%',
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    button: {
+      width: '100%',
+      paddingVertical: 8,
+      marginHorizontal: 10,
+      justifyContent: 'center',
+      backgroundColor: colors.lightGrey,
+      borderRadius: 5,
+    },
+    buttonLabel: {
+      width: '100%',
+      fontSize: isAccessibilityMode ? 16 * 1.25 : 16,
+      opacity: 0.9,
+      marginBottom: 2,
+    },
+    text: {
+      color: colors.background,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -195,42 +234,9 @@ export default function SettingsProfileScreen() {
           onMapPress={() => setActiveView('map')}
           style={{marginBottom: 20}}
         />
-        {(data_modified || address_modified) && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#CFCFCF"}} onPress={handlePress}/>}
+        {(data_modified || address_modified) && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: colors.border}} onPress={handlePress}/>}
       </View>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingTop: 10,
-    alignItems: 'center',
-
-  },
-  subContainer: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  button: {
-    width: '100%',
-    paddingVertical: 8,
-    marginHorizontal: 10,
-    justifyContent: 'center',
-    backgroundColor: "#F1F1F1",
-    borderRadius: 5,
-  },
-  buttonLabel: {
-    width: '100%',
-    fontSize: 16,
-    opacity: 0.9,
-    marginBottom: 2,
-  },
-  text: {
-    color: '#fff',
-  },
-});

@@ -5,6 +5,8 @@ import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { Ionicons } from '@expo/vector-icons';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
 
 
 const screenWidth = Dimensions.get('window').width;
@@ -41,6 +43,10 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
     } | null>(null);
     const [region, setRegion] = useState<Region | null>(null);
     const mapRef = useRef<MapView>(null);
+
+    const { isDarkMode } = UseTheme();
+    const colors = getColors(isDarkMode);
+    const { isAccessibilityMode } = UseTheme();
 
     const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -121,6 +127,34 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
         console.log(marker);
         goBack();
     }
+
+    const styles = StyleSheet.create({
+        container: { flex: 1 },
+        map: { flex: 1 },
+        addressContainer: {
+            padding: 12,
+            backgroundColor: colors.background,
+            borderTopWidth: 1,
+            borderColor: colors.buttonBackground,
+        },
+        addressText: {
+            fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+            marginBottom: 10,
+        },
+        acceptButton: {
+            backgroundColor: '#2e86de',
+            paddingVertical: 10,
+            borderRadius: 8,
+            alignItems: 'center',
+        },
+        backButton: {
+            position: 'absolute',
+            top: 70,
+            left: 20,
+            zIndex: 1,
+        },
+        acceptText: { color: '#fff', fontWeight: 'bold', fontSize: isAccessibilityMode ? 14 * 1.25 : 14 },
+    });
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -203,6 +237,7 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
                             borderRadius: 8,
                             paddingHorizontal: 10,
                             height: 44,
+                            fontSize: isAccessibilityMode ? 15 * 1.25 : 15,
                         }
                     }}
                     suppressDefaultStyles={false}
@@ -232,31 +267,3 @@ export default function MapPicker({ onLocationPicked, goBack }: MapProps) {
         </TouchableWithoutFeedback>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1 },
-    map: { flex: 1 },
-    addressContainer: {
-        padding: 12,
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderColor: '#ddd',
-    },
-    addressText: {
-        fontSize: 14,
-        marginBottom: 10,
-    },
-    acceptButton: {
-        backgroundColor: '#2e86de',
-        paddingVertical: 10,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    backButton: {
-        position: 'absolute',
-        top: 70,
-        left: 20,
-        zIndex: 1,
-    },
-    acceptText: { color: '#fff', fontWeight: 'bold', },
-});

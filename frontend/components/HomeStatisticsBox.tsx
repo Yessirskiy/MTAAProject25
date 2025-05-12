@@ -1,5 +1,8 @@
 import { StyleSheet, View, Text, TextInput, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 type Props = {
     upperText: string,
@@ -10,6 +13,37 @@ type Props = {
 }
 
 export default function HomeStatisticsBox({upperText, statisticText, bottomText, containerStyle, statisticStyle} : Props) {
+  
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+
+  const styles = StyleSheet.create({
+    container: {
+      backgroundColor: colors.lightGrey,
+      padding: 10,
+      flexDirection: 'column',
+      justifyContent: 'center',
+      borderRadius: 10
+    },
+    upperTextStyle: {
+      marginHorizontal: 10,
+      textAlign: 'center',
+      fontSize: 18,
+      color: colors.textPrimary,
+    },
+    statisticTextStyle: {
+      textAlign: 'center',
+      fontSize: 48,
+      color: colors.textPrimary,
+    },
+    bottomTextStyle: {
+      marginHorizontal: 18,
+      textAlign: 'center',
+      fontSize: 18,
+      color: colors.textPrimary,
+    }
+  });
+
   return (
     <View style={[styles.container, containerStyle]}>
         <Text style={[styles.upperTextStyle]}>{upperText}</Text>
@@ -19,27 +53,4 @@ export default function HomeStatisticsBox({upperText, statisticText, bottomText,
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#F1F1F1',
-    padding: 10,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    borderRadius: 10
-  },
-  upperTextStyle: {
-    marginHorizontal: 10,
-    textAlign: 'center',
-    fontSize: 18
-  },
-  statisticTextStyle: {
-    textAlign: 'center',
-    fontSize: 48
-  },
-  bottomTextStyle: {
-    marginHorizontal: 18,
-    textAlign: 'center',
-    fontSize: 18
-  }
-});
   

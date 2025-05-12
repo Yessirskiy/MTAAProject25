@@ -3,6 +3,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, RelativePathString } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 interface AddressInputProps {
     address: string;
@@ -19,11 +22,43 @@ export default function TempAddressInputField({ address, setAddress, setCoords, 
   
   const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
   useEffect(() => {
       if (searchRef.current && address) {
           searchRef.current.setAddressText(address);
       }
   }, [address]);
+
+  const styles = StyleSheet.create({
+    container: {
+      width: '100%',
+      height: 55,
+      paddingHorizontal: 15,
+    },
+    fieldContainer: {
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      justifyContent: 'center',
+      backgroundColor: colors.lightGrey,
+      borderRadius: 8,
+    },
+    fieldLabel: {
+      opacity: 0.7,
+      fontSize: isAccessibilityMode ? 13 * 1.25 : 13,
+      color: colors.textPrimary,
+    },
+    fieldInputArea: {
+      flexDirection: 'row',
+    },
+    textInput: {
+      flex: 1,
+      fontSize: isAccessibilityMode ? 15 * 1.25 : 15,
+    },
+  });
+
   return (
     <View style={[styles.container, style]}>
       <View style={styles.fieldContainer}>
@@ -93,10 +128,10 @@ export default function TempAddressInputField({ address, setAddress, setCoords, 
                 height: 30,
               },
               textInput: {
-                fontSize: 15,
+                fontSize: isAccessibilityMode ? 15 * 1.25 : 15,
                 flex: 0,
                 backgroundColor: 'transparent',
-                color: 'black',
+                color: colors.textPrimary,
                 marginLeft: -10,
                 height: 25
               },
@@ -107,37 +142,11 @@ export default function TempAddressInputField({ address, setAddress, setCoords, 
             timeout={20000}
         />
         <TouchableOpacity onPress={onMapPress}>
-          {iconName && <Ionicons name={`${iconName}-outline` as keyof typeof Ionicons.glyphMap} size={22} style={{opacity: 0.7}} />}
+          {iconName && <Ionicons name={`${iconName}-outline` as keyof typeof Ionicons.glyphMap} size={22} style={{opacity: 0.7, color: colors.textPrimary}} />}
         </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    height: 55,
-    paddingHorizontal: 15,
-  },
-  fieldContainer: {
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-    backgroundColor: "#F1F1F1",
-    borderRadius: 8,
-  },
-  fieldLabel: {
-    opacity: 0.7,
-    fontSize: 13,
-  },
-  fieldInputArea: {
-    flexDirection: 'row',
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 15
-  },
-});
   

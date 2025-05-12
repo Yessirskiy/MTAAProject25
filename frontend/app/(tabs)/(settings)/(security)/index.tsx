@@ -9,6 +9,8 @@ import ToggleSwitchField from '@/components/ToggleSwitchField';
 import { router } from 'expo-router';
 import { getUserSettingsMe, updateUserSettingsMe } from '@/api/userApi';
 import Toast from 'react-native-toast-message';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
 
 
 const PlaceholderImage = require('@/assets/images/icon.png');
@@ -54,6 +56,10 @@ export default function SecurityScreen() {
 
   const data_modified = JSON.stringify(init_data) !== JSON.stringify(cur_data);
 
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
   const handleSavePress = async () => {
     try {
       console.log('Call to update User s Settings');
@@ -94,6 +100,30 @@ export default function SecurityScreen() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 10,
+      alignItems: 'center',
+
+    },
+    subContainer: {
+      width: '100%',
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    groupLabel: {
+      alignSelf: 'flex-start', 
+      marginLeft: 18, 
+      marginBottom: 7,
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+      opacity: 0.7,
+      color: colors.textPrimary,
+    }
+  });
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -130,13 +160,14 @@ export default function SecurityScreen() {
           handleChange={handleChange}
           style={{marginBottom: 10}}
         />
-        {data_modified && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: "#CFCFCF"}} onPress={handleSavePress}/>}
+        {data_modified && <ButtonField label="Uložiť" buttonStyle={{backgroundColor: colors.border}} onPress={handleSavePress}/>}
         <Text style={styles.groupLabel}>Prihlasovanie</Text>
         <ButtonField 
           label="Zmena hesla" 
           buttonStyle={{height: '100%', alignItems: 'flex-start'}} 
           style={{marginBottom: 10}}
           onPress={() => router.push("/(tabs)/(settings)/(security)/changePassword")}
+          labelStyle={{ fontSize: isAccessibilityMode ? 16 * 1.25 : 16 }}
         />
         <ButtonField 
           label="Odhlásenie z každého zariadenia" 
@@ -144,33 +175,10 @@ export default function SecurityScreen() {
             height: '100%', 
             alignItems: 'flex-start'
           }}
-          labelStyle={{color: dangerZoneColor}}
+          labelStyle={{color: dangerZoneColor, fontSize: isAccessibilityMode ? 16 * 1.25 : 16}}
         />
       </View>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingTop: 10,
-    alignItems: 'center',
-
-  },
-  subContainer: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  groupLabel: {
-    alignSelf: 'flex-start', 
-    marginLeft: 18, 
-    marginBottom: 7,
-    fontSize: 14,
-    opacity: 0.7
-  }
-});

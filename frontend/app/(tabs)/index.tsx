@@ -1,6 +1,12 @@
 import { Redirect } from "expo-router";
+import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 
-const Index = () => {
-  return <Redirect href="/(home)" />;
-};
-export default Index;
+export default function Index() {
+  const user = useProtectedRoute();
+  if (!user) return null;
+  console.log(user);
+  return (
+    <Redirect href="/(home)" />
+  );
+}
+
