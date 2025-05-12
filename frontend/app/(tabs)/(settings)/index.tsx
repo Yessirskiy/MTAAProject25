@@ -1,8 +1,8 @@
-import { Text, View, StyleSheet, ScrollView, Image  } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, Image, RefreshControl  } from 'react-native';
 import SettingsButtonGeneral from '@/components/SettingsButtonGeneral'
 import SettingsProfilePicture from '@/components/SettingsProfilePicture';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useCallback } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
 import { router, useRouter } from 'expo-router';
 import { getUserPhotoMe } from '@/api/userApi';
@@ -12,6 +12,7 @@ const dangerZoneColor = '#D63E3E';
 
 export default function SettingsScreen() {
   const [profilePic, setProfilePic] = useState<string>(PlaceholderImage);
+  const [refreshing, setRefreshing] = useState(false);
 
   const router1 = useRouter();
   const auth = useContext(AuthContext);
@@ -25,22 +26,28 @@ export default function SettingsScreen() {
     router1.replace("/signin");
   };
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const response = await getUserPhotoMe();
-      if (response.status == 204){
-        setProfilePic(PlaceholderImage);
-        return;
-      }
-      const blob = await response.data;
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePic(reader.result as string);
-      };
-      reader.readAsDataURL(blob);
+  const fetchImage = async () => {
+    const response = await getUserPhotoMe();
+    if (response.status == 204){
+      setProfilePic(PlaceholderImage);
+      return;
+    }
+    const blob = await response.data;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfilePic(reader.result as string);
     };
+    reader.readAsDataURL(blob);
+  };
 
+  useEffect(() => {
     fetchImage();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    fetchImage();
+    setRefreshing(false);
   }, []);
 
   return (
@@ -48,6 +55,9 @@ export default function SettingsScreen() {
       <ScrollView
         style={{width: "100%"}}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
       <View style={styles.subContainer}>
         <SettingsProfilePicture imgSource={profilePic} style={{marginBottom: 20}}/>
