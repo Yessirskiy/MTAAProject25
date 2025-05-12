@@ -9,6 +9,8 @@ import ToggleSwitchField from '@/components/ToggleSwitchField';
 import { router } from 'expo-router';
 import { getUserSettingsMe, updateUserSettingsMe } from '@/api/userApi';
 import Toast from 'react-native-toast-message';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
 
 
 const PlaceholderImage = require('@/assets/images/icon.png');
@@ -37,6 +39,10 @@ export default function NotificationsScreen() {
   const handleChange = (field: keyof typeof cur_data, value: boolean) => {
     setCurData(prev => ({ ...prev, [field]: value }));
   };
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
 
   useEffect(() => {
       const fetchData = async () => {
@@ -95,6 +101,31 @@ export default function NotificationsScreen() {
       }
     };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 10,
+      alignItems: 'center',
+
+    },
+    subContainer: {
+      width: '100%',
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    groupLabel: {
+      alignSelf: 'flex-start', 
+      marginLeft: 18, 
+      marginBottom: 7,
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+      opacity: 0.7,
+      color: colors.textPrimary,
+    }
+  });
+
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -149,26 +180,3 @@ export default function NotificationsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingTop: 10,
-    alignItems: 'center',
-
-  },
-  subContainer: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  groupLabel: {
-    alignSelf: 'flex-start', 
-    marginLeft: 18, 
-    marginBottom: 7,
-    fontSize: 14,
-    opacity: 0.7
-  }
-});

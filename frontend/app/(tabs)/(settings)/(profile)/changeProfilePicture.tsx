@@ -6,6 +6,9 @@ import ButtonField from '@/components/ButtonField';
 import SettingsProfilePicture from '@/components/SettingsProfilePicture';
 import { deleteUserPhotoMe, getUserPhotoMe, updateUserPhotoMe } from '@/api/userApi';
 import Toast from 'react-native-toast-message';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
 const dangerZoneColor = '#D63E3E';
@@ -15,6 +18,9 @@ const dangerZoneColor = '#D63E3E';
 export default function PhotoPickerScreen() {
   const [imageUri, setImageUri] = useState<string>(PlaceholderImage);
   const [imageSelected, setImageSelected] = useState<boolean>(false);
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
 
   const fetchImage = async () => {
     setImageUri(PlaceholderImage);
@@ -133,6 +139,24 @@ export default function PhotoPickerScreen() {
     }
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      backgroundColor: colors.background
+    },
+    imageContainer: {
+      alignItems: 'center',
+      marginHorizontal: 15
+    },
+    image: {
+      marginTop: 20,
+      width: 200,
+      height: 200,
+      borderRadius: 10,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
@@ -150,21 +174,3 @@ export default function PhotoPickerScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#ffffff'
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginHorizontal: 15
-  },
-  image: {
-    marginTop: 20,
-    width: 200,
-    height: 200,
-    borderRadius: 10,
-  },
-});

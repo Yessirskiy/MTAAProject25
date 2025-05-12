@@ -1,5 +1,8 @@
 import { StyleSheet, View, Pressable, Text, TextInput, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 type Props<T> = {
     name: string,
@@ -12,6 +15,39 @@ type Props<T> = {
 }
 
 export default function CredentialField<T>({name, style, iconName, field, placeholder, value, handleChange} : Props<T>) {
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+  
+  const styles = StyleSheet.create({
+    container: {
+      width: '100%',
+      height: 55,
+      paddingHorizontal: 15,
+    },
+    fieldContainer: {
+      paddingVertical: 10,
+      paddingHorizontal: 10,
+      justifyContent: 'center',
+      backgroundColor: colors.lightGrey,
+      borderRadius: 8,
+    },
+    fieldInputArea: {
+      flexDirection: 'row',
+      marginBottom: 2
+    },
+    verticalBar: {
+      width: StyleSheet.hairlineWidth,
+      height: "100%", 
+      backgroundColor: colors.textPrimary, 
+      marginHorizontal: 10,
+    },
+    textInput: {
+      flex: 1,
+      fontSize: isAccessibilityMode ? 15 * 1.25 : 15,
+    },
+  });
+
   return (
     <View style={[styles.container, style]}>
       <View style={styles.fieldContainer}>
@@ -33,33 +69,4 @@ export default function CredentialField<T>({name, style, iconName, field, placeh
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    height: 55,
-    paddingHorizontal: 15,
-  },
-  fieldContainer: {
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-    backgroundColor: "#F1F1F1",
-    borderRadius: 8,
-  },
-  fieldInputArea: {
-    flexDirection: 'row',
-    marginBottom: 2
-  },
-  verticalBar: {
-    width: StyleSheet.hairlineWidth,
-    height: "100%", 
-    backgroundColor: 'black', 
-    marginHorizontal: 10,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 15
-  },
-});
   

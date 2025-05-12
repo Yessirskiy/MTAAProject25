@@ -5,6 +5,9 @@ import HomeStatisticsBox from "@/components/HomeStatisticsBox";
 import FeedCard from "@/components/FeedCard";
 import { useEffect, useState } from "react";
 import { getFeed } from "@/api/feedApi";
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 export type Report = {
   id: number;
@@ -54,6 +57,10 @@ export default function Index() {
 
   const [feedReports, setFeedReports] = useState<Report[]>([]);
   
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
   useEffect(() => {
     const fetchFeed = async () => {
       try {
@@ -69,6 +76,45 @@ export default function Index() {
 
     fetchFeed();
   }, []);
+
+  const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    alignSelf: 'stretch',
+    alignItems: 'flex-start',
+    gap: 20,
+    marginHorizontal: 20,
+    backgroundColor: colors.background,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+    paddingHorizontal: 10,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.textPrimary,
+    opacity: 0.6,
+    marginHorizontal: 8,
+  },
+  sectionText: {
+    fontSize: isAccessibilityMode ? 20 * 1.25 : 20,
+    color: colors.textSecondary,
+  },
+  feedContainer: {
+    flex: 1,
+    marginHorizontal: 20,
+    alignSelf: 'stretch',
+  }
+  });
 
   return (
     <View style={styles.container}>
@@ -101,41 +147,3 @@ export default function Index() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    alignSelf: 'stretch',
-    alignItems: 'flex-start',
-    gap: 20,
-    marginHorizontal: 20,
-    backgroundColor: '#ffffff',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 20,
-    paddingHorizontal: 10,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'black',
-    opacity: 0.6,
-    marginHorizontal: 8,
-  },
-  sectionText: {
-    fontSize: 20,
-  },
-  feedContainer: {
-    flex: 1,
-    marginHorizontal: 20,
-    alignSelf: 'stretch',
-  }
-});

@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 interface PhotoPickerProps {
     onPhotoSelected: (uris: string[]) => void;
@@ -38,6 +41,10 @@ export default function PhotoPicker({ onPhotoSelected, onGoBack }: PhotoPickerPr
         }
     };
 
+    const { isDarkMode } = UseTheme();
+    const colors = getColors(isDarkMode);
+    const { isAccessibilityMode } = UseTheme();
+
     const takePhoto = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
@@ -55,11 +62,41 @@ export default function PhotoPicker({ onPhotoSelected, onGoBack }: PhotoPickerPr
         }
     };
 
+    const styles = StyleSheet.create({
+        container: { padding: 24, flex:1, backgroundColor: colors.background, alignItems: 'center', },
+        header: {
+            fontSize: isAccessibilityMode ? 22 * 1.25 : 22,
+            fontWeight: 'bold',
+            marginBottom: 32,
+            justifyContent: 'center',
+            marginTop: 60,
+            color: colors.textPrimary,
+        },
+        backButton: {
+            position: 'absolute',
+            top: 50,
+            left: 20,
+            zIndex: 1,
+        },
+        button: {
+            backgroundColor: '#007AFF',
+            padding: 16,
+            borderRadius: 8,
+            marginBottom: 16,
+            alignItems: 'center',
+            width: 330
+        },
+        buttonText: {
+            color: '#fff',
+            fontSize: isAccessibilityMode ? 16 * 1.25 : 16,
+        },
+    });
+
     return (
         <View style={styles.container}>
 
             <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
-                <Ionicons name="arrow-back" size={24} color="#000" />
+                <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
             </TouchableOpacity>
 
             <Text style={styles.header}>Pridať fotku</Text>
@@ -74,33 +111,3 @@ export default function PhotoPicker({ onPhotoSelected, onGoBack }: PhotoPickerPr
         </View>
     );
 }
-
-
-const styles = StyleSheet.create({
-    container: { padding: 24, flex:1, backgroundColor: '#fff', alignItems: 'center', },
-    header: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginBottom: 32,
-        justifyContent: 'center',
-        marginTop: 60,
-    },
-    backButton: {
-        position: 'absolute',
-        top: 50,
-        left: 20,
-        zIndex: 1,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        padding: 16,
-        borderRadius: 8,
-        marginBottom: 16,
-        alignItems: 'center',
-        width: 330
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-    },
-});

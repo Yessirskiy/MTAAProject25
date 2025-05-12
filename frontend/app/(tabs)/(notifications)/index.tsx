@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react';
 import { getNotificationsMe } from '@/api/notificationsApi';
 import NotificationCard from '@/components/NotificationCard';
 import Toast from 'react-native-toast-message';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 type NotificationDataType = {
   id: number,
@@ -22,6 +25,10 @@ export default function NotificationsScreen() {
   const router = useRouter();
 
   const [notifications, setNotifications] = useState<NotificationDataType[]>([]);
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -64,6 +71,20 @@ export default function NotificationsScreen() {
     fetchNotifications();
   }, []);
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingTop: 10
+    },
+    text: {
+      color: colors.background,
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -82,16 +103,3 @@ export default function NotificationsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 10
-  },
-  text: {
-    color: '#fff',
-  },
-});

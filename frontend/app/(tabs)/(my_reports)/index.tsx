@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import { Text, View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, FlatList, Alert, ScrollView } from 'react-native';
 import { getUserReportsMe } from '@/api/userApi';
 import { getReportPhoto } from '@/api/reportApi';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
@@ -9,6 +9,9 @@ import MapPicker from '@/components/MapPicker';
 import AddressInputField from '@/components/AddressInputField';
 import EditReport from '@/components/EditReport';
 import { useFocusEffect } from 'expo-router';
+import Toast from 'react-native-toast-message';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
 
 
 type Report = {
@@ -60,6 +63,10 @@ export default function MyReportsScreen() {
   const [reports, setReports] = useState<ReportWithPhoto[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
   const fetchReports = async () => {
       try {
         const response = await getUserReportsMe();
@@ -81,8 +88,17 @@ export default function MyReportsScreen() {
         //console.log(reports);
 
         setReports(reportsWithPhotos);
-      } catch (err) {
-        console.error('Failed to fetch report:', err);
+      } catch (err: any) {
+        if (err.request) {
+          Toast.show({
+            type: 'error',
+            text1: 'Network error.',
+            text2: `Please, check connection.`
+          });
+        }
+        else {
+          console.error('Failed to fetch report:', err);
+        }
       } finally {
         setLoading(false);
       }
@@ -128,6 +144,72 @@ export default function MyReportsScreen() {
     );
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      fontSize: isAccessibilityMode ? 24 * 1.25 : 24,
+      fontWeight: '600',
+      textAlign: 'center',
+      marginVertical: 16,
+    },
+    card: {
+      flexDirection: 'row',
+      padding: 12,
+      margin: 8,
+      backgroundColor: colors.surface,
+      borderRadius: 8,
+    },
+    image: {
+      width: isAccessibilityMode ? 125 : 100,
+      height: isAccessibilityMode ? 125 : 100,
+      borderRadius: 6,
+      backgroundColor: colors.border,
+    },
+    info: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    title: {
+      fontWeight: 'bold',
+      fontSize: isAccessibilityMode ? 16 * 1.25 : 16,
+      color: colors.textPrimary
+    },
+    note: {
+      color: colors.darkGrey,
+      marginTop: 4,
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+    },
+    id: {
+      color: colors.icon,
+      marginTop: 6,
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+    },
+    status: {
+      backgroundColor: colors.buttonBackground,
+      padding: 4,
+      borderRadius: 6,
+      marginTop: 6,
+      alignSelf: 'flex-start',
+      color: colors.icon,
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+    },
+    editContainer: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colors.background,
+    },
+    backButton: {
+      marginTop: 40,
+      backgroundColor: colors.darkGrey,
+      padding: 12,
+      alignItems: 'center',
+      borderRadius: 8,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -136,7 +218,7 @@ export default function MyReportsScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
-            activeOpacity={item.status === 'resolved' ? 1 : 0.2}
+            activeOpacity={item.status === 'resolved' || item.status === 'cancelled' ? 1 : 0.2}
             onPress={() => {
               if (item.status !== 'resolved') {
                 setSelectedReport(item);
@@ -168,63 +250,3 @@ export default function MyReportsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginVertical: 16,
-  },
-  card: {
-    flexDirection: 'row',
-    padding: 12,
-    margin: 8,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 8,
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 6,
-    backgroundColor: '#ccc',
-  },
-  info: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  title: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  note: {
-    color: '#333',
-    marginTop: 4,
-  },
-  id: {
-    color: '#888',
-    marginTop: 6,
-  },
-  status: {
-    backgroundColor: '#ddd',
-    padding: 4,
-    borderRadius: 6,
-    marginTop: 6,
-    alignSelf: 'flex-start',
-  },
-  editContainer: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  backButton: {
-    marginTop: 40,
-    backgroundColor: '#333',
-    padding: 12,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-});

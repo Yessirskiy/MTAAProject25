@@ -1,5 +1,8 @@
 import { StyleSheet, View, Pressable, Text, ViewStyle, TextStyle } from 'react-native';
 import { formatDateTime } from '@/utils/formatDateTime';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 type Notification = {
   id: number,
@@ -20,6 +23,50 @@ type Props = {
 }
 
 export default function ButtonField({notification, onPress, containerStyle, titleStyle, noteStyle, receivedStyle} : Props) {
+  
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      width: '100%',
+      minHeight: 140,
+    },
+    pressableContainer: {
+      position: 'relative',
+      backgroundColor: colors.lightGrey,
+      marginHorizontal: 18,
+      padding: 10,
+      borderRadius: 8,
+      flex: 1,
+      flexDirection: 'column',
+      
+    },
+    titleStyle: {
+      fontSize: isAccessibilityMode ? 15 * 1.25: 15,
+      marginBottom: 7,
+    },
+    noteStyle: {
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+      opacity: 0.8,
+      marginBottom: 'auto'
+    },
+    receivedStyle: {
+      fontSize: isAccessibilityMode ? 10 * 1.25 : 10,
+      opacity: 0.5
+    },
+    unreadDot: {
+      position: 'absolute',
+      top: -5,
+      right: -5,
+      width: 15,
+      height: 15,
+      borderRadius: 10,
+      backgroundColor: colors.accentRedLight,
+    }
+  });
+
   return (
     <View style={[styles.container, containerStyle]}>
       <Pressable style={[styles.pressableContainer]} onPress={onPress}>
@@ -33,43 +80,4 @@ export default function ButtonField({notification, onPress, containerStyle, titl
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    minHeight: 140,
-  },
-  pressableContainer: {
-    position: 'relative',
-    backgroundColor: '#F1F1F1',
-    marginHorizontal: 18,
-    padding: 10,
-    borderRadius: 8,
-    flex: 1,
-    flexDirection: 'column',
-    
-  },
-  titleStyle: {
-    fontSize: 15,
-    marginBottom: 7,
-  },
-  noteStyle: {
-    fontSize: 14,
-    opacity: 0.8,
-    marginBottom: 'auto'
-  },
-  receivedStyle: {
-    fontSize: 10,
-    opacity: 0.5
-  },
-  unreadDot: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    width: 15,
-    height: 15,
-    borderRadius: 10,
-    backgroundColor: '#FF6C6C',
-  }
-});
   

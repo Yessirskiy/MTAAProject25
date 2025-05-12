@@ -5,10 +5,16 @@ import { getTabScreenOptions } from '@/utils/getTabScreenOptions';
 import { useContext, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { AuthContext } from "@/contexts/AuthContext";
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 export default function TabLayout() {
   const { accessToken, isLoading } = useContext(AuthContext);
   const router = useRouter();
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
@@ -18,21 +24,22 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#000000',
-        tabBarInactiveTintColor: '#000000',
+        tabBarActiveTintColor: colors.textPrimary,
+        tabBarInactiveTintColor: colors.textPrimary,
         headerStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.background,
         },
         headerShadowVisible: false,
-        headerTintColor: '#000000',
+        headerTintColor: colors.textPrimary,
         headerTitleStyle: {
-          color: '#000000',
+          color: colors.textPrimary,
           fontSize: 24,
           textAlign: 'center'
         },
         tabBarStyle: {
-          backgroundColor: '#D9D9D9',
+          backgroundColor: colors.bar,
           paddingTop: 5,
+          borderColor: colors.buttonBackground,
         },
       }}
     >

@@ -6,6 +6,9 @@ import { useState, useContext } from 'react';
 import { Text, View, StyleSheet, Image, ScrollView, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { AuthContext } from '../contexts/AuthContext';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 const PlaceholderImage = require('@/assets/images/icon.png');
 
@@ -19,6 +22,9 @@ export default function SignInScreen() {
     email: "",
     password: ""
   });
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
 
   const auth = useContext(AuthContext);
   const router = useRouter();
@@ -67,6 +73,40 @@ export default function SignInScreen() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      height: "100%",
+      flexDirection: 'column',
+      backgroundColor: colors.background,
+      paddingTop: 120,
+      alignItems: 'center',
+    },
+    subContainer: {
+      width: '100%',
+      backgroundColor: colors.background,
+      alignItems: 'center'
+    },
+    logo: {
+      width: "50%",
+      height: 140,
+      borderRadius: 10,
+      marginBottom: 40
+    },
+    titleText: {
+      color: colors.textPrimary,
+      fontSize: 32
+    },
+    sloganText: {
+      color: colors.textPrimary,
+      opacity: 0.8,
+      fontSize: 13
+    },
+    hintText: {
+      color: colors.textPrimary,
+      opacity: 0.5,
+      fontSize: 11
+    }
+  });
 
   return (
     <KeyboardAvoidingView
@@ -120,38 +160,3 @@ export default function SignInScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    height: "100%",
-    flexDirection: 'column',
-    backgroundColor: '#FFFFFF',
-    paddingTop: 120,
-    alignItems: 'center',
-  },
-  subContainer: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center'
-  },
-  logo: {
-    width: "50%",
-    height: 140,
-    borderRadius: 10,
-    marginBottom: 40
-  },
-  titleText: {
-    color: '#000000',
-    fontSize: 32
-  },
-  sloganText: {
-    color: '#000000',
-    opacity: 0.8,
-    fontSize: 13
-  },
-  hintText: {
-    color: '#000000',
-    opacity: 0.5,
-    fontSize: 11
-  }
-});

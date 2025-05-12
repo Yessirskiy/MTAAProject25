@@ -6,6 +6,9 @@ import { View, Text, ScrollView } from 'react-native';
 import { StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { formatDateTime } from '@/utils/formatDateTime';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 type NotificationDataType = {
   id: number,
@@ -29,7 +32,11 @@ export default function NotificationDetail() {
   const { id } = useLocalSearchParams();
 
   const [notification, setNotification] = useState<NotificationDataType>(notification_mock_data);
-  
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
   useEffect(() => {
     const fetchNotification = async () => {
       try {
@@ -76,6 +83,19 @@ export default function NotificationDetail() {
     fetchNotification();
   }, []);
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      paddingTop: 10
+    },
+    text: {
+      color: colors.background,
+      fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -90,15 +110,3 @@ export default function NotificationDetail() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    paddingTop: 10
-  },
-  text: {
-    color: '#fff',
-  },
-});

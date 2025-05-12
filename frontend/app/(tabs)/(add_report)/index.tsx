@@ -18,12 +18,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import PhotoPicker from '@/components/PhotoPicker';
 import MapPicker from '@/components/MapPicker';
-import InputField from '@/components/InputField'
+import { getColors } from '@/theme/colors';
 import AddressInputField from '@/components/AddressInputField'
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { createReport } from '@/api/reportApi';
 import { useRouter } from 'expo-router';
-
+import { UseTheme } from '@/contexts/ThemeContext';
+import Toast from 'react-native-toast-message';
 
 
 export default function AddReportScreen() {
@@ -43,6 +44,10 @@ export default function AddReportScreen() {
   } | null>(null);
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [note, setNote] = useState('');
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
 
   const handleSubmit = async () => {
     if (!user) {
@@ -91,7 +96,11 @@ export default function AddReportScreen() {
 
         Alert.alert('Error', error.response.data.detail);
       } else if (error.request) {
-        Alert.alert('Chyba siete', 'Prosím skontrolujte vaše pripojenie');
+        Toast.show({
+          type: 'error',
+          text1: 'Network error.',
+          text2: `Please, check connection.`
+        });
       } else {
         console.error('Unknown error', error);
         Alert.alert('Chyba', 'Nastala chyba');
@@ -127,10 +136,58 @@ export default function AddReportScreen() {
     );
   }
 
+  const screenWidth = Dimensions.get('window').width;
+
+  const styles = StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      backgroundColor: colors.background,
+      padding: 20,
+    },
+    photoBox: {
+      backgroundColor: colors.border,
+      borderRadius: 10,
+      width: screenWidth - 40,
+      height: screenWidth - 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderColor: colors.card,
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 15,
+      marginBottom: 10,
+    },
+    input: { flex: 1, fontSize: isAccessibilityMode ? 16 * 1.25 : 16, color: colors.textPrimary },
+    closeButton: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+      backgroundColor: colors.textPrimary,
+      borderRadius: 12,
+      padding: 2,
+      zIndex: 1,
+    },
+    photoAddButton: {
+      marginBottom: 10,
+      backgroundColor: colors.card,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 10,
+      paddingVertical: 10,
+    },
+  });
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: '#fff'}}
+      style={{ flex: 1, backgroundColor: colors.background}}
     >
       <ScrollView
         contentContainerStyle={styles.container}
@@ -147,11 +204,11 @@ export default function AddReportScreen() {
         />
 
         <View style={styles.inputContainer}>
-          <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: '#666' }}>Poznámka</Text>
+          <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: colors.textSecondary, fontSize: isAccessibilityMode ? 14 * 1.25 : 14 }}>Poznámka</Text>
           <TextInput
             style={[styles.input, { height: 40, paddingTop: 15 }]}
             placeholder="Pridať poznámku"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textGrey}
             value={note}
             onChangeText={setNote}
             multiline
@@ -176,7 +233,7 @@ export default function AddReportScreen() {
                   }
                   style={styles.closeButton}
                 >
-                  <Ionicons name="close" size={18} color="#fff" />
+                  <Ionicons name="close" size={18} color={colors.background} />
                 </TouchableOpacity>
               </View>
             )}
@@ -188,7 +245,7 @@ export default function AddReportScreen() {
             style={styles.photoBox}
           >
             <Ionicons name="camera" size={48} color="#999" />
-            <Text style={{ color: '#999', marginTop: 8 }}>Pridať fotky</Text>
+            <Text style={{ color: colors.icon, marginTop: 8, fontSize: isAccessibilityMode ? 14 * 1.25 : 14 }}>Pridať fotky</Text>
           </TouchableOpacity>
         )}
 
@@ -197,62 +254,14 @@ export default function AddReportScreen() {
           style={styles.photoAddButton}
         >
           <Ionicons name="add-circle-outline" size={32} color="#666" />
-          <Text style={{ color: '#666', marginVertical: 4 }}>
+          <Text style={{ color: colors.textSecondary, marginVertical: 4, fontSize: isAccessibilityMode ? 14 * 1.25 : 14 }}>
             Pridať ďalšie fotky
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleSubmit()} style={styles.photoAddButton}>
-          <Text style={{ color: '#000', marginVertical: 4, fontSize: 18 }}>Nahlásiť</Text>
+          <Text style={{ color: colors.textPrimary, marginVertical: 4, fontSize: isAccessibilityMode ? 18 * 1.25 : 18 }}>Nahlásiť</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const screenWidth = Dimensions.get('window').width;
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-  },
-  photoBox: {
-    backgroundColor: '#ccc',
-    borderRadius: 10,
-    width: screenWidth - 40,
-    height: screenWidth - 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#eee',
-    backgroundColor: '#eee',
-    borderRadius: 8,
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 15,
-    marginBottom: 10,
-  },
-  input: { flex: 1, fontSize: 16 },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 12,
-    padding: 2,
-    zIndex: 1,
-  },
-  photoAddButton: {
-    marginBottom: 10,
-    backgroundColor: '#eee',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-    paddingVertical: 10,
-  },
-});

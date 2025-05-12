@@ -1,5 +1,8 @@
 import { StyleSheet, View, Pressable, Text, ViewStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { UseTheme } from '@/contexts/ThemeContext';
+import { getColors } from '@/theme/colors';
+
 
 type Props = {
   label: string;
@@ -14,6 +17,42 @@ type Props = {
 };
 
 export default function SettingsButtonGeneral({ label, iconName, style, labelStyle, onPress, iconColor = "black", isFirst = false, isLast = false, isGroup = false }: Props) {
+
+  const { isDarkMode } = UseTheme();
+  const colors = getColors(isDarkMode);
+  const { isAccessibilityMode } = UseTheme();
+
+  const styles = StyleSheet.create({
+    buttonContainer: {
+      width: '100%',
+      height: 40,
+      paddingHorizontal: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    button: {
+      borderRadius: 8,
+      paddingHorizontal: 15,
+      width: '100%',
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexDirection: 'row',
+      backgroundColor: colors.lightGrey,
+    },
+    divider: {
+      width: '95%', 
+      height: StyleSheet.hairlineWidth, 
+      backgroundColor: colors.textPrimary, 
+      opacity: 0.9
+    },
+    buttonLabel: {
+      color: colors.textPrimary,
+      fontSize: isAccessibilityMode ? 16 * 1.25 : 16,
+      opacity: 0.9,
+    },
+  });
+
   return (
     <View style={[styles.buttonContainer, style]}>
       <Pressable 
@@ -32,40 +71,10 @@ export default function SettingsButtonGeneral({ label, iconName, style, labelSty
         <Ionicons name={`${iconName}-outline` as keyof typeof Ionicons.glyphMap} size={22} color={iconColor} style={{opacity: 0.7}} />
       </Pressable>
       {(isGroup && !isLast) && 
-        <View style={{backgroundColor: '#F1F1F1', width: '100%', alignItems: 'center'}}>
+        <View style={{backgroundColor: colors.lightGrey, width: '100%', alignItems: 'center'}}>
           <View style={styles.divider}/>
         </View>}
     </View>
   );
 }
 // {isGroup && <View style={{ width: '95%', height: 1, backgroundColor: '#000000', opacity: 0.9}} />}
-const styles = StyleSheet.create({
-  buttonContainer: {
-    width: '100%',
-    height: 40,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  button: {
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    width: '100%',
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    backgroundColor: "#F1F1F1",
-  },
-  divider: {
-    width: '95%', 
-    height: StyleSheet.hairlineWidth, 
-    backgroundColor: '#000000', 
-    opacity: 0.9
-  },
-  buttonLabel: {
-    color: '#000000',
-    fontSize: 16,
-    opacity: 0.9,
-  },
-});
