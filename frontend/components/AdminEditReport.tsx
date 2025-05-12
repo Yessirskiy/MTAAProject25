@@ -137,9 +137,11 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                 votes_neg: report.votes_neg,
             };
 
-            if (reportStatusValue === 'resolved') {
+            if (reportStatusValue === 'resolved' || reportStatusValue === 'cancelled') {
+                const title = reportStatusValue === 'cancelled' ? 'Hlásenie vymazané' : 'Zariadenie opravené';
+                const note = reportStatusValue === 'cancelled' ? `Vaše hlásenie č. ${report.id} bolo vymazané` : `Vaše hlásenie č. ${report.id} bolo vyriešené`;
                 try {
-                    const result = await postNotification(report.user.id, report.id, `Zariadenie opravené`, `Vaše hlásenie č. ${report.id} bolo vyriešené`);
+                    const result = await postNotification(report.user.id, report.id, title, note);
                 } catch (error: any) {
                     if (error.response) {
                         console.error('HTTP Error:', error.response.status);
@@ -319,7 +321,6 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     });
 
     if (activeView === 'main') {
-
         return (
             <ScrollView contentContainerStyle={styles.container} style={{ flex: 1, backgroundColor: colors.background }} nestedScrollEnabled={true}>
                 <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
@@ -336,6 +337,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     style={{ marginBottom: 10, paddingHorizontal: 0 }}
                 />
                 <InfoField name='Poznámka' value={report.note} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
+                <InfoField name='Vytvorené používateľom' value={report.user.email} style={{  marginBottom: 10, paddingHorizontal: 0 }} />
                 <FlatList
                     data={report.photos}
                     keyExtractor={(item) => item.id.toString()}
