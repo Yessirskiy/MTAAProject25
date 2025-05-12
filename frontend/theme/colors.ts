@@ -17,6 +17,8 @@ type ColorPalette = {
     darkGrey: string;
     lightGrey: string;
     bar: string;
+    reactButtonOn: string;
+    reactButtonOff: string;
 }
 
 export const getColors = (isDarkMode: boolean): ColorPalette => {
@@ -40,6 +42,8 @@ export const getColors = (isDarkMode: boolean): ColorPalette => {
         darkGrey: '#ddd',
         lightGrey: '#1c1c1c',
         bar: '#1F1F1F',
+        reactButtonOn: '#3A3A3A',
+        reactButtonOff: '#2A2A2A',
       }
     : {
         background: '#fff',           // Light background
@@ -60,5 +64,7 @@ export const getColors = (isDarkMode: boolean): ColorPalette => {
         darkGrey: '#333',
         lightGrey: '#F1F1F1',
         bar: '#D9D9D9',
+        reactButtonOn: '#C4C4C4',
+        reactButtonOff: '#D9D9D9',
       };
 };

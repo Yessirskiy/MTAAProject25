@@ -44,7 +44,7 @@ export default function ReactionButton({label, style, iconName, pressed, onPress
 
   return (
     <View style={[styles.container, style]}>
-        <Pressable style={[styles.button, {backgroundColor: pressed ? "#C4C4C4" : "#D9D9D9"}]} onPress={onPress}>
+        <Pressable style={[styles.button, {backgroundColor: pressed ? colors.reactButtonOn : colors.surface}]} onPress={onPress}>
             <Text style={[styles.buttonLabel]}>{label}</Text>
             <Ionicons name={`${iconName}-outline` as keyof typeof Ionicons.glyphMap} size={22} style={styles.buttonIcon} />
         </Pressable>
