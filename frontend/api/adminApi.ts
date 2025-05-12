@@ -15,6 +15,7 @@ type ReportUpdate = {
     status: string;
     report_datetime: string;
     published_datetime: string;
+    admin_note: string;
     votes_pos: number;
     votes_neg: number;
 };

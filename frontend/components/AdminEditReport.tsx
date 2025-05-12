@@ -29,6 +29,7 @@ import {Report} from '@/types/report';
 import { adminUpdateReport } from '@/api/adminApi';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { postNotification } from '@/api/notificationsApi';
+import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 
 
 type EditReportProps = {
@@ -38,6 +39,7 @@ type EditReportProps = {
 };
 
 export default function EditReport({ report, onGoBack, accessToken }: EditReportProps) {
+    const user = useProtectedRoute();
     const [activeView, setActiveView] = useState<'main' | 'edit' | 'map'>('main');
     const [addressText, setAddressText] = useState('');
     const [address, setAddress] = useState<{
@@ -57,7 +59,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     });
     const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>({latitude: parseFloat(report.address.latitude), longitude: parseFloat(report.address.longitude)});
     const [note, setNote] = useState(report.note);
-
+    const [adminNote, setAdminNote] = useState('');
     const [open, setOpen] = useState(false);
     const [reportStatusValue, setReportStatusValue] = useState(report.status);
     const [reportStatus, setReportStatus] = useState([
@@ -115,7 +117,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
         }
 
     const handleSave = async () => {
-        console.log('Saving:', address, note, coords);
+        console.log('Saving:', address, note, coords, adminNote);
 
         try {
             const reportData = {
@@ -133,6 +135,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                 status: reportStatusValue,
                 report_datetime: report.report_datetime,
                 published_datetime: reportStatusValue === 'published' ? getCurrentTimestamp() : report.published_datetime,
+                admin_note: adminNote,
                 votes_pos: report.votes_pos,
                 votes_neg: report.votes_neg,
             };
@@ -361,9 +364,12 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     </View>
                     )}
                 />
+                {user?.is_admin ? (
                 <TouchableOpacity onPress={() => setActiveView('edit')} style={styles.editButton}>
                     <Text style={{ color: colors.textPrimary, marginVertical: 8, fontSize: isAccessibilityMode ? 18 * 1.25 : 18 }}>Upraviť hlásenie</Text>
                 </TouchableOpacity>
+                ) : <Text></Text>
+                }
             </ScrollView>
         )
     }
@@ -398,7 +404,17 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                         multiline
                     />
                 </View>
-
+                <View style={styles.inputContainer}>
+                    <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: colors.textSecondary }}>Poznámka administrátora</Text>
+                    <TextInput
+                        style={[styles.input, { height: 40, paddingTop: 15 }]}
+                        placeholder="Pridať poznámku"
+                        placeholderTextColor="#999"
+                        value={adminNote}
+                        onChangeText={setAdminNote}
+                        multiline
+                    />
+                </View>
                 <View style={styles.dropdownContainer}>
                 <DropDownPicker
                     open={open}

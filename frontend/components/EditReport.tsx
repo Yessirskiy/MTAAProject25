@@ -33,6 +33,7 @@ type Report = {
   report_datetime: string;
   published_datetime: string | null;
   note: string;
+  admin_note: string | null;
   votes_pos: number;
   votes_neg: number;
   user: {
@@ -91,7 +92,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     });
     const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>({latitude: parseFloat(report.address.latitude), longitude: parseFloat(report.address.longitude)});
     const [note, setNote] = useState(report.note);
-
+    const adminNote = report.admin_note;
     const { isDarkMode } = UseTheme();
     const colors = getColors(isDarkMode);
     const { isAccessibilityMode } = UseTheme();
@@ -294,6 +295,10 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     style={{ marginBottom: 10, paddingHorizontal: 0 }}
                 />
                 <InfoField name='Poznámka' value={report.note} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
+                {adminNote !== null && adminNote !== '' ? (
+                    <InfoField name='Poznámka administrátora' value={report.admin_note ? report.admin_note : ''} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
+                ) : <Text></Text>
+                }
                 <FlatList
                     data={report.photos}
                     keyExtractor={(item) => item.id.toString()}
@@ -317,9 +322,12 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     </View>
                     )}
                 />
+                {report.status !== 'resolved' && report.status !== 'cancelled' ? (
                 <TouchableOpacity onPress={() => setActiveView('edit')} style={styles.editButton}>
                     <Text style={{ color: colors.textPrimary, marginVertical: 8, fontSize: isAccessibilityMode ? 18 * 1.25 : 18 }}>Upraviť hlásenie</Text>
                 </TouchableOpacity>
+                ) : <Text></Text>
+                }
             </ScrollView>
         )
     }

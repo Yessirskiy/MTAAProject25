@@ -21,6 +21,7 @@ type Report = {
   report_datetime: string;
   published_datetime: string | null;
   note: string;
+  admin_note: string | null;
   votes_pos: number;
   votes_neg: number;
   user: {
@@ -110,6 +111,7 @@ export default function MyReportsScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchReports();
+      console.log(reports);
     }, [])
   );
 
@@ -252,12 +254,9 @@ export default function MyReportsScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
-            activeOpacity={item.status === 'resolved' || item.status === 'cancelled' ? 1 : 0.2}
             onPress={() => {
-              if (item.status !== 'resolved') {
                 setSelectedReport(item);
                 setActiveView('edit');
-              }
             }}
           >
             <Image

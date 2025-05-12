@@ -69,6 +69,7 @@ export default function AddReportScreen() {
       const reportData = {
         user_id: userId,
         note: note,
+        admin_note: null,
         address: {
           building: address.building || '',
           street: address.street || '',
