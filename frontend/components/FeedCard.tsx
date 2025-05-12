@@ -207,7 +207,7 @@ export default function FeedCard({imgSource, report, imgStyle, containerStyle} :
       color: colors.textPrimary,
     },
     reactionsContainer: {
-      backgroundColor: colors.buttonBackground,
+      backgroundColor: isDarkMode ? "#2F2F2F" : "#E9E9E9", 
       borderRadius: 5,
       paddingHorizontal: 10,
       paddingTop: 7,

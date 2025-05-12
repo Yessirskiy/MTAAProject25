@@ -23,12 +23,12 @@ export default function ReactionButton({label, style, iconName, pressed, onPress
       flex: 1,
     },
     button: {
-      backgroundColor: colors.border,
       paddingVertical: isAccessibilityMode ? 12 * 1.25 : 12,
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      borderRadius: 8
+      borderRadius: 8,
+      backgroundColor: isDarkMode ? (pressed ? "#404040" : "#626262") : (pressed ? "#C4C4C4" : "#D9D9D9"),
     },
     buttonLabel: {
       fontSize: isAccessibilityMode ? 13 * 1.25 : 13,
@@ -44,7 +44,7 @@ export default function ReactionButton({label, style, iconName, pressed, onPress
 
   return (
     <View style={[styles.container, style]}>
-        <Pressable style={[styles.button, {backgroundColor: pressed ? "#C4C4C4" : "#D9D9D9"}]} onPress={onPress}>
+        <Pressable style={[styles.button]} onPress={onPress}>
             <Text style={[styles.buttonLabel]}>{label}</Text>
             <Ionicons name={`${iconName}-outline` as keyof typeof Ionicons.glyphMap} size={22} style={styles.buttonIcon} />
         </Pressable>
