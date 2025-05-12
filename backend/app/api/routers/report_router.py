@@ -27,6 +27,8 @@ from app.db.crud.report_crud import (
 from app.dependencies.auth import getUser
 from app.dependencies.common import getSettings
 
+from app.websockets.new_report import manager as newReportManager
+
 import os
 import json
 import uuid
@@ -81,7 +83,14 @@ async def createReportRoute(
             )
         await db.commit()  # Commit only after all the operations completed
         # to obtain full info, we have to make one more request to DB
-        return await getReportByID(db, created_report.id, full=True)
+        report = await getReportByID(db, created_report.id, full=True)
+        try:
+            await newReportManager.broadcastNewReport(
+                ReportReadFull(report).model_dump_json(exclude_none=True)
+            )
+        except Exception as e:
+            print("Error while broadcasting report to WS: ", e)
+        return report
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid ReportCreate Form")
     except AssertionError:
