@@ -63,6 +63,11 @@ export const getReportPhoto = async (photoId: number) => {
     return res;
 }
 
+export const getReportPhotoBlob = async (photoId: number) => {
+    const res = API.get(`/report/photo/${photoId}`, {responseType: 'blob'});
+    return res;
+}
+
 export const updateReport = async (reportId: number, data: ReportUpdate) => {
     const res = API.put(`report/${reportId}`, data);
     return res;

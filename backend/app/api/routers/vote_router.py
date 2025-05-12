@@ -32,7 +32,7 @@ async def createVoteRoute(
             raise HTTPException(status_code=500)
 
 
-@router.get("/", response_model=VoteRead, summary="Retrieve Vote")
+@router.get("", response_model=VoteRead, summary="Retrieve Vote")
 async def getVoteRoute(
     user_id: int,
     report_id: int,
@@ -55,7 +55,7 @@ async def getVoteRoute(
             raise HTTPException(status_code=500)
 
 
-@router.patch("/", response_model=VoteRead, summary="Patch Vote")
+@router.patch("", response_model=VoteRead, summary="Patch Vote")
 async def patchVoteRoute(
     vote_update: VoteUpdate,
     db: AsyncSession = Depends(getSession),
@@ -76,7 +76,7 @@ async def patchVoteRoute(
             raise HTTPException(status_code=500)
 
 
-@router.delete(f"/", summary="Delete Vote")
+@router.delete(f"", summary="Delete Vote")
 async def deleteVoteRoute(
     user_id: int,
     report_id: int,

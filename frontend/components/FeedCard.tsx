@@ -1,9 +1,16 @@
 import { StyleSheet, View, Text, TextInput, ViewStyle, TextStyle, ImageStyle, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
+import { Image as ExpoImage } from 'expo-image';
+import { Image } from 'react-native';
 import type { Report, ReportUser, ReportAddress } from '@/types/report';
 import ReactionButton from './ReactionButton';
+import { useEffect, useState } from 'react';
+import { createVote, deleteVote, getVote, updateVote } from '@/api/voteApi';
+import { useProtectedRoute } from '@/hooks/useProtectedRoute';
+import Toast from 'react-native-toast-message';
+import { getReportPhoto, getReportPhotoBlob } from '@/api/reportApi';
 
+const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
 
 type Props = {
     imgSource: string,
@@ -13,9 +20,153 @@ type Props = {
 }
 
 export default function FeedCard({imgSource, report, imgStyle, containerStyle} : Props) {
+  const user = useProtectedRoute();
+  const [vote, setVote] = useState<boolean | null>(null);
+  const [imageUri, setImageUri] = useState(PlaceholderImage);
+  
+  const onReactionPress = async (value: boolean) => {
+    try {
+      if (vote == null) {
+        const res = await createVote(Number(user != null ? user.id : 0), report.id, value);
+        if (res.data) {
+          setVote(res.data.is_positive);
+        }
+      } else {
+        if (vote === value) {
+          const res = await deleteVote(Number(user != null ? user.id : 0), report.id);
+          if (res.status === 200){
+            setVote(null);
+          }
+        } else {
+          const res = await updateVote(Number(user != null ? user.id : 0), report.id, value);
+          if (res.data){
+            setVote(res.data.is_positive);
+          }
+        }
+      }
+    } catch (error: any) {
+      const detail = error.response?.data?.detail;
+      const isStringDetail = typeof detail === 'string';
+      if (error.response) {
+        if (error.response.status === 404){
+          console.log("No vote for the feed & user")
+          setVote(null);
+        }
+        console.error('HTTP Error:', error.response.status);
+        console.error('Error details:', error.response.data);
+        Toast.show({
+          type: 'error',
+          text1:  isStringDetail ? detail : 'An error occurred',
+          text2: `Return code: ${error.response.status}`
+        });
+      } else if (error.request) {
+        Toast.show({
+          type: 'error',
+          text1: 'Network error.',
+          text2: `Please, check connection.`
+        });
+      } else {
+        console.log(error);
+        Toast.show({
+          type: 'error',
+          text1: 'Unknown error.'
+        });
+      }
+    }
+  };
+
+  const fetchVote = async () => {
+    try {
+      const res = await getVote(Number(user ? user.id : 0), report.id);
+      if (res.data) {
+        setVote(res.data.is_positive);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        if (error.response.status === 404){
+          console.log("No vote for the feed & user")
+          setVote(null);
+        } else {
+          console.error('HTTP Error:', error.response.status);
+          console.error('Error details:', error.response.data);
+          Toast.show({
+            type: 'error',
+            text1:  error.response.data.detail,
+            text2: `Return code: ${error.response.status}`
+          });
+        }
+        
+      } else if (error.request) {
+        Toast.show({
+          type: 'error',
+          text1: 'Network error.',
+          text2: `Please, check connection.`
+        });
+      } else {
+        console.log(error);
+        Toast.show({
+          type: 'error',
+          text1: 'Unknown error.'
+        });
+      }
+    }
+  };
+
+  const fetchImage = async () => {
+    try {
+      const res = await getReportPhotoBlob(report.photos[0].id);
+      console.log(res.status);
+      if (res.status == 204){
+        setImageUri(PlaceholderImage);
+      } else {
+        const blob = await res.data;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImageUri(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      }
+      
+    } catch (error: any) {
+      console.log("HERE");
+      if (error.response) {
+        if (error.response.status === 404){
+          console.log("No vote for the feed & user")
+          setVote(null);
+        } else {
+          console.error('HTTP Error:', error.response.status);
+          console.error('Error details:', error.response.data);
+          Toast.show({
+            type: 'error',
+            text1:  error.response.data.detail,
+            text2: `Return code: ${error.response.status}`
+          });
+        }
+        
+      } else if (error.request) {
+        Toast.show({
+          type: 'error',
+          text1: 'Network error.',
+          text2: `Please, check connection.`
+        });
+      } else {
+        console.log(error);
+        Toast.show({
+          type: 'error',
+          text1: 'Unknown error.'
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchVote();
+    fetchImage();
+  }, []);
+
   return (
     <View style={[styles.container, containerStyle]}>
-        <Image source={{uri: imgSource}} style={[styles.image, imgStyle]} />
+        <ExpoImage source={{uri: imageUri}} style={[styles.image, imgStyle]} />
         <Text style={styles.noteText}>{report.note}</Text>
         <Text style={styles.addressText}>
           {report.address.street + " " + report.address?.building + ", " + report.address?.postal_code}
@@ -26,8 +177,20 @@ export default function FeedCard({imgSource, report, imgStyle, containerStyle} :
         <View style={styles.reactionsContainer}>
           <Text style={styles.reactionsLabel}>Videli ste to?</Text>
           <View style={styles.reactionsSubcontainer}>
-            <ReactionButton label="Áno, je to tak" iconName='arrow-up' style={{alignSelf: "stretch"}}/>
-            <ReactionButton label="Nie, to tak nie je" iconName='arrow-down' style={{alignSelf: "stretch"}}/>
+            <ReactionButton 
+              label="Áno, je to tak" 
+              pressed={vote != null ? vote : false} 
+              iconName='arrow-up' 
+              style={{alignSelf: "stretch"}}
+              onPress={() => onReactionPress(true)}
+            />
+            <ReactionButton 
+              label="Nie, to tak nie je" 
+              pressed={vote != null ? !vote : false} 
+              iconName='arrow-down' 
+              style={{alignSelf: "stretch"}}
+              onPress={() => onReactionPress(false)}
+            />
           </View>
         </View>
     </View>
