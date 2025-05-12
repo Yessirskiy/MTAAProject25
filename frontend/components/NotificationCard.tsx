@@ -46,15 +46,18 @@ export default function ButtonField({notification, onPress, containerStyle, titl
     titleStyle: {
       fontSize: isAccessibilityMode ? 15 * 1.25: 15,
       marginBottom: 7,
+      color: colors.textPrimary,
     },
     noteStyle: {
       fontSize: isAccessibilityMode ? 14 * 1.25 : 14,
       opacity: 0.8,
-      marginBottom: 'auto'
+      marginBottom: 'auto',
+      color: colors.textPrimary,
     },
     receivedStyle: {
       fontSize: isAccessibilityMode ? 10 * 1.25 : 10,
-      opacity: 0.5
+      opacity: 0.5,
+      color: colors.textPrimary,
     },
     unreadDot: {
       position: 'absolute',
