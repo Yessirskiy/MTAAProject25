@@ -84,6 +84,7 @@ class ReportReadFull(BaseModel):
     published_datetime: Optional[datetime.datetime] = None
 
     note: str
+    admin_note: Optional[str] = None
 
     votes_pos: int
     votes_neg: int
@@ -115,7 +116,7 @@ class ReportUpdateAdmin(ReportUpdate):
     published_datetime: Optional[datetime.datetime] = None
 
     # note: Optional[str] = None
-
+    admin_note: Optional[str] = None
     votes_pos: Optional[int] = None
     votes_neg: Optional[int] = None
 

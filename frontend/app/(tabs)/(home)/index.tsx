@@ -15,6 +15,7 @@ import MapPicker from '@/components/MapPicker';
 import InfoField from '@/components/InfoField';
 import { adminUpdateReport } from "@/api/adminApi";
 import AdminEditReport from "@/components/AdminEditReport";
+import Toast from 'react-native-toast-message';
 
 
 const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
@@ -49,7 +50,13 @@ export default function Index() {
         setFeedReports(res.data.data);
       }
     } catch (error: any){
-
+      if (error.request) {
+        Toast.show({
+          type: 'error',
+          text1: 'Network error.',
+          text2: `Please, check connection.`
+        });
+      }
     }
   };
 
