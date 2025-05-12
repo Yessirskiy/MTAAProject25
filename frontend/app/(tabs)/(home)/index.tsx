@@ -100,7 +100,16 @@ export default function Index() {
             bottomText="hlásení"
             containerStyle={{flexShrink: 1}}
           />
-@@ -92,33 +67,32 @@
+          <HomeStatisticsBox 
+            upperText="V tomto roku sme opravili" 
+            statisticText="17" 
+            bottomText="zariadení"
+            containerStyle={{flexShrink: 1}}
+          />
+        </View>
+        <View style={styles.sectionHeader}>
+          <View style={styles.line} />
+          <Text style={styles.sectionText}>Hlásenia vo vašom okolí</Text>
           <View style={styles.line} />
         </View>
         <View style={styles.feedContainer}>
