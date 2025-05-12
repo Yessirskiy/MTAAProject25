@@ -249,7 +249,7 @@ export default function FeedCard({imgSource, report, imgStyle, containerStyle} :
             onPress={() => onReactionPress(true)}
           />
           <ReactionButton 
-            label="Nie, to tak nie je" 
+            label="Nie, nie je to tak" 
             pressed={vote != null ? !vote : false} 
             iconName='arrow-down' 
             style={{alignSelf: "stretch"}}
