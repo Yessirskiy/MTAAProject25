@@ -38,6 +38,7 @@ export default function ReactionButton({label, style, iconName} : Props) {
     },
     buttonIcon: {
       opacity: 0.7,
+      color: colors.textPrimary,
     }
   });
 
