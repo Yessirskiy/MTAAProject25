@@ -125,7 +125,7 @@ async def getReportPhoto(db: AsyncSession, photo_id: int):
     return await db.get(ReportPhoto, photo_id)
 
 
-async def getFeedReports(db: AsyncSession) -> list[Report]:
+async def getFeedReports(db: AsyncSession, admin_view: bool = False) -> list[Report]:
     stmt = (
         select(Report)
         .options(
@@ -133,7 +133,10 @@ async def getFeedReports(db: AsyncSession) -> list[Report]:
             joinedload(Report.user),
             joinedload(Report.photos),
         )
-        .where(Report.status.in_([ReportStatus.published, ReportStatus.in_progress]))
-        .order_by(Report.published_datetime.desc())
     )
+    if not admin_view:
+        stmt = stmt.where(Report.status.in_([ReportStatus.published, ReportStatus.in_progress]))
+    
+    stmt = stmt.order_by(Report.published_datetime.desc())
+    
     return (await db.execute(stmt)).scalars().unique().all()

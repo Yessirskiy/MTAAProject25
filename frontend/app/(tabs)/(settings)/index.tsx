@@ -21,9 +21,6 @@ export default function SettingsScreen() {
   const auth = useContext(AuthContext);
   const { logout } = auth;
 
-  const user = useProtectedRoute();
-  if (!user) return null;
-
   const handleLogoutPress = async () => {
     await logout();
     router1.replace("/signin");

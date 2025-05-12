@@ -25,48 +25,14 @@ import { parse } from '@babel/core';
 import { updateReport } from '@/api/reportApi';
 import { UseTheme } from '@/contexts/ThemeContext';
 import { getColors } from '@/theme/colors';
+import {Report} from '@/types/report';
+import { adminUpdateReport } from '@/api/adminApi';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { postNotification } from '@/api/notificationsApi';
 
-
-type Report = {
-  id: number;
-  status: string;
-  report_datetime: string;
-  published_datetime: string | null;
-  note: string;
-  votes_pos: number;
-  votes_neg: number;
-  user: {
-    id: number;
-    first_name: string;
-    last_name: string | null;
-    email: string;
-    phone_number: string | null;
-    created_datetime: string;
-  };
-  address: {
-    id: number;
-    report_id: number;
-    building: string;
-    street: string;
-    city: string;
-    state: string;
-    postal_code: string;
-    country: string;
-    latitude: string;
-    longitude: string;
-  };
-  photos: {
-    id: number;
-    report_id: number;
-  }[];
-};
-
-type ReportWithPhoto = Report & {
-  photoUri: string | null;
-};
 
 type EditReportProps = {
-    report: ReportWithPhoto;
+    report: Report;
     onGoBack: () => void;
     accessToken: string | null;
 };
@@ -91,6 +57,16 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     });
     const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>({latitude: parseFloat(report.address.latitude), longitude: parseFloat(report.address.longitude)});
     const [note, setNote] = useState(report.note);
+
+    const [open, setOpen] = useState(false);
+    const [reportStatusValue, setReportStatusValue] = useState(report.status);
+    const [reportStatus, setReportStatus] = useState([
+        { label: 'Nahlásené', value: 'reported' },
+        { label: 'Zamietnuté', value: 'cancelled' },
+        { label: 'Opravené', value: 'resolved' },
+        { label: 'Spracováva sa', value: 'in_progress' },
+        { label: 'Zverejnené', value: 'published' },
+    ]);
 
     const { isDarkMode } = UseTheme();
     const colors = getColors(isDarkMode);
@@ -117,7 +93,26 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
         .join(', ');
 
         setAddressText(fullAddress);
-    }, []);
+        }, []);
+
+        function getCurrentTimestamp(): string {
+            const now = new Date();
+
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+            const timezoneOffset = -now.getTimezoneOffset();
+            const timezoneHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0');
+            const timezoneMinutes = String(Math.abs(timezoneOffset) % 60).padStart(2, '0');
+            const timezoneSign = timezoneOffset >= 0 ? '+' : '-';
+
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}${timezoneSign}${timezoneHours}:${timezoneMinutes}`;
+        }
 
     const handleSave = async () => {
         console.log('Saving:', address, note, coords);
@@ -135,9 +130,33 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     latitude: coords?.latitude || 0,
                     longitude: coords?.longitude || 0,
                 },
+                status: reportStatusValue,
+                report_datetime: report.report_datetime,
+                published_datetime: reportStatusValue === 'published' ? getCurrentTimestamp() : report.published_datetime,
+                votes_pos: report.votes_pos,
+                votes_neg: report.votes_neg,
             };
 
-            const result = await updateReport(report.id, reportData);
+            if (reportStatusValue === 'resolved') {
+                try {
+                    const result = await postNotification(report.user.id, report.id, `Zariadenie opravené`, `Vaše hlásenie č. ${report.id} bolo vyriešené`);
+                } catch (error: any) {
+                    if (error.response) {
+                        console.error('HTTP Error:', error.response.status);
+                        console.error('Error details:', error.response.data);
+                
+                        Alert.alert('Error', error.response.data.detail);
+                    } else if (error.request) {
+                        console.error('Request Error:', error.request);
+                        Alert.alert('Chyba siete', 'Prosím skontrolujte vaše pripojenie');
+                    } else {
+                        console.error('Unknown error', error);
+                        Alert.alert('Chyba', 'Nastala chyba');
+                    }
+                }
+            }
+
+            const result = await adminUpdateReport(report.user.id, report.id, reportData);
             Alert.alert('Úspech', 'Hlásenie bolo úspešne upravené');
             onGoBack();
         } catch (error: any) {
@@ -147,6 +166,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
         
                 Alert.alert('Error', error.response.data.detail);
             } else if (error.request) {
+                console.error('Request Error:', error.request);
                 Alert.alert('Chyba siete', 'Prosím skontrolujte vaše pripojenie');
             } else {
                 console.error('Unknown error', error);
@@ -273,6 +293,28 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
             paddingVertical: 15,
             marginBottom: 10,
         },
+        dropdown: {
+            borderWidth: 1,
+            borderColor: colors.darkGrey,
+            borderRadius: 8,
+            padding: 10,
+            backgroundColor: colors.lightGrey,
+        },
+        dropdownContainer: {
+            backgroundColor: colors.lightGrey,
+            borderColor: colors.darkGrey,
+        },
+        dropdownText: {
+            fontSize: 16,
+            backgroundColor: colors.lightGrey,
+            color: colors.textPrimary,
+            borderColor: colors.darkGrey,
+        },
+        dropdownLabel: {
+            fontSize: 16,
+            color: colors.textPrimary,
+            borderColor: colors.darkGrey,
+        },
         input: { flex: 1, color: colors.textPrimary, fontSize: isAccessibilityMode ? 16 * 1.25 : 16 },
     });
 
@@ -355,11 +397,35 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     />
                 </View>
 
+                <View style={styles.dropdownContainer}>
+                <DropDownPicker
+                    open={open}
+                    value={reportStatusValue}
+                    items={reportStatus}
+                    setOpen={setOpen}
+                    setValue={setReportStatusValue}
+                    setItems={setReportStatus}
+                    style={styles.dropdown}
+                    flatListProps={{
+                        scrollEnabled: false,
+                    }}
+                    textStyle={styles.dropdownText}
+                    labelStyle={styles.dropdownLabel}
+                    dropDownContainerStyle={styles.dropdownContainer}
+                    ArrowUpIconComponent={({ style }) => (
+                        <Ionicons name="chevron-up" size={20} color={colors.textPrimary} />
+                    )}
+                    ArrowDownIconComponent={({ style }) => (
+                        <Ionicons name="chevron-down" size={20} color={colors.textPrimary} />
+                    )}
+                />
+                </View>
+
                 <View style={styles.buttonRow}>
                     <TouchableOpacity style={styles.cancelButton} onPress={() => setActiveView('main')}>
                         <Text style={styles.buttonText}>Zrušiť</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                    <TouchableOpacity style={styles.saveButton} onPress={(handleSave)}>
                         <Text style={styles.buttonText}>Uložiť</Text>
                     </TouchableOpacity>
                 </View>
