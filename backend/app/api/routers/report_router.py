@@ -105,7 +105,10 @@ async def createReportRoute(
 async def getReportsFeedRoute(
     db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
 ):
-    reports = await getFeedReports(db)
+    if user.is_admin:
+        reports = await getFeedReports(db, admin_view=True)
+    else:
+        reports = await getFeedReports(db, admin_view=False)
     return {"data": reports}
 
 

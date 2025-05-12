@@ -245,6 +245,7 @@ export default function MyReportsScreen() {
 
   return (
     <View style={styles.container}>
+      {reports.length > 0 ? (
       <FlatList
         data={reports}
         keyExtractor={(item) => item.id.toString()}
@@ -279,7 +280,9 @@ export default function MyReportsScreen() {
           </TouchableOpacity>
         )}
       />
+      ) : (
+        <Text style={{ textAlign: 'center', marginTop: 300, fontSize: isAccessibilityMode ? 16 * 1.25 : 16 }}>Zatiaľ ste nezverejnili žiadne hlásenia</Text>
+      )}
     </View>
   );
 }
-

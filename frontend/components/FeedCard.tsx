@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, ViewStyle, TextStyle, ImageStyle, Pressable } from 'react-native';
+import { StyleSheet, View, Text, TextInput, ViewStyle, TextStyle, ImageStyle, Pressable, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 import { Image } from 'react-native';
@@ -19,9 +19,10 @@ type Props = {
     report: Report,
     imgStyle?: ImageStyle, 
     containerStyle?: ViewStyle,
+    onHandlePress: () => void;
 }
 
-export default function FeedCard({imgSource, report, imgStyle, containerStyle} : Props) {
+export default function FeedCard({ imgSource, report, imgStyle, containerStyle, onHandlePress } : Props) {
   const user = useProtectedRoute();
   const [vote, setVote] = useState<boolean | null>(null);
   const [imageUri, setImageUri] = useState(PlaceholderImage);
@@ -230,6 +231,7 @@ export default function FeedCard({imgSource, report, imgStyle, containerStyle} :
 
   return (
     <View style={[styles.container, containerStyle]}>
+      <TouchableOpacity onPress={onHandlePress}>
       <ExpoImage source={{uri: imageUri}} style={[styles.image, imgStyle]} />
       <Text style={styles.noteText}>{report.note}</Text>
       <Text style={styles.addressText}>
@@ -257,6 +259,7 @@ export default function FeedCard({imgSource, report, imgStyle, containerStyle} :
           />
         </View>
       </View>
+      </TouchableOpacity>
     </View>
   );
 };

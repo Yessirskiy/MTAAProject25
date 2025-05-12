@@ -39,6 +39,7 @@ class UserRead(BaseModel):
     email: Optional[str] = None
     phone_number: Optional[str] = None
     created_datetime: datetime.datetime
+    is_admin: bool = False
 
 
 class UserReadFull(UserRead):
