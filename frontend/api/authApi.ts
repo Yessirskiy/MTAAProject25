@@ -10,8 +10,8 @@ interface LoginData {
 interface RegisterData {
   first_name: string;
   email: string;
-  password: string;
   password1: string;
+  password2: string;
 }
 
 export const login = async (data: LoginData) => {
@@ -37,7 +37,7 @@ export const login = async (data: LoginData) => {
 };
 
 export const register = async (data: RegisterData) => {
-  const res = await API.post('/user/register', data);
+  const res = await API.post('/user/signup', data);
   return res.data;
 };
 

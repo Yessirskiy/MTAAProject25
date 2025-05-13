@@ -77,16 +77,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await SecureStore.setItemAsync('accessToken', access_token);
     await SecureStore.setItemAsync('refreshToken', refresh_token);
     await SecureStore.setItemAsync('userData', JSON.stringify(user));
+    console.log(accessToken, refreshToken, user);
   };
 
   const logout = async () => {
-    setAccessToken(null);
-    setRefreshToken(null);
-    setUser(null);
 
     await SecureStore.deleteItemAsync('accessToken');
     await SecureStore.deleteItemAsync('refreshToken');
     await SecureStore.deleteItemAsync('userData');
+
+    setAccessToken(null);
+    setRefreshToken(null);
+    setUser(null);
+    console.log(user);
   };
 
   const refreshAccessToken = async () => {
