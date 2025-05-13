@@ -62,13 +62,37 @@ export default function Index() {
 
   useEffect(() => {
     fetchFeed();
+    const socket = new WebSocket("ws://192.168.2.7:8000/ws/new_report");
+
+    socket.onopen = () => {
+      console.log("WS connected");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Message:", data);
+      console.log("Message:", data.address);
+      setFeedReports((prevReports) => [data, ...prevReports]);
+    };
+
+    socket.onerror = (error) => {
+      console.log("WS error:", error);
+    };
+
+    socket.onclose = () => {
+      console.log("WS disconnected");
+    };
+
+    return () => {
+      socket.close();
+    };
   }, []);
 
   const onRefresh = useCallback(async () => {
-      setRefreshing(true);
-      fetchFeed();
-      setRefreshing(false);
-    }, []);
+    setRefreshing(true);
+    fetchFeed();
+    setRefreshing(false);
+  }, []);
 
   if (!user) return null;
 
@@ -239,25 +263,6 @@ export default function Index() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View style={styles.statsContainer}>
-          <HomeStatisticsBox 
-            upperText="V tomto roku ste zaslali" 
-            statisticText="06" 
-            bottomText="hlásení"
-            containerStyle={{flexShrink: 1}}
-          />
-          <HomeStatisticsBox 
-            upperText="V tomto roku sme opravili" 
-            statisticText="17" 
-            bottomText="zariadení"
-            containerStyle={{flexShrink: 1}}
-          />
-        </View>
-        <View style={styles.sectionHeader}>
-          <View style={styles.line} />
-          <Text style={styles.sectionText}>Hlásenia vo vašom okolí</Text>
-          <View style={styles.line} />
-        </View>
         <View style={styles.feedContainer}>
           {feedReports.map((item) => (
             <FeedCard key={item.id} report={item} onHandlePress={() => {setSelectedReport(item); setActiveView('inspect')}}/>

@@ -15,14 +15,13 @@ import { getReportPhoto, getReportPhotoBlob } from '@/api/reportApi';
 const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
 
 type Props = {
-    imgSource: string,
     report: Report,
     imgStyle?: ImageStyle, 
     containerStyle?: ViewStyle,
     onHandlePress: () => void;
 }
 
-export default function FeedCard({ imgSource, report, imgStyle, containerStyle, onHandlePress } : Props) {
+export default function FeedCard({ report, imgStyle, containerStyle, onHandlePress } : Props) {
   const user = useProtectedRoute();
   const [vote, setVote] = useState<boolean | null>(null);
   const [imageUri, setImageUri] = useState(PlaceholderImage);
@@ -98,7 +97,6 @@ export default function FeedCard({ imgSource, report, imgStyle, containerStyle, 
             text2: `Return code: ${error.response.status}`
           });
         }
-        
       } else if (error.request) {
         Toast.show({
           type: 'error',
