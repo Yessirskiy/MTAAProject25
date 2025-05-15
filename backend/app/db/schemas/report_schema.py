@@ -23,6 +23,9 @@ class ReportPhotoRead(BaseModel):
     report_id: int
     # filename is unneccessary
 
+    class Config:
+        from_attributes = True
+
 
 class ReportAddress(BaseModel):
     id: int
@@ -37,6 +40,9 @@ class ReportAddress(BaseModel):
 
     latitude: decimal.Decimal
     longitude: decimal.Decimal
+
+    class Config:
+        from_attributes = True
 
 
 class ReportAddressCreate(BaseModel):
@@ -92,6 +98,10 @@ class ReportReadFull(BaseModel):
     user: UserRead
     address: ReportAddressRead
     photos: list[ReportPhotoRead]
+
+    class Config:
+        from_attributes = True
+        use_enum_values = True
 
 
 class ReportCreate(BaseModel):

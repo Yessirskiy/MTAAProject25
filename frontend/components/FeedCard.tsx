@@ -15,13 +15,14 @@ import { getReportPhoto, getReportPhotoBlob } from '@/api/reportApi';
 const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
 
 type Props = {
-    report: Report,
-    imgStyle?: ImageStyle, 
-    containerStyle?: ViewStyle,
-    onHandlePress: () => void;
+  report: Report,
+  imgStyle?: ImageStyle, 
+  containerStyle?: ViewStyle,
+  onHandlePress: () => void;
+  reactions?: boolean
 }
 
-export default function FeedCard({ report, imgStyle, containerStyle, onHandlePress } : Props) {
+export default function FeedCard({ report, imgStyle, containerStyle, onHandlePress, reactions = true } : Props) {
   const user = useProtectedRoute();
   const [vote, setVote] = useState<boolean | null>(null);
   const [imageUri, setImageUri] = useState(PlaceholderImage);
@@ -238,7 +239,7 @@ export default function FeedCard({ report, imgStyle, containerStyle, onHandlePre
       <View>
         <Text style={styles.reporterText}>{report.user.first_name} {report.user.last_name}</Text>
       </View>
-      <View style={styles.reactionsContainer}>
+      {reactions && <View style={styles.reactionsContainer}>
         <Text style={styles.reactionsLabel}>Videli ste to?</Text>
         <View style={styles.reactionsSubcontainer}>
           <ReactionButton 
@@ -256,7 +257,7 @@ export default function FeedCard({ report, imgStyle, containerStyle, onHandlePre
             onPress={() => onReactionPress(false)}
           />
         </View>
-      </View>
+      </View>}
       </TouchableOpacity>
     </View>
   );

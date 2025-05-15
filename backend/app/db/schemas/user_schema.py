@@ -41,6 +41,9 @@ class UserRead(BaseModel):
     created_datetime: datetime.datetime
     is_admin: bool = False
 
+    class Config:
+        from_attributes = True
+
 
 class UserReadFull(UserRead):
     address: UserAddressRead

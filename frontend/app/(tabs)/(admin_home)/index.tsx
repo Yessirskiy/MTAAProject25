@@ -1,60 +1,50 @@
 import { Text, View, StyleSheet, Image, ScrollView, FlatList, RefreshControl, TouchableOpacity, Dimensions, KeyboardAvoidingView, Platform, TextInput, Alert } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import HomeStatisticsBox from "@/components/HomeStatisticsBox";
 import FeedCard from "@/components/FeedCard";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { getFeed } from "@/api/feedApi";
+import { useCallback, useEffect, useState } from "react";
+import { getAdminFeed } from "@/api/feedApi";
 import { UseTheme } from '@/contexts/ThemeContext';
 import { getColors } from '@/theme/colors';
-import type { Report as FeedCardReport, ReportUser, ReportAddress } from '@/types/report';
-import { AuthContext } from "@/contexts/AuthContext";
-import { Ionicons } from '@expo/vector-icons';
-import AddressInputField from '@/components/AddressInputField';
-import MapPicker from '@/components/MapPicker';
-import InfoField from '@/components/InfoField';
-import { adminUpdateReport } from "@/api/adminApi";
-import AdminEditReport from "@/components/AdminEditReport";
+import type { Report as FeedCardReport } from '@/types/report';
 import Toast from 'react-native-toast-message';
-
-
-const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
-
-const enum StatusEnum {
-  Reported = "reported",
-  Published = "published",
-  InProgress = "in_progress",
-  Resolved = "resolved",
-  Cancelled = "cancelled",
-}
 
 export default function Index() {
   const user = useProtectedRoute();
   const [feedReports, setFeedReports] = useState<FeedCardReport[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { accessToken } = useContext(AuthContext);
-
   const { isDarkMode } = UseTheme();
   const colors = getColors(isDarkMode);
   const { isAccessibilityMode } = UseTheme();
-  const [selectedReport, setSelectedReport] = useState<FeedCardReport | null>(null);
-
-  const [activeView, setActiveView] = useState<'main' | 'inspect'>('main');
 
   const fetchFeed = async () => {
     try {
-      const res = await getFeed();
+      const res = await getAdminFeed();
       if (res.data.data) {
         console.log(res.data.data);
         setFeedReports(res.data.data);
       }
     } catch (error: any){
-      if (error.request) {
+      if (error.response) {
+        console.error('[ADMIN] HTTP Error:', error.response.status);
+        console.error('[ADMIN] Error details:', error.response.data);
+        Toast.show({
+          type: 'error',
+          text1:  error.response.data.detail,
+          text2: `Return code: ${error.response.status}`
+        });
+      } else if (error.request) {
         Toast.show({
           type: 'error',
           text1: 'Network error.',
           text2: `Please, check connection.`
+        });
+      } else {
+        console.log("[ADMIN] ", error);
+        Toast.show({
+          type: 'error',
+          text1: 'Unknown error.'
         });
       }
     }
@@ -62,16 +52,15 @@ export default function Index() {
 
   useEffect(() => {
     fetchFeed();
-    const socket = new WebSocket("ws://192.168.2.7:8000/ws/new_report");
+    const socket = new WebSocket("ws://147.175.163.6:8000/ws/new_report");
 
     socket.onopen = () => {
       console.log("WS connected");
     };
 
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+      const data: FeedCardReport = JSON.parse(event.data);
       console.log("Message:", data);
-      console.log("Message:", data.address);
       setFeedReports((prevReports) => [data, ...prevReports]);
     };
 
@@ -237,23 +226,6 @@ export default function Index() {
   input: { flex: 1, color: colors.textPrimary, fontSize: isAccessibilityMode ? 16 * 1.25 : 16 },
   });
 
-  if (activeView === 'inspect') {
-
-    if (selectedReport) {
-
-      return (
-        <AdminEditReport
-          report={selectedReport}
-          onGoBack={() => {
-            setSelectedReport(null);
-            setActiveView('main');
-          }}
-          accessToken={accessToken}
-        />
-      )
-    }
-  }
-
   return (
     <View style={styles.container}>
       <ScrollView 
@@ -265,7 +237,7 @@ export default function Index() {
       >
         <View style={styles.feedContainer}>
           {feedReports.map((item) => (
-            <FeedCard key={item.id} report={item} onHandlePress={() => {setSelectedReport(item); setActiveView('inspect')}}/>
+            <FeedCard key={item.id} report={item} reactions={false} onHandlePress={() => router.push(`/(admin_home)/${item.id}`)}/>
           ))}
         </View>
       </ScrollView>

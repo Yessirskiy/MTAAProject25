@@ -86,7 +86,7 @@ async def createReportRoute(
         report = await getReportByID(db, created_report.id, full=True)
         try:
             await newReportManager.broadcastNewReport(
-                ReportReadFull(report).model_dump_json(exclude_none=True)
+                ReportReadFull.model_validate(report).model_dump_json()
             )
         except Exception as e:
             print("Error while broadcasting report to WS: ", e)
