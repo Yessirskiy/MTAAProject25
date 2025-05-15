@@ -11,6 +11,7 @@ from sqlalchemy import (
     DateTime,
     func,
     UniqueConstraint,
+    JSON
 )
 from sqlalchemy.orm import relationship
 import enum
@@ -79,5 +80,8 @@ class ReportPhoto(Base):
     id = Column(Integer, primary_key=True, index=True)
     report_id = Column(Integer, ForeignKey("reports.id", ondelete="CASCADE"))
     filename_path = Column(String, nullable=False)
+
+    ai_score = Column(Integer, nullable=True)
+    ai_labels = Column(JSON, nullable=True)
 
     report = relationship("Report", back_populates="photos")
