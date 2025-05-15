@@ -130,6 +130,7 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
   const fetchReport = async () => {
     try {
       console.log("[ADMIN]: Retrieving report...")
+      setReportPhotos([]);
       const res = await getReport(Number(id));
       if (res.data) {
         console.log(res.data);
@@ -224,8 +225,32 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
     }
   };
 
+  const setupWS = async () => {
+    const socket = new WebSocket("ws://192.168.2.7:8000/ws/update_report");
+    socket.onopen = () => {
+      console.log("[ADMIN-WS-ONOPEN]: WS connected");
+    };
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const rep_id = Number(data.report_id);
+      console.log("[ADMIN-WS-ONMESSAGE]: report_id from message: ", rep_id);
+      if (rep_id == report.id)
+        fetchReport();
+    };
+    socket.onerror = (error) => {
+      console.log("[ADMIN-WS-ONERROR]: ", error);
+    };
+    socket.onclose = () => {
+      console.log("[ADMIN-WS-ONCLOSE]: WS disconnected");
+    };
+    return () => {
+      socket.close();
+    };
+  }
+
   useEffect(() => {
     fetchReport();
+    setupWS();
   }, []);
 
   useEffect(() => {

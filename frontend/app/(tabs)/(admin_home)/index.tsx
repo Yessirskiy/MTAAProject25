@@ -52,29 +52,6 @@ export default function Index() {
 
   useEffect(() => {
     fetchFeed();
-    const socket = new WebSocket("ws://147.175.163.6:8000/ws/new_report");
-
-    socket.onopen = () => {
-      console.log("WS connected");
-    };
-
-    socket.onmessage = (event) => {
-      const data: FeedCardReport = JSON.parse(event.data);
-      console.log("Message:", data);
-      setFeedReports((prevReports) => [data, ...prevReports]);
-    };
-
-    socket.onerror = (error) => {
-      console.log("WS error:", error);
-    };
-
-    socket.onclose = () => {
-      console.log("WS disconnected");
-    };
-
-    return () => {
-      socket.close();
-    };
   }, []);
 
   const onRefresh = useCallback(async () => {

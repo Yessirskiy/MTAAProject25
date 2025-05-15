@@ -28,7 +28,7 @@ from app.dependencies.auth import getUser
 from app.dependencies.common import getSettings
 
 from app.utils.vision import get_photo_label_and_score
-from app.websockets.new_report import manager as newReportManager
+from app.websockets.update_report import manager as updateReportManager
 
 import os
 import json
@@ -62,7 +62,7 @@ async def createReportRoute(
         )
         settings = getSettings()
         inappropriate_found = False
-        
+
         for photo in photos:
             file_extension = Path(photo.filename).suffix
             # TODO: CHECK THE EXTENSIONS (PHOTOS ONLY)
@@ -77,39 +77,43 @@ async def createReportRoute(
 
             with (settings.REPORT_PHOTOS / file_path).open("wb") as f:
                 f.write(await photo.read())
-                
-            labels, score, is_inappropriate = await get_photo_label_and_score(str(settings.REPORT_PHOTOS / file_path))
-            print(f"Labels: {labels}\nScore: {score}\nIs inappropriate: {is_inappropriate}")
-            
+
+            labels, score, is_inappropriate = await get_photo_label_and_score(
+                str(settings.REPORT_PHOTOS / file_path)
+            )
+            print(
+                f"Labels: {labels}\nScore: {score}\nIs inappropriate: {is_inappropriate}"
+            )
+
             if is_inappropriate:
                 inappropriate_found = True
-            
+
             await createReportPhoto(
                 db,
                 ReportPhotoCreate(
                     report_id=created_report.id,
                     filename_path=str(file_path),
                     ai_score=score,
-                    ai_labels=labels
+                    ai_labels=labels,
                 ),
                 nocommit=True,
             )
-            
-        #If any photo was inappropriate, update the report status and admin note
+
+        # If any photo was inappropriate, update the report status and admin note
         if inappropriate_found:
             created_report.status = ReportStatus.cancelled
             created_report.admin_note = "Jeden z vložených obrázkov bol automaticky ohodnotený ako nevhodný. Čaká sa na kontrolu správcom."
             await db.flush()
-            
+
         await db.commit()  # Commit only after all the operations completed
         # to obtain full info, we have to make one more request to DB
         report = await getReportByID(db, created_report.id, full=True)
-        try:
-            await newReportManager.broadcastNewReport(
-                ReportReadFull.model_validate(report).model_dump_json()
-            )
-        except Exception as e:
-            print("Error while broadcasting report to WS: ", e)
+        # try:
+        #     await newReportManager.broadcastNewReport(
+        #         ReportReadFull.model_validate(report).model_dump_json()
+        #     )
+        # except Exception as e:
+        #     print("Error while broadcasting report to WS: ", e)
         return report
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid ReportCreate Form")
@@ -153,6 +157,10 @@ async def updateReportRoute(
 ):
     try:
         report = await updateReport(db, report_id, report_update, user.id)
+        try:
+            await updateReportManager.broadcastUpdateReport({"report_id": report_id})
+        except Exception as e:
+            print("Error while broadcasting report to WS: ", e)
         return report
     except AssertionError as e:
         if "Report not found" in e.args:

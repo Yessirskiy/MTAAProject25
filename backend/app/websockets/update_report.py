@@ -2,7 +2,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from typing import List
 
 
-class NewReportManager:
+class UpdateReportManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
 
@@ -13,15 +13,15 @@ class NewReportManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def broadcastNewReport(self, report_data: dict):
+    async def broadcastUpdateReport(self, report_data: dict):
         for ws in self.active_connections:
             await ws.send_json(report_data)
 
 
-manager = NewReportManager()
+manager = UpdateReportManager()
 
 
-async def newReportWebsocket(websocket: WebSocket):
+async def updateReportWebsocket(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
