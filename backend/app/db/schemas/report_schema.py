@@ -16,6 +16,8 @@ class ReportPhoto(BaseModel):
 class ReportPhotoCreate(BaseModel):
     report_id: int
     filename_path: str
+    ai_score: Optional[int] = None
+    ai_labels: Optional[list[str]] = None
 
 
 class ReportPhotoRead(BaseModel):

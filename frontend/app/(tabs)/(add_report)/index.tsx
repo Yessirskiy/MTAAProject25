@@ -14,6 +14,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import PhotoPicker from '@/components/PhotoPicker';
@@ -44,6 +45,7 @@ export default function AddReportScreen() {
   } | null>(null);
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [note, setNote] = useState('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { isDarkMode } = UseTheme();
   const colors = getColors(isDarkMode);
@@ -64,6 +66,8 @@ export default function AddReportScreen() {
     console.log(address);
     console.log(note);
     console.log(photos);
+
+    setLoading(true);
 
     try {
       const reportData = {
@@ -106,6 +110,8 @@ export default function AddReportScreen() {
         console.error('Unknown error', error);
         Alert.alert('Chyba', 'Nastala chyba');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,6 +125,15 @@ export default function AddReportScreen() {
         onGoBack={() => setActiveView('main')}
       />
     );
+  }
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.textPrimary} />
+        <Text style={{ color: colors.textPrimary, marginTop: 16 }}>Odosielam hlásenie, tento proces môže trvať niekoľko sekúnd...</Text>
+      </View>
+    )
   }
 
   if (activeView === 'map') {

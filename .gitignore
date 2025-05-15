@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+active-bird-458216-i1-aa74343839f8.json
+
 # C extensions
 *.so
 

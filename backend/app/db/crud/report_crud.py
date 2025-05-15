@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
+from sqlalchemy import desc, func
 from app.db.models.report import Report, ReportStatus, ReportAddress, ReportPhoto
 from app.db.schemas.report_schema import (
     ReportCreate,
@@ -128,15 +129,15 @@ async def getReportPhoto(db: AsyncSession, photo_id: int):
 async def getFeedReports(db: AsyncSession, admin_view: bool = False) -> list[Report]:
     stmt = (
         select(Report)
+        .outerjoin(ReportPhoto, Report.id == ReportPhoto.report_id)
         .options(
             joinedload(Report.address),
             joinedload(Report.user),
             joinedload(Report.photos),
         )
+        .group_by(Report.id)
+        .order_by(desc(func.coalesce(func.sum(ReportPhoto.ai_score), 0)), Report.published_datetime)
     )
     if not admin_view:
-        stmt = stmt.where(Report.status.in_([ReportStatus.published, ReportStatus.in_progress]))
-    
-    stmt = stmt.order_by(Report.published_datetime.desc())
-    
+        stmt = stmt.where(Report.status.in_([ReportStatus.published, ReportStatus.in_progress]))    
     return (await db.execute(stmt)).scalars().unique().all()
