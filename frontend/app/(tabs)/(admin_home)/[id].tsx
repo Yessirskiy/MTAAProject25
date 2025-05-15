@@ -83,6 +83,7 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
 
   const { id } = useLocalSearchParams();
   const [ report, setReport ] = useState<Report>(mock_report);
+  const reportIdRef = useRef(report.id);
 
   const [activeView, setActiveView] = useState<'main' | 'edit' | 'map'>('main');
 
@@ -234,7 +235,7 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
       const data = JSON.parse(event.data);
       const rep_id = Number(data.report_id);
       console.log("[ADMIN-WS-ONMESSAGE]: report_id from message: ", rep_id);
-      if (rep_id == report.id)
+      if (rep_id === reportIdRef.current)
         fetchReport();
     };
     socket.onerror = (error) => {
@@ -281,6 +282,10 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
     setReportStatusValue(report.status);
     report.photos.map(photo => fetchImage(photo.id));
   }, [report]);
+
+  useEffect(() => {
+    reportIdRef.current = report.id;
+  }, [report.id]);
 
   function getCurrentTimestamp(): string {
     const now = new Date();
