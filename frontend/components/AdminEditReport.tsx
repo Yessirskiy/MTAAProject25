@@ -144,7 +144,25 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                 const title = reportStatusValue === 'cancelled' ? 'Hlásenie vymazané' : 'Zariadenie opravené';
                 const note = reportStatusValue === 'cancelled' ? `Vaše hlásenie č. ${report.id} bolo vymazané` : `Vaše hlásenie č. ${report.id} bolo vyriešené`;
                 try {
-                    const result = await postNotification(report.user.id, report.id, title, note);
+                    const result = await postNotification(report.user.id, report.id, title, adminNote === '' ? note : adminNote);
+                } catch (error: any) {
+                    if (error.response) {
+                        console.error('HTTP Error:', error.response.status);
+                        console.error('Error details:', error.response.data);
+                
+                        Alert.alert('Error', error.response.data.detail);
+                    } else if (error.request) {
+                        console.error('Request Error:', error.request);
+                        Alert.alert('Chyba siete', 'Prosím skontrolujte vaše pripojenie');
+                    } else {
+                        console.error('Unknown error', error);
+                        Alert.alert('Chyba', 'Nastala chyba');
+                    }
+                }
+            } else if (adminNote !== '') {
+                const title = `Správca pridal poznámku k hláseniu č. ${report.id}`
+                try {
+                    const result = await postNotification(report.user.id, report.id, title, adminNote);
                 } catch (error: any) {
                     if (error.response) {
                         console.error('HTTP Error:', error.response.status);

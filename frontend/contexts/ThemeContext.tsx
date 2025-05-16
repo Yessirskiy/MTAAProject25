@@ -18,7 +18,10 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
 
     const toggleDarkMode = () => setIsDarkMode(prev => !prev);
-    const toggleAccessibility = () => setIsAccessibilityMode(prev => !prev);
+    const toggleAccessibility = () => {
+        setIsAccessibilityMode(prev => !prev);
+        if (isDarkMode) toggleDarkMode();
+    };
 
     return (
         <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, isAccessibilityMode, toggleAccessibility }}>

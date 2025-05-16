@@ -45,6 +45,7 @@ export default function CredentialField<T>({name, style, iconName, field, placeh
     textInput: {
       flex: 1,
       fontSize: isAccessibilityMode ? 15 * 1.25 : 15,
+      color: colors.textPrimary,
     },
   });
 
@@ -52,7 +53,7 @@ export default function CredentialField<T>({name, style, iconName, field, placeh
     <View style={[styles.container, style]}>
       <View style={styles.fieldContainer}>
         <View style={styles.fieldInputArea}>
-          {iconName && <Ionicons name={`${iconName}-outline` as keyof typeof Ionicons.glyphMap} size={22} style={{opacity: 0.6}} />}
+          {iconName && <Ionicons name={`${iconName}-outline` as keyof typeof Ionicons.glyphMap} size={22} style={{opacity: 0.6, color: colors.textPrimary}} />}
           {iconName && <View style={styles.verticalBar} />}
           <TextInput
             placeholder={placeholder}
