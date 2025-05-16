@@ -334,7 +334,36 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
         const title = reportStatusValue === 'cancelled' ? 'Hlásenie vymazané' : 'Zariadenie opravené';
         const note = reportStatusValue === 'cancelled' ? `Vaše hlásenie č. ${report.id} bolo vymazané` : `Vaše hlásenie č. ${report.id} bolo vyriešené`;
         try {
-          const result = await postNotification(report.user.id, report.id, title, note);
+          const result = await postNotification(report.user.id, report.id, title, adminNote === '' ? note : adminNote);
+        } catch (error: any) {
+          if (error.response) {
+            console.error('[ADMIN:save-report] HTTP Error:', error.response.status);
+            console.error('[ADMIN:save-report] Error details:', error.response.data);
+      
+            Toast.show({
+              type: 'error',
+              text1:  error.response.data.detail,
+              text2: `Return code: ${error.response.status}`
+            });
+          } else if (error.request) {
+            console.error('[ADMIN:save-report] Request Error:', error.request);
+            Toast.show({
+              type: 'error',
+              text1: 'Network error.',
+              text2: `Please, check connection.`
+            });
+          } else {
+            console.error('[ADMIN:save-report] Unknown error', error);
+            Toast.show({
+              type: 'error',
+              text1: 'Unknown error.'
+            });
+          }
+        }
+      } else if (adminNote !== '') {
+        const title = `Správca pridal poznámku k hláseniu č. ${report.id}`;
+        try {
+          const result = await postNotification(report.user.id, report.id, title, adminNote);
         } catch (error: any) {
           if (error.response) {
             console.error('[ADMIN:save-report] HTTP Error:', error.response.status);

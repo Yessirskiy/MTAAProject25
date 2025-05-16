@@ -102,7 +102,7 @@ export default function NotificationDetail() {
         style={{width: "100%"}}
         showsVerticalScrollIndicator={false}
       >
-        <InfoField name="Titulek" value={notification.title} style={{marginBottom: 10}}/>
+        <InfoField name="Titulok" value={notification.title} style={{marginBottom: 10}}/>
         <InfoField name="Správa" value={notification.note} style={{marginBottom: 10}}/>
         <InfoField name="Čas" value={formatDateTime(notification.sent_datetime)} style={{marginBottom: 10}}/>
         {notification.report_id && <InfoField name="Hlásenie" value={`Hlásenie č. ${notification.report_id.toString()}`} style={{marginBottom: 10}}/>}

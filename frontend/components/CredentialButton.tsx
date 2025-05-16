@@ -46,7 +46,7 @@ export default function CredentialButton({label, style, buttonStyle, labelStyle,
   return (
     <View style={[styles.container, style]}>
       <Pressable style={[styles.fieldContainer, buttonStyle]} onPress={onPress}>
-        {iconName && <Ionicons name={iconName as keyof typeof Ionicons.glyphMap} size={22} style={{opacity: 0.7, marginRight: 10}} />}
+        {iconName && <Ionicons name={iconName as keyof typeof Ionicons.glyphMap} size={22} style={{opacity: 0.7, marginRight: 10, color: colors.textPrimary}} />}
         <Text style={[styles.fieldLabel, labelStyle]}>{label}</Text>
       </Pressable>
     </View>
