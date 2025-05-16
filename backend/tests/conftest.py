@@ -7,7 +7,7 @@ from pathlib import Path
 from app.main import app
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from app.db.base import Base
-from app.db.models.user import User
+from app.db.models.user import User, UserAddress, UserSetting
 from app.db.base import getSession
 from app.dependencies.auth import getUser
 from app.dependencies.common import getSettings
@@ -85,6 +85,40 @@ async def test_user(db_session, tmp_path: Path):
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
+    address = UserAddress(
+        user_id=user.id,
+        street="123 Test St",
+        building="Apt 1",
+        city="Testville",
+        state="TS",
+        postal_code="12345",
+        country="Testland",
+    )
+    db_session.add(address)
+    await db_session.commit()
+    await db_session.refresh(address)
+
+    settings = UserSetting(
+        user_id=user.id, is_email_hidden=False, is_notification_allowed=True
+    )
+    db_session.add(settings)
+    await db_session.commit()
+    await db_session.refresh(settings)
+
+    return user
+
+
+@pytest_asyncio.fixture
+async def admin_user(db_session: AsyncSession):
+    user = User(
+        email="admin@example.com",
+        first_name="Admin",
+        hashed_password=hashPassword("password1234"),
+        is_admin=True,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
     return user
 
 
@@ -92,6 +126,14 @@ async def test_user(db_session, tmp_path: Path):
 def override_getUser(test_user):
     async def _override():
         return test_user
+
+    return _override
+
+
+@pytest_asyncio.fixture
+def override_getUser_asAdmin(admin_user):
+    async def _override():
+        return admin_user
 
     return _override
 
