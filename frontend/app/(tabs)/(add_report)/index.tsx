@@ -26,6 +26,8 @@ import { createReport } from '@/api/reportApi';
 import { useRouter } from 'expo-router';
 import { UseTheme } from '@/contexts/ThemeContext';
 import Toast from 'react-native-toast-message';
+import NetInfo from '@react-native-community/netinfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function AddReportScreen() {
@@ -43,6 +45,9 @@ export default function AddReportScreen() {
     postal_code?: string;
     country?: string;
   } | null>(null);
+
+  const QUEUE_KEY = 'queuedReports';
+
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -50,6 +55,22 @@ export default function AddReportScreen() {
   const { isDarkMode } = UseTheme();
   const colors = getColors(isDarkMode);
   const { isAccessibilityMode } = UseTheme();
+
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const queueReport = async (reportData: any, photos: string[]) => {
+    const existing = await AsyncStorage.getItem(QUEUE_KEY);
+    const queue = existing ? JSON.parse(existing) : [];
+    queue.push({ reportData, photos });
+    await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  };
 
   const handleSubmit = async () => {
     if (!user) {
@@ -69,8 +90,7 @@ export default function AddReportScreen() {
 
     setLoading(true);
 
-    try {
-      const reportData = {
+    const reportData = {
         user_id: userId,
         note: note,
         admin_note: null,
@@ -85,6 +105,18 @@ export default function AddReportScreen() {
           longitude: coords.longitude,
         },
       };
+
+    try {
+
+      const netState = await NetInfo.fetch();
+      if (!netState.isConnected) {
+        await queueReport(reportData, photos);
+        setLoading(false);
+        Alert.alert('Ste offline', 'Hlásenie bolo uložené a bude odoslané po získaní pripojenia.');
+        router.replace('/');
+        return;
+      }
+
 
       const result = await createReport(reportData, photos);
 
@@ -115,6 +147,35 @@ export default function AddReportScreen() {
     }
   };
 
+  useEffect(() => {
+    interface QueuedReport {
+      reportData: any;
+      photos: string[];
+    }
+
+    const unsubscribe = NetInfo.addEventListener(async (state: { isConnected: boolean | null }) => {
+      if (state.isConnected) {
+      const existing = await AsyncStorage.getItem(QUEUE_KEY);
+      const queue: QueuedReport[] = existing ? JSON.parse(existing) : [];
+      if (queue.length > 0) {
+        for (const item of queue) {
+          await AsyncStorage.removeItem(QUEUE_KEY);
+          try {
+            await createReport(item.reportData, item.photos);
+          } catch (error) {
+            continue;
+          }
+          Toast.show({
+            type: 'success',
+            text1: 'Offline hlásenia boli odoslané.',
+          });
+        }
+      }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   if (activeView === 'photo') {
     return (
       <PhotoPicker
@@ -131,7 +192,8 @@ export default function AddReportScreen() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
         <ActivityIndicator size="large" color={colors.textPrimary} />
-        <Text style={{ color: colors.textPrimary, marginTop: 16 }}>Odosielam hlásenie, tento proces môže trvať niekoľko sekúnd...</Text>
+        <Text style={{ color: colors.textPrimary, marginTop: 16, paddingHorizontal: 15 }}>Odosielam hlásenie,</Text>
+        <Text style={{ color: colors. textPrimary, paddingHorizontal: 15, }}>tento proces môže trvať niekoľko sekúnd...</Text>
       </View>
     )
   }
@@ -210,14 +272,31 @@ export default function AddReportScreen() {
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled={true}
       >
-        <AddressInputField
-          address={address}
-          setAddress={setAddress}
-          setCoords={setCoords}
-          addressText={addressText}
-          setAddressText={setAddressText}
-          onMapPress={() => setActiveView('map')}
-        />
+        {isConnected ? (
+          <AddressInputField
+            address={address}
+            setAddress={setAddress}
+            setCoords={setCoords}
+            addressText={addressText}
+            setAddressText={setAddressText}
+            onMapPress={() => setActiveView('map')}
+          />
+        ) : (
+          <View style={styles.inputContainer}>
+          <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: colors.textSecondary, fontSize: isAccessibilityMode ? 14 * 1.25 : 14 }}>Adresa</Text>
+          <TextInput
+            style={[styles.input, { height: 40, paddingTop: 15 }]}
+            placeholder="Pridať adresu"
+            placeholderTextColor={colors.textGrey}
+            value={addressText}
+            onChangeText={text => {
+              setAddressText(text);
+              setAddress({ street: text });
+              setCoords({ latitude: 0, longitude: 0 });
+            }}
+          />
+        </View>
+        )}
 
         <View style={styles.inputContainer}>
           <Text style={{ position: 'absolute', marginLeft: 10, marginTop: -38, color: colors.textSecondary, fontSize: isAccessibilityMode ? 14 * 1.25 : 14 }}>Poznámka</Text>
