@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, model_validator, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, model_validator, Field
 import datetime
 from typing import Optional, Self
 
@@ -41,8 +41,7 @@ class UserRead(BaseModel):
     created_datetime: datetime.datetime
     is_admin: bool = False
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserReadFull(UserRead):

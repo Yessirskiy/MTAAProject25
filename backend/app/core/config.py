@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     DATABASE_URL: str
     DEV_DATABASE_URL: str
-    
+
     GOOGLE_APPLICATION_CREDENTIALS: str | None = None
 
     # JWT TOKEN SETTINGS
@@ -30,5 +30,6 @@ class Settings(BaseSettings):
     # 2nd option looks much more robust, that is why I left it here
     # it will always look for .env in the /backend directory
     model_config = SettingsConfigDict(
-        env_file=str(Path(__file__).resolve().parent.parent.parent / ".env")
+        env_file=str(Path(__file__).resolve().parent.parent.parent / ".env"),
+        extra="allow",  # to ignore test variables
     )

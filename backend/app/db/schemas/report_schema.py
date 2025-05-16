@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import datetime
 import decimal
 from typing import Optional
@@ -25,8 +25,10 @@ class ReportPhotoRead(BaseModel):
     report_id: int
     # filename is unneccessary
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+    # class Config:
+    #     from_attributes = True
 
 
 class ReportAddress(BaseModel):
@@ -43,8 +45,9 @@ class ReportAddress(BaseModel):
     latitude: decimal.Decimal
     longitude: decimal.Decimal
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+    # class Config:
+    #     from_attributes = True
 
 
 class ReportAddressCreate(BaseModel):
@@ -79,9 +82,10 @@ class Report(BaseModel):
     votes_pos: int
     votes_neg: int
 
-    class Config:
-        from_attributes = True
-        use_enum_values = True
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+    # class Config:
+    #     from_attributes = True
+    #     use_enum_values = True
 
 
 class ReportReadFull(BaseModel):
@@ -101,9 +105,10 @@ class ReportReadFull(BaseModel):
     address: ReportAddressRead
     photos: list[ReportPhotoRead]
 
-    class Config:
-        from_attributes = True
-        use_enum_values = True
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+    # class Config:
+    #     from_attributes = True
+    #     use_enum_values = True
 
 
 class ReportCreate(BaseModel):
@@ -111,9 +116,10 @@ class ReportCreate(BaseModel):
     note: str
     address: ReportAddressCreate
 
-    class Config:
-        from_attributes = True
-        use_enum_values = True
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+    # class Config:
+    #     from_attributes = True
+    #     use_enum_values = True
 
 
 class ReportUpdate(BaseModel):
