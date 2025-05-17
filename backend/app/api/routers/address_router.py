@@ -29,7 +29,7 @@ async def getAddressMeRoute(
         if "Address not found" in e.args[0]:
             raise HTTPException(404, detail="Address not found")
         elif "Permission denied" in e.args[0]:
-            raise HTTPException(403, "Permission denied")
+            raise HTTPException(403, detail="Permission denied")
         else:
             print(e)
             raise HTTPException(500)

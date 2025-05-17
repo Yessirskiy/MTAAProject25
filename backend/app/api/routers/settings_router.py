@@ -23,6 +23,7 @@ async def getSettingsNotificationsMeRoute(
 ):
     try:
         settings = await getSettings(db, user.id)
+        assert settings is not None, "Settings not found"
         return settings
     except AssertionError as e:
         if "Settings not found" in e.args[0]:
@@ -46,6 +47,7 @@ async def updateSettingsNotificationsMeRoute(
 ):
     try:
         settings = await updateSettings(db, user.id, settings_update)
+        assert settings is not None, "Settings not found"
         return settings
     except AssertionError as e:
         if "Settings not found" in e.args[0]:
@@ -96,6 +98,7 @@ async def updateSettingsRoute(
         if not user.is_admin:
             assert user.id == user_id, "Permission denied"
         settings = await updateSettings(db, user_id, settings_update)
+        assert settings is not None, "Settings not found"
         return settings
     except AssertionError as e:
         if "Settings not found" in e.args[0]:

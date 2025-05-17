@@ -1,4 +1,13 @@
-from fastapi import APIRouter, Depends, Form, File, UploadFile, HTTPException, Response
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    File,
+    UploadFile,
+    HTTPException,
+    Response,
+    BackgroundTasks,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -27,14 +36,15 @@ from app.db.crud.report_crud import (
 from app.dependencies.auth import getUser
 from app.dependencies.common import getSettings
 
-from app.utils.vision import get_photo_label_and_score
 from app.websockets.update_report import manager as updateReportManager
+from app.tasks.background_assess_report import assessReport
 
 import os
 import json
 import uuid
 from pathlib import Path
 from typing import Annotated
+
 
 router = APIRouter()
 
@@ -44,6 +54,7 @@ async def createReportRoute(
     reportcreatestr: Annotated[
         str, Form()
     ],  # here is the form because the data is sent as multipart/form-data
+    background_tasks: BackgroundTasks,
     photos: Annotated[list[UploadFile], File()],
     db: AsyncSession = Depends(getSession),
     user: User = Depends(getUser),
@@ -61,7 +72,7 @@ async def createReportRoute(
             db, reportcreate.address, created_report.id, nocommit=True
         )
         settings = getSettings()
-        inappropriate_found = False
+        # inappropriate_found = False
 
         for photo in photos:
             file_extension = Path(photo.filename).suffix
@@ -78,42 +89,38 @@ async def createReportRoute(
             with (settings.REPORT_PHOTOS / file_path).open("wb") as f:
                 f.write(await photo.read())
 
-            labels, score, is_inappropriate = await get_photo_label_and_score(
-                str(settings.REPORT_PHOTOS / file_path)
-            )
-            print(
-                f"Labels: {labels}\nScore: {score}\nIs inappropriate: {is_inappropriate}"
-            )
+            # labels, score, is_inappropriate = await get_photo_label_and_score(
+            #     str(settings.REPORT_PHOTOS / file_path)
+            # )
+            # print(
+            #     f"Labels: {labels}\nScore: {score}\nIs inappropriate: {is_inappropriate}"
+            # )
 
-            if is_inappropriate:
-                inappropriate_found = True
+            # if is_inappropriate:
+            #     inappropriate_found = True
 
             await createReportPhoto(
                 db,
                 ReportPhotoCreate(
                     report_id=created_report.id,
                     filename_path=str(file_path),
-                    ai_score=score,
-                    ai_labels=labels,
+                    # ai_score=score,
+                    # ai_labels=labels,
                 ),
                 nocommit=True,
             )
 
         # If any photo was inappropriate, update the report status and admin note
-        if inappropriate_found:
-            created_report.status = ReportStatus.cancelled
-            created_report.admin_note = "Jeden z vložených obrázkov bol automaticky ohodnotený ako nevhodný. Čaká sa na kontrolu správcom."
-            await db.flush()
+        # if inappropriate_found:
+        #     created_report.status = ReportStatus.cancelled
+        #     created_report.admin_note = "Jeden z vložených obrázkov bol automaticky ohodnotený ako nevhodný. Čaká sa na kontrolu správcom."
+        #     await db.flush()
 
         await db.commit()  # Commit only after all the operations completed
         # to obtain full info, we have to make one more request to DB
         report = await getReportByID(db, created_report.id, full=True)
-        # try:
-        #     await newReportManager.broadcastNewReport(
-        #         ReportReadFull.model_validate(report).model_dump_json()
-        #     )
-        # except Exception as e:
-        #     print("Error while broadcasting report to WS: ", e)
+        if report:
+            background_tasks.add_task(assessReport, report=report, db=db)
         return report
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid ReportCreate Form")

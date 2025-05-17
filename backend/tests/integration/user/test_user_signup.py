@@ -15,6 +15,7 @@ async def test_signup_user_success(client: AsyncClient):
 
     response = await client.post("/user/signup", json=user_data)
     assert response.status_code == 200
+    # TODO: validate userAddress and userSettings
 
 
 @pytest.mark.asyncio
