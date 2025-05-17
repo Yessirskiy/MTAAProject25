@@ -227,7 +227,7 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
   };
 
   const setupWS = async () => {
-    const socket = new WebSocket("ws://192.168.240.23:8000/ws/update_report");
+    const socket = new WebSocket("ws://192.168.2.7:8000/ws/update_report");
     socket.onopen = () => {
       console.log("[ADMIN-WS-ONOPEN]: WS connected");
     };
