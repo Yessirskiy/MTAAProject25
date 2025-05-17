@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, FlatList, Alert, ScrollView } from 'react-native';
+import { Text, View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, FlatList, Alert, ScrollView, useWindowDimensions } from 'react-native';
 import { getUserReportsMe } from '@/api/userApi';
 import { getReportPhoto } from '@/api/reportApi';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
@@ -59,6 +59,9 @@ export default function MyReportsScreen() {
   const user = useProtectedRoute();
   const { accessToken } = useContext(AuthContext);
   if (!user) return null;
+
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const [activeView, setActiveView] = useState<'list' | 'edit'>('list');
   const [selectedReport, setSelectedReport] = useState<ReportWithPhoto | null>(null);
@@ -167,6 +170,16 @@ export default function MyReportsScreen() {
       backgroundColor: colors.surface,
       borderRadius: 8,
     },
+    tabletCard: {
+      flex: 1,
+      flexDirection: 'row',
+      padding: 12,
+      margin: 8,
+      backgroundColor: colors.surface,
+      borderRadius: 8,
+      minWidth: 0,
+      maxWidth: '48%',
+    },
     image: {
       width: isAccessibilityMode ? 125 : 100,
       height: isAccessibilityMode ? 125 : 100,
@@ -251,9 +264,11 @@ export default function MyReportsScreen() {
       <FlatList
         data={reports}
         keyExtractor={(item) => item.id.toString()}
+        numColumns={ isTablet ? 2 : 1 }
+        key={`columns-${isTablet && isLandscape ? 2 : 1}`}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.card}
+            style={isTablet ? styles.tabletCard : styles.card}
             onPress={() => {
                 setSelectedReport(item);
                 setActiveView('edit');

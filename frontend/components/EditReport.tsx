@@ -14,6 +14,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AddressInputField from '@/components/AddressInputField';
@@ -25,6 +26,7 @@ import { parse } from '@babel/core';
 import { updateReport } from '@/api/reportApi';
 import { UseTheme } from '@/contexts/ThemeContext';
 import { getColors } from '@/theme/colors';
+import { isNativePlatformSupported } from 'react-native-screens/lib/typescript/core';
 
 
 type Report = {
@@ -96,6 +98,9 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     const { isDarkMode } = UseTheme();
     const colors = getColors(isDarkMode);
     const { isAccessibilityMode } = UseTheme();
+
+    const { width, height } = useWindowDimensions();
+    const isLandscape = width > height;
 
     const date = new Date(report.report_datetime);
     const day = String(date.getUTCDate()).padStart(2, '0');
@@ -189,9 +194,9 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
         },
         image: {
             backgroundColor: colors.border,
-            borderRadius: 10,
-            width: screenWidth - 40,
-            height: screenWidth - 40,
+            borderRadius: isLandscape ? 0 : 10,
+            width: isLandscape ? width / 2 - 27 : screenWidth - 40,
+            height: isLandscape ? width / 2 - 27 : screenWidth - 40,
             justifyContent: 'center',
             alignItems: 'center',
             marginBottom: 10,
@@ -255,6 +260,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: 10,
+            maxHeight: 50
         },
         backButton: {
             position: 'absolute',
@@ -278,16 +284,17 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
     });
 
     if (activeView === 'main') {
-
-        return (
-            <ScrollView contentContainerStyle={styles.container} style={{ flex: 1, backgroundColor: colors.background }} nestedScrollEnabled={true}>
+        if (isLandscape) {
+            return (
+                <ScrollView contentContainerStyle={[styles.container, { flexDirection: 'row', alignItems: 'flex-start' }]} style={{ flex: 1, backgroundColor: colors.background }} nestedScrollEnabled={true}>
+                <View style={{ flex: 1, marginRight: 16 }}>
                 <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
                     <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
                 </TouchableOpacity>
                 <InfoField
                     name='Nahlásené'
                     value={formattedDate}
-                    style={{ marginBottom: 10, paddingHorizontal: 0, marginTop: 20 }}
+                    style={{ marginBottom: 10, paddingHorizontal: 0, marginTop: isLandscape ? 50 : 20 }}
                 />
                 <InfoField
                     name='Adresa'
@@ -297,8 +304,14 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                 <InfoField name='Poznámka' value={report.note} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
                 {adminNote !== null && adminNote !== '' ? (
                     <InfoField name='Poznámka administrátora' value={report.admin_note ? report.admin_note : ''} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
-                ) : <Text></Text>
-                }
+                ) : <Text></Text>}
+                {report.status !== 'resolved' && report.status !== 'cancelled' ? (
+                    <TouchableOpacity onPress={() => setActiveView('edit')} style={styles.editButton}>
+                    <Text style={{ color: colors.textPrimary, marginVertical: 8, fontSize: isAccessibilityMode ? 18 * 1.25 : 18 }}>Upraviť hlásenie</Text>
+                    </TouchableOpacity>
+                ) : <Text></Text>}
+                </View>
+                <View style={{ flex: 1 }}>
                 <FlatList
                     data={report.photos}
                     keyExtractor={(item) => item.id.toString()}
@@ -307,29 +320,77 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     scrollEnabled
                     showsHorizontalScrollIndicator={true}
                     keyboardShouldPersistTaps="handled"
-                    style={{ maxHeight: screenWidth - 40, marginBottom: 10 }}
+                    style={{ maxHeight: width / 2 - 40, marginBottom: 10, }}
                     renderItem={({ item }: { item: { id: number } }) => (
                     <View style={{ position: 'relative' }}>
                         <Image
-                            style={styles.image}
-                            source={{
+                        style={styles.image}
+                        source={{
                             uri: `${process.env.EXPO_PUBLIC_BASE_URL}/report/photo/${item.id}` || undefined,
                             headers: {
-                                Authorization: `Bearer ${accessToken}`,
+                            Authorization: `Bearer ${accessToken}`,
                             },
-                            }}
+                        }}
                         />
                     </View>
                     )}
                 />
-                {report.status !== 'resolved' && report.status !== 'cancelled' ? (
-                <TouchableOpacity onPress={() => setActiveView('edit')} style={styles.editButton}>
-                    <Text style={{ color: colors.textPrimary, marginVertical: 8, fontSize: isAccessibilityMode ? 18 * 1.25 : 18 }}>Upraviť hlásenie</Text>
-                </TouchableOpacity>
-                ) : <Text></Text>
-                }
+                </View>
             </ScrollView>
-        )
+            )
+        } else {
+            return (
+                <ScrollView contentContainerStyle={styles.container} style={{ flex: 1, backgroundColor: colors.background }} nestedScrollEnabled={true}>
+                    <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
+                        <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+                    </TouchableOpacity>
+                    <InfoField
+                        name='Nahlásené'
+                        value={formattedDate}
+                        style={{ marginBottom: 10, paddingHorizontal: 0, marginTop: 20 }}
+                    />
+                    <InfoField
+                        name='Adresa'
+                        value={`${report.address?.street === '' ? '' : `${report.address?.street} `}${report.address?.building === '' ? '' : `${report.address?.building} `}${report.address?.postal_code === '' ? '' : `${report.address?.postal_code} `}${report.address?.city}`}
+                        style={{ marginBottom: 10, paddingHorizontal: 0 }}
+                    />
+                    <InfoField name='Poznámka' value={report.note} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
+                    {adminNote !== null && adminNote !== '' ? (
+                        <InfoField name='Poznámka administrátora' value={report.admin_note ? report.admin_note : ''} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
+                    ) : <Text></Text>
+                    }
+                    <FlatList
+                        data={report.photos}
+                        keyExtractor={(item) => item.id.toString()}
+                        horizontal
+                        pagingEnabled
+                        scrollEnabled
+                        showsHorizontalScrollIndicator={true}
+                        keyboardShouldPersistTaps="handled"
+                        style={{ maxHeight: screenWidth - 40, marginBottom: 10 }}
+                        renderItem={({ item }: { item: { id: number } }) => (
+                        <View style={{ position: 'relative' }}>
+                            <Image
+                                style={styles.image}
+                                source={{
+                                uri: `${process.env.EXPO_PUBLIC_BASE_URL}/report/photo/${item.id}` || undefined,
+                                headers: {
+                                    Authorization: `Bearer ${accessToken}`,
+                                },
+                                }}
+                            />
+                        </View>
+                        )}
+                    />
+                    {report.status !== 'resolved' && report.status !== 'cancelled' ? (
+                    <TouchableOpacity onPress={() => setActiveView('edit')} style={styles.editButton}>
+                        <Text style={{ color: colors.textPrimary, marginVertical: 8, fontSize: isAccessibilityMode ? 18 * 1.25 : 18 }}>Upraviť hlásenie</Text>
+                    </TouchableOpacity>
+                    ) : <Text></Text>
+                    }
+                </ScrollView>
+            )
+        }
     }
 
     return (
