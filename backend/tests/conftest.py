@@ -15,7 +15,7 @@ from app.utils.passwords import hashPassword
 
 from dotenv import load_dotenv
 
-from app.db.models.report import Report, ReportStatus
+from app.db.models.report import Report, ReportStatus, ReportAddress
 from app.db.models.vote import Vote
 
 load_dotenv()
@@ -156,8 +156,19 @@ async def test_report(db_session: AsyncSession, test_user: User):
         status=ReportStatus.reported,
     )
     db_session.add(report)
+    await db_session.flush()
+    address = ReportAddress(
+        report_id=report.id,
+        city="Cityville",
+        street="Example Street",
+        country="Testland",
+        latitude=48.123456,
+        longitude=17.654321,
+    )
+    db_session.add(address)
     await db_session.commit()
     await db_session.refresh(report)
+
     return report
 
 

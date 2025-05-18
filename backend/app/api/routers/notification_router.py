@@ -82,7 +82,11 @@ async def deleteNotificationRoute(
     db: AsyncSession = Depends(getSession),
     user: User = Depends(getUser),
 ):
-    notification = await deleteNotification(db, notification_id)
-    if not notification:
+    try:
+        notification = await deleteNotification(db, notification_id)
+        return notification
+    except AssertionError:
         raise HTTPException(status_code=404, detail="Notification not found")
-    return notification
+    except Exception as e:
+        print(f"[DELETE NOTIFICATION]: {e}")
+        raise HTTPException(status_code=500)

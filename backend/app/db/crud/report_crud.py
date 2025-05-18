@@ -136,8 +136,13 @@ async def getFeedReports(db: AsyncSession, admin_view: bool = False) -> list[Rep
             joinedload(Report.photos),
         )
         .group_by(Report.id)
-        .order_by(desc(func.coalesce(func.sum(ReportPhoto.ai_score), 0)), Report.published_datetime)
+        .order_by(
+            desc(func.coalesce(func.sum(ReportPhoto.ai_score), 0)),
+            Report.published_datetime,
+        )
     )
     if not admin_view:
-        stmt = stmt.where(Report.status.in_([ReportStatus.published, ReportStatus.in_progress]))    
+        stmt = stmt.where(
+            Report.status.in_([ReportStatus.published, ReportStatus.in_progress])
+        )
     return (await db.execute(stmt)).scalars().unique().all()

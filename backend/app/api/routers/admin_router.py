@@ -49,7 +49,7 @@ async def getUserFullRoute(
 
 
 @router.put(
-    "/report/{user_id}",
+    "/report/{report_id}",
     response_model=ReportReadFull,
     summary="Extensive update of the Report",
 )
