@@ -358,7 +358,7 @@ export default function EditReport({ report, onGoBack, accessToken }: EditReport
                     style={{ marginBottom: 10, paddingHorizontal: 0 }}
                 />
                 <InfoField name='Poznámka' value={report.note} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
-                <InfoField name='Vytvorené používateľom' value={report.user.email} style={{  marginBottom: 10, paddingHorizontal: 0 }} />
+                <InfoField name='Vytvorené používateľom' value={report.user.settings.is_name_hidden ? report.user.settings.is_email_hidden ? "Anonymný používateľ" : report.user.email : `${report.user.first_name} ${report.user.last_name || ''}`} style={{  marginBottom: 10, paddingHorizontal: 0 }} />
                 <FlatList
                     data={report.photos}
                     keyExtractor={(item) => item.id.toString()}

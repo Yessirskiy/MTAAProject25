@@ -12,6 +12,11 @@ export type Report = {
   photos: ReportPhoto[];
 };
 
+type ReportUserSettings = {
+  is_name_hidden: boolean;
+  is_email_hidden: boolean;
+}
+
 export type ReportUser = {
   id: number;
   first_name: string;
@@ -19,6 +24,7 @@ export type ReportUser = {
   email: string;
   phone_number: string;
   created_datetime: string;
+  settings: ReportUserSettings;
 };
 
 export type ReportAddress = {

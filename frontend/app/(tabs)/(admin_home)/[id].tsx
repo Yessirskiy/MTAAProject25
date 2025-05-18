@@ -59,7 +59,8 @@ const mock_report: Report = {
     last_name: '',
     email: '',
     phone_number: '',
-    created_datetime: ''
+    created_datetime: '',
+    settings: { is_email_hidden: false, is_name_hidden: false }
   },
   address: {
     id: 0,

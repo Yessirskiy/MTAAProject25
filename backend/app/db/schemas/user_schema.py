@@ -32,6 +32,10 @@ class UserCreate(BaseModel):
         return self
 
 
+class UserSettingsRead(BaseModel):
+    is_name_hidden: bool
+    is_email_hidden: bool
+
 class UserRead(BaseModel):
     id: int
     first_name: str
@@ -40,6 +44,8 @@ class UserRead(BaseModel):
     phone_number: Optional[str] = None
     created_datetime: datetime.datetime
     is_admin: bool = False
+    
+    settings: Optional[UserSettingsRead]
 
     model_config = ConfigDict(from_attributes=True)
 

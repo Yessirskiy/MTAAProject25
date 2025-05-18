@@ -3,6 +3,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy import desc, func
 from app.db.models.report import Report, ReportStatus, ReportAddress, ReportPhoto
+from app.db.models.user import User
 from app.db.schemas.report_schema import (
     ReportCreate,
     ReportAddressCreate,
@@ -132,7 +133,7 @@ async def getFeedReports(db: AsyncSession, admin_view: bool = False) -> list[Rep
         .outerjoin(ReportPhoto, Report.id == ReportPhoto.report_id)
         .options(
             joinedload(Report.address),
-            joinedload(Report.user),
+            joinedload(Report.user).joinedload(User.settings),
             joinedload(Report.photos),
         )
         .group_by(Report.id)
