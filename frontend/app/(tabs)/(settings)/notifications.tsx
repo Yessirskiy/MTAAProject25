@@ -142,7 +142,7 @@ export default function NotificationsScreen() {
           style={{marginBottom: 10}}
         />
         <ToggleSwitchField<UserPrivacyType> 
-          name="Aktualizácií vo vašej lokalite" 
+          name="Aktualizácie vo vašej lokalite" 
           field='is_local_notification' 
           value={cur_data.is_local_notification} 
           handleChange={handleChange}
@@ -167,7 +167,7 @@ export default function NotificationsScreen() {
           isDisabled={!cur_data.is_notification_allowed}
         />
         <ToggleSwitchField<UserPrivacyType> 
-          name="Oznámiť o reakciách na hlásení" 
+          name="Oznámenia o reakciách na hlásení" 
           field='is_onreact_notification' 
           value={cur_data.is_onreact_notification} 
           handleChange={handleChange}

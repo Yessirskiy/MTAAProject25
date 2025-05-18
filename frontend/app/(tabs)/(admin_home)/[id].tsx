@@ -144,8 +144,10 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
         console.error('[ADMIN] Error details:', error.response.data);
         Toast.show({
           type: 'error',
-          text1:  error.response.data.detail,
-          text2: `Return code: ${error.response.status}`
+          text1: 'Error',
+          text2: typeof error.response.data.detail === 'string'
+            ? error.response.data.detail
+            : JSON.stringify(error.response.data.detail),
         });
       } else if (error.request) {
         Toast.show({
@@ -205,8 +207,10 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
           console.error('[ADMIN] Error details:', error.response.data);
           Toast.show({
             type: 'error',
-            text1:  error.response.data.detail,
-            text2: `Return code: ${error.response.status}`
+            text1: 'Error',
+            text2: typeof error.response.data.detail === 'string'
+              ? error.response.data.detail
+              : JSON.stringify(error.response.data.detail),
           });
         }
         
@@ -342,8 +346,10 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
       
             Toast.show({
               type: 'error',
-              text1:  error.response.data.detail,
-              text2: `Return code: ${error.response.status}`
+              text1: 'Error',
+              text2: typeof error.response.data.detail === 'string'
+                ? error.response.data.detail
+                : JSON.stringify(error.response.data.detail),
             });
           } else if (error.request) {
             console.error('[ADMIN:save-report] Request Error:', error.request);
@@ -371,8 +377,10 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
       
             Toast.show({
               type: 'error',
-              text1:  error.response.data.detail,
-              text2: `Return code: ${error.response.status}`
+              text1: 'Error',
+              text2: typeof error.response.data.detail === 'string'
+                ? error.response.data.detail
+                : JSON.stringify(error.response.data.detail),
             });
           } else if (error.request) {
             console.error('[ADMIN:save-report] Request Error:', error.request);
@@ -403,8 +411,10 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
         console.error('[ADMIN:save-report] Error details:', error.response.data);
         Toast.show({
           type: 'error',
-          text1:  error.response.data.detail,
-          text2: `Return code: ${error.response.status}`
+          text1: 'Error',
+          text2: typeof error.response.data.detail === 'string'
+            ? error.response.data.detail
+            : JSON.stringify(error.response.data.detail),
         });
       } else if (error.request) {
         console.error('[ADMIN:save-report] Request Error:', error.request);
