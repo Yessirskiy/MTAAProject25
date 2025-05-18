@@ -306,7 +306,7 @@ export default function MyReportsScreen() {
         )}
       />
       ) : (
-        <Text style={{ textAlign: 'center', marginTop: 300, fontSize: isAccessibilityMode ? 16 * 1.25 : 16 }}>Zatiaľ ste nezverejnili žiadne hlásenia</Text>
+        <Text style={{ textAlign: 'center', marginTop: 300, fontSize: isAccessibilityMode ? 16 * 1.25 : 16, color: colors.textPrimary }}>Zatiaľ ste nezverejnili žiadne hlásenia</Text>
       )}
     </View>
   );
