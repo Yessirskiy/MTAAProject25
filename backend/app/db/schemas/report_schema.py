@@ -4,7 +4,7 @@ import decimal
 from typing import Optional
 
 from app.db.models.report import ReportStatus
-from app.db.schemas.user_schema import UserRead
+from app.db.schemas.user_schema import UserRead, UserReadFeed
 
 
 class ReportPhoto(BaseModel):
@@ -110,6 +110,8 @@ class ReportReadFull(BaseModel):
     #     from_attributes = True
     #     use_enum_values = True
 
+class ReportReadFullFeed(ReportReadFull):
+    user: UserReadFeed
 
 class ReportCreate(BaseModel):
     user_id: int
@@ -146,4 +148,4 @@ class UserReports(BaseModel):
 
 
 class FeedReports(BaseModel):
-    data: list[ReportReadFull]
+    data: list[ReportReadFullFeed]

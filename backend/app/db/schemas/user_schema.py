@@ -32,7 +32,7 @@ class UserCreate(BaseModel):
         return self
 
 
-class UserSettingsRead(BaseModel):
+class UserPrivacySettingsRead(BaseModel):
     is_name_hidden: bool
     is_email_hidden: bool
 
@@ -45,9 +45,11 @@ class UserRead(BaseModel):
     created_datetime: datetime.datetime
     is_admin: bool = False
     
-    settings: Optional[UserSettingsRead]
-
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserReadFeed(UserRead):
+    settings: UserPrivacySettingsRead
 
 
 class UserReadFull(UserRead):
