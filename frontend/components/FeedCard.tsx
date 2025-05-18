@@ -237,7 +237,7 @@ export default function FeedCard({ report, imgStyle, containerStyle, onHandlePre
         {report.address.street + " " + report.address?.building + ", " + report.address?.postal_code}
       </Text>
       <View>
-        <Text style={styles.reporterText}>{report.user.first_name} {report.user.last_name}</Text>
+        <Text style={styles.reporterText}>{report.user.settings.is_name_hidden ? report.user.settings.is_email_hidden ? `Anonymný používateľ` : report.user.email : report.user.first_name} {report.user.settings.is_name_hidden ? '' : report.user.last_name}</Text>
       </View>
       {reactions && <View style={styles.reactionsContainer}>
         <Text style={styles.reactionsLabel}>Videli ste to?</Text>
