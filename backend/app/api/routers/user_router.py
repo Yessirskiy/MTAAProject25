@@ -15,6 +15,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from datetime import datetime
+
 from app.db.base import getSession
 from app.db.models.user import User
 from app.db.schemas.user_schema import (
@@ -206,6 +208,7 @@ async def deleteMeRoute(
     try:
         user = await getUserByID(db, user.id)
         user.is_active = False
+        user.deactivated_datetime = datetime.now()
         await db.commit()
         return Response(status_code=200)
     except AssertionError as e:

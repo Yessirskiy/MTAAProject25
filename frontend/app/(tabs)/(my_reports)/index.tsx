@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, FlatList, Alert, ScrollView, useWindowDimensions } from 'react-native';
+import { Text, View, StyleSheet, Image, TouchableOpacity, ActivityIndicator, RefreshControl, FlatList, Alert, ScrollView, useWindowDimensions } from 'react-native';
 import { getUserReportsMe } from '@/api/userApi';
 import { getReportPhoto } from '@/api/reportApi';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
@@ -72,6 +72,8 @@ export default function MyReportsScreen() {
   const colors = getColors(isDarkMode);
   const { isAccessibilityMode } = UseTheme();
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const isTablet = Device.deviceType === Device.DeviceType.TABLET;
 
   const fetchReports = async () => {
@@ -117,6 +119,12 @@ export default function MyReportsScreen() {
       console.log(reports);
     }, [])
   );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    fetchReports();
+    setRefreshing(false);
+  }, []);
 
   interface StatusLabels {
     [key: string]: string;
@@ -264,6 +272,9 @@ export default function MyReportsScreen() {
       <FlatList
         data={reports}
         keyExtractor={(item) => item.id.toString()}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         numColumns={ isTablet ? 2 : 1 }
         key={`columns-${isTablet && isLandscape ? 2 : 1}`}
         renderItem={({ item }) => (
@@ -295,7 +306,7 @@ export default function MyReportsScreen() {
         )}
       />
       ) : (
-        <Text style={{ textAlign: 'center', marginTop: 300, fontSize: isAccessibilityMode ? 16 * 1.25 : 16 }}>Zatiaľ ste nezverejnili žiadne hlásenia</Text>
+        <Text style={{ textAlign: 'center', marginTop: 300, fontSize: isAccessibilityMode ? 16 * 1.25 : 16, color: colors.textPrimary }}>Zatiaľ ste nezverejnili žiadne hlásenia</Text>
       )}
     </View>
   );

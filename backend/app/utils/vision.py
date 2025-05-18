@@ -44,7 +44,6 @@ async def get_photo_label_and_score(image_path:str):
         getattr(safe, "violence", 0) >= LIKELY or
         getattr(safe, "adult", 0) >= LIKELY
     )
-    
     return labels, score, is_inappropriate
 
 ### async def main():

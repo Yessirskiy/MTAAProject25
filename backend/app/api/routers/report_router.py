@@ -1,3 +1,4 @@
+from app.utils.vision import get_photo_label_and_score
 from fastapi import (
     APIRouter,
     Depends,
@@ -75,7 +76,7 @@ async def createReportRoute(
             db, reportcreate.address, created_report.id, nocommit=True
         )
         settings = getSettings()
-        # inappropriate_found = False
+        inappropriate_found = False
 
         for photo in photos:
             file_extension = Path(photo.filename).suffix
@@ -92,15 +93,15 @@ async def createReportRoute(
             with (settings.REPORT_PHOTOS / file_path).open("wb") as f:
                 f.write(await photo.read())
 
-            # labels, score, is_inappropriate = await get_photo_label_and_score(
-            #     str(settings.REPORT_PHOTOS / file_path)
-            # )
-            # print(
-            #     f"Labels: {labels}\nScore: {score}\nIs inappropriate: {is_inappropriate}"
-            # )
+            labels, score, is_inappropriate = await get_photo_label_and_score(
+                str(settings.REPORT_PHOTOS / file_path)
+            )
+            print(
+                f"Labels: {labels}\nScore: {score}\nIs inappropriate: {is_inappropriate}"
+            )
 
-            # if is_inappropriate:
-            #     inappropriate_found = True
+            if is_inappropriate:
+                inappropriate_found = True
 
             await createReportPhoto(
                 db,
@@ -114,10 +115,10 @@ async def createReportRoute(
             )
 
         # If any photo was inappropriate, update the report status and admin note
-        # if inappropriate_found:
-        #     created_report.status = ReportStatus.cancelled
-        #     created_report.admin_note = "Jeden z vložených obrázkov bol automaticky ohodnotený ako nevhodný. Čaká sa na kontrolu správcom."
-        #     await db.flush()
+        if inappropriate_found:
+            created_report.status = ReportStatus.cancelled
+            created_report.admin_note = "Jeden z vložených obrázkov bol automaticky ohodnotený ako nevhodný. Čaká sa na kontrolu správcom."
+            await db.flush()
 
         await db.commit()  # Commit only after all the operations completed
         # to obtain full info, we have to make one more request to DB
