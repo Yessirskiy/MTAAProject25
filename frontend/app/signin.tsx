@@ -94,7 +94,8 @@ export default function SignInScreen() {
     },
     titleText: {
       color: colors.textPrimary,
-      fontSize: 32
+      fontSize: 32,
+      marginTop: 170,
     },
     sloganText: {
       color: colors.textPrimary,
@@ -119,8 +120,7 @@ export default function SignInScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.subContainer]}>
-          <Image source={PlaceholderImage} style={styles.logo} />
-          <Text style={styles.titleText}>REPORT APP</Text>
+          <Text style={styles.titleText}>Active Resident</Text>
           <Text style={styles.sloganText}>Na meste nam zaleží</Text>
         </View>
         <View style={[styles.subContainer, {paddingTop: 140}]}>
