@@ -8,6 +8,7 @@ from app.db.models.user import User
 from app.db.schemas.vote_schema import VoteCreate, VoteRead, VoteUpdate
 from app.db.crud.vote_crud import createVote, getVote, updateVote, deleteVote
 from app.dependencies.auth import getUser
+from app.websockets.update_report import manager as updateReportManager
 
 router = APIRouter()
 
@@ -22,6 +23,12 @@ async def createVoteRoute(
         if not user.is_admin and (not vote_create.user_id == user.id):
             raise HTTPException(status_code=403, detail="No permission to create")
         created_vote = await createVote(db, vote_create)
+        try:
+            await updateReportManager.broadcastUpdateReport(
+                {"report_id": vote_create.report_id}
+            )
+        except Exception as e:
+            print("Error while broadcasting report to WS: ", e)
         return created_vote
     except IntegrityError as e:
         if isinstance(e.orig.__cause__, asyncpg.exceptions.UniqueViolationError):
@@ -65,6 +72,12 @@ async def patchVoteRoute(
         if not user.is_admin:
             assert user.id == vote_update.user_id, "user ids do not match"
         updated_vote = await updateVote(db, vote_update)
+        try:
+            await updateReportManager.broadcastUpdateReport(
+                {"report_id": vote_update.report_id}
+            )
+        except Exception as e:
+            print("Error while broadcasting report to WS: ", e)
         return updated_vote
     except AssertionError as e:
         if "Vote not found" in e.args:
@@ -87,6 +100,10 @@ async def deleteVoteRoute(
         if not user.is_admin:
             assert user.id == user_id, "user ids do not match"
         await deleteVote(db, user_id, report_id)
+        try:
+            await updateReportManager.broadcastUpdateReport({"report_id": report_id})
+        except Exception as e:
+            print("Error while broadcasting report to WS: ", e)
         return Response(status_code=200)
     except AssertionError as e:
         if "Vote not found" in e.args:

@@ -108,6 +108,8 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
   const [adminNote, setAdminNote] = useState(report.admin_note);
   const [open, setOpen] = useState(false);
   const [reportStatusValue, setReportStatusValue] = useState(report.status);
+  const [reportVotesPos, setReportVotesPos] = useState(report.votes_pos);
+  const [reportVotesNeg, setReportVotesNeg] = useState(report.votes_pos);
   const [reportStatus, setReportStatus] = useState([
     { label: 'Nahlásené', value: 'reported' },
     { label: 'Zamietnuté', value: 'cancelled' },
@@ -231,7 +233,7 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
   };
 
   const setupWS = async () => {
-    const socket = new WebSocket("ws://192.168.240.23:8000/ws/update_report");
+    const socket = new WebSocket("ws://192.168.2.7:8000/ws/update_report");
     socket.onopen = () => {
       console.log("[ADMIN-WS-ONOPEN]: WS connected");
     };
@@ -284,6 +286,8 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
     setNote(report.note);
     setAdminNote(report.admin_note);
     setReportStatusValue(report.status);
+    setReportVotesNeg(report.votes_neg);
+    setReportVotesPos(report.votes_pos);
     report.photos.map(photo => fetchImage(photo.id));
   }, [report]);
 
@@ -591,6 +595,8 @@ export default function AdminReportView({ accessToken }: EditReportProps) {
         />
         <InfoField name='Poznámka' value={report.note} style={{ marginBottom: 10, paddingHorizontal: 0 }} />
         <InfoField name='Vytvorené používateľom' value={report.user.email} style={{  marginBottom: 10, paddingHorizontal: 0 }} />
+        <InfoField name='Počet hlasov nahor' value={reportVotesPos.toString()} style={{  marginBottom: 10, paddingHorizontal: 0 }} />
+        <InfoField name='Počet hlasov nadol' value={reportVotesNeg.toString()} style={{  marginBottom: 10, paddingHorizontal: 0 }} />
         <FlatList
           data={reportPhotos.length > 0 ? reportPhotos : [{id: 0, uri: PlaceholderImage}]}
           keyExtractor={(item) => item.id.toString()}
