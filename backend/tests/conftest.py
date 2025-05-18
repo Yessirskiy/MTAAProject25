@@ -15,6 +15,9 @@ from app.utils.passwords import hashPassword
 
 from dotenv import load_dotenv
 
+from app.db.models.report import Report, ReportStatus
+from app.db.models.vote import Vote
+
 load_dotenv()
 
 DB_USER = os.getenv("TEST_DB_USER", "user")
@@ -143,6 +146,28 @@ def override_dependencies(override_getUser):
     app.dependency_overrides[getUser] = override_getUser
     yield
     app.dependency_overrides.pop(getUser, None)
+
+
+@pytest_asyncio.fixture
+async def test_report(db_session: AsyncSession, test_user: User):
+    report = Report(
+        user_id=test_user.id,
+        note="Test report note",
+        status=ReportStatus.reported,
+    )
+    db_session.add(report)
+    await db_session.commit()
+    await db_session.refresh(report)
+    return report
+
+
+@pytest_asyncio.fixture
+async def test_vote(db_session: AsyncSession, test_user: User, test_report: Report):
+    vote = Vote(user_id=test_user.id, report_id=test_report.id, is_positive=True)
+    db_session.add(vote)
+    await db_session.commit()
+    await db_session.refresh(vote)
+    return vote
 
 
 @pytest.fixture

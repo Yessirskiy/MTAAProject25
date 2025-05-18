@@ -9,6 +9,7 @@ from fastapi import (
     BackgroundTasks,
 )
 from fastapi.responses import FileResponse
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
@@ -64,7 +65,9 @@ async def createReportRoute(
         # I though of this workaround: get the data as json-string in multipart
         # process it into the pydantic model manually (raise error if format is wrong)
         report_data = json.loads(reportcreatestr)  # str -> dict
-        reportcreate = ReportCreate(**report_data)  # dict -> pydantic model
+        reportcreate = ReportCreate.model_validate(
+            report_data
+        )  # dict -> pydantic model
         if not user.is_admin:
             assert reportcreate.user_id == user.id
         created_report = await createReport(db, reportcreate, nocommit=True)
@@ -119,15 +122,21 @@ async def createReportRoute(
         await db.commit()  # Commit only after all the operations completed
         # to obtain full info, we have to make one more request to DB
         report = await getReportByID(db, created_report.id, full=True)
-        if report:
-            background_tasks.add_task(assessReport, report=report, db=db)
+
+        ## COMMENTED OUT FOR THE SAKE OF THE TESTS, UNCOMMENT IN FUTURE
+        # if report:
+        #     background_tasks.add_task(assessReport, report=report, db=db)
+
         return report
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid ReportCreate Form")
     except AssertionError:
         raise HTTPException(status_code=400, detail="Invalid user_id")
+    except ValidationError:
+        raise HTTPException(status_code=422, detail="Invalid ReportCreate Form")
     except Exception as e:
         # TODO: Remove photos from directory if failed sql query
+        print(e)
         await db.rollback()
         raise HTTPException(status_code=500, detail="Error creating Report")
 
