@@ -40,6 +40,7 @@ from app.dependencies.common import getSettings
 
 from app.websockets.update_report import manager as updateReportManager
 from app.tasks.background_assess_report import assessReport
+from app.tasks.background_notify_report import notifyReport
 
 import os
 import json
@@ -125,8 +126,9 @@ async def createReportRoute(
         report = await getReportByID(db, created_report.id, full=True)
 
         ## COMMENTED OUT FOR THE SAKE OF THE TESTS, UNCOMMENT IN FUTURE
-        # if report:
-        #     background_tasks.add_task(assessReport, report=report, db=db)
+        if report:
+            # background_tasks.add_task(assessReport, report=report, db=db)
+            background_tasks.add_task(notifyReport, report=report, db=db)
 
         return report
     except json.JSONDecodeError:

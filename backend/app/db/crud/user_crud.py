@@ -1,16 +1,17 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update
-from sqlalchemy.orm import joinedload
+from sqlalchemy import update, func
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.db.models.user import User
+from app.db.models.report import Report, ReportStatus
 from app.db.schemas.user_schema import (
     UserCreate,
     UserUpdate,
     UserChangePassword,
     UserPhotoUpdate,
 )
-from typing import Optional
+from typing import List, Optional
 
 from app.utils import passwords
 
@@ -19,7 +20,11 @@ async def getUserByID(
     db: AsyncSession, user_id: int, active_only: bool = True
 ) -> Optional[User]:
     if active_only:
-        stmt = select(User).where(User.id == user_id, User.is_active == True)
+        stmt = (
+            select(User)
+            .options(joinedload(User.settings))
+            .where(User.id == user_id, User.is_active == True)
+        )
         return (await db.execute(stmt)).scalars().one_or_none()
     return await db.get(User, user_id)
 
@@ -105,3 +110,24 @@ async def updateUserPhoto(db: AsyncSession, update_photo: UserPhotoUpdate):
     user.picture_path = update_photo.picture_path
     await db.commit()
     await db.refresh(user)
+
+
+async def getUserStatistics(db: AsyncSession, user_id: int):
+    stmt = select(
+        func.count().filter(Report.user_id == user_id).label("reported_count"),
+        func.count()
+        .filter((Report.user_id == user_id) & (Report.status == ReportStatus.resolved))
+        .label("resolved_count"),
+    )
+
+    result = await db.execute(stmt)
+    reported_count, resolved_count = result.one()
+    return {"reported_count": reported_count, "resolved_count": resolved_count}
+
+
+async def getAllUsers(db: AsyncSession, active_only: bool = True) -> List[User]:
+    stmt = select(User).options(joinedload(User.settings))
+    if active_only:
+        stmt = stmt.where(User.is_active == True)
+    result = await db.execute(stmt)
+    return result.scalars().all()

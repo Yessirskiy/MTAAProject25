@@ -24,6 +24,7 @@ from app.db.schemas.user_schema import (
     UserRead,
     UserCreate,
     UserUpdate,
+    UserStatistics,
 )
 from app.db.schemas.report_schema import UserReports
 from app.db.schemas.tokens_schema import TokenSchema, AccessTokenSchema
@@ -120,6 +121,18 @@ async def getMeRoute(
     #         detail="User not found",
     #     )
     return user
+
+
+@router.get(
+    "/me/stats",
+    summary="Get home screen statistics of the User",
+    response_model=UserStatistics,
+)
+async def getMeStatisticsRoute(
+    db: AsyncSession = Depends(getSession), user: User = Depends(getUser)
+):
+    stats = await getUserStatistics(db, user.id)
+    return stats
 
 
 @router.get(

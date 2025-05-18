@@ -16,6 +16,7 @@ import InfoField from '@/components/InfoField';
 import { adminUpdateReport } from "@/api/adminApi";
 import AdminEditReport from "@/components/AdminEditReport";
 import Toast from 'react-native-toast-message';
+import { getUserStatsMe } from "@/api/userApi";
 
 
 const PlaceholderImage: string = Image.resolveAssetSource(require('@/assets/images/icon.png')).uri;
@@ -39,6 +40,8 @@ export default function Index() {
   const colors = getColors(isDarkMode);
   const { isAccessibilityMode } = UseTheme();
   const [selectedReport, setSelectedReport] = useState<FeedCardReport | null>(null);
+  const [reportedCount, setReportedCount] = useState<number>(6);
+  const [resolvedCount, setResolvedCount] = useState<number>(17);
 
   const [activeView, setActiveView] = useState<'main' | 'inspect'>('main');
 
@@ -60,13 +63,35 @@ export default function Index() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const res = await getUserStatsMe();
+      if (res) {
+        console.log(res);
+        setReportedCount(res.reported_count);
+        setResolvedCount(res.resolved_count);
+      }
+    } catch (error: any){
+      console.log(error);
+      if (error.request) {
+        Toast.show({
+          type: 'error',
+          text1: 'Network error.',
+          text2: `Please, check connection.`
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     fetchFeed();
+    fetchStats();
   }, []);
 
   const onRefresh = useCallback(async () => {
       setRefreshing(true);
       fetchFeed();
+      fetchStats();
       setRefreshing(false);
     }, []);
 
@@ -242,13 +267,13 @@ export default function Index() {
         <View style={styles.statsContainer}>
           <HomeStatisticsBox 
             upperText="V tomto roku ste zaslali" 
-            statisticText="06" 
+            statisticText={reportedCount.toString()}
             bottomText="hlásení"
             containerStyle={{flexShrink: 1}}
           />
           <HomeStatisticsBox 
             upperText="V tomto roku sme opravili" 
-            statisticText="17" 
+            statisticText={resolvedCount.toString()}
             bottomText="zariadení"
             containerStyle={{flexShrink: 1}}
           />

@@ -40,6 +40,11 @@ type AddressUpdate = {
   country?: string
 }
 
+type UserStatistics = {
+  reported_count: number,
+  resolved_count: number,
+}
+
 export const getUserMe = async () => {
   const res = await API.get('/user/me');
   return res.data;
@@ -47,6 +52,11 @@ export const getUserMe = async () => {
 
 export const updateUserMe = async (data: UserUpdate) => {
   const res = await API.put('/user/me', data);
+  return res.data;
+};
+
+export const getUserStatsMe = async () => {
+  const res = await API.get('/user/me/stats');
   return res.data;
 }
 

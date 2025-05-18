@@ -22,7 +22,7 @@ async def getReportByID(
         select(Report)
         .options(
             joinedload(Report.address),
-            joinedload(Report.user),
+            joinedload(Report.user).joinedload(User.settings),
             joinedload(Report.photos),
         )
         .where(Report.id == report_id)
@@ -35,7 +35,7 @@ async def getUserReports(db: AsyncSession, user_id: int) -> list[Report]:
         select(Report)
         .options(
             joinedload(Report.address),
-            joinedload(Report.user),
+            joinedload(Report.user).joinedload(User.settings),
             joinedload(Report.photos),
         )
         .where(Report.user_id == user_id)

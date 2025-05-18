@@ -30,7 +30,11 @@ async def getNotification(
 
 
 async def getNotificationAll(db: AsyncSession, user_id: int) -> List[Notification]:
-    stmt = select(Notification).where(Notification.user_id == user_id)
+    stmt = (
+        select(Notification)
+        .where(Notification.user_id == user_id)
+        .order_by(Notification.sent_datetime.desc())
+    )
     return (await db.scalars(stmt)).all()
 
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 import asyncpg
@@ -9,6 +9,8 @@ from app.db.schemas.vote_schema import VoteCreate, VoteRead, VoteUpdate
 from app.db.crud.vote_crud import createVote, getVote, updateVote, deleteVote
 from app.dependencies.auth import getUser
 from app.websockets.update_report import manager as updateReportManager
+from app.tasks.background_notify_report import notifyVote
+
 
 router = APIRouter()
 
@@ -16,6 +18,7 @@ router = APIRouter()
 @router.post("/create", response_model=VoteRead, summary="Create Vote")
 async def createVoteRoute(
     vote_create: VoteCreate,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(getSession),
     user: User = Depends(getUser),
 ):
@@ -23,6 +26,10 @@ async def createVoteRoute(
         if not user.is_admin and (not vote_create.user_id == user.id):
             raise HTTPException(status_code=403, detail="No permission to create")
         created_vote = await createVote(db, vote_create)
+        if created_vote:
+            background_tasks.add_task(
+                notifyVote, report_id=vote_create.report_id, db=db
+            )
         try:
             await updateReportManager.broadcastUpdateReport(
                 {"report_id": vote_create.report_id}
