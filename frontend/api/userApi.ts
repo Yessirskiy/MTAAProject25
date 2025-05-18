@@ -102,3 +102,8 @@ export const getUserReportsMe = async() => {
   const res = await API.get('/user/me/reports');
   return res;
 }
+
+export const deleteUserMe = async() => {
+  const res = await API.delete('/user/me');
+  return res;
+}
